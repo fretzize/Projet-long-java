@@ -24,10 +24,60 @@ public class personnage implements entite {
         return this.bouclier;
     }
     
+    // on perd d'abord en bouclier et ensuite en vide si on n'a plus de vie
+
+
+    SpriteBatch batch;
+    Texture bouclierIntact;
+    Texture bouclierCasse;
+    BitmapFont font;
+    boolean etatbouclier = false;
+
+    // on pourra créer deux images si le bouclier est cassé ou non
+    @Override
+    public void create() {
+        batch = new SpriteBatch();
+        bouclierIntact = new Texture("bouclier.png"); 
+        bouclierCasse = new Texture("bouclier_casse.png");  
+        font = new BitmapFont();
+    }
+
+    public void casserBouclier() {
+        bouclierCasseState = true;
+    }
+
+    @Override
+    public void render() {
+        Gdx.gl.glClearColor(1, 1, 1, 1);
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+
+        batch.begin();
+        if (bouclierCasseState) {
+            batch.draw(bouclierCasse, 50, 50);
+        } else {
+            batch.draw(bouclierIntact, 50, 50);
+        }
+        batch.end();
+    }
+
+    public void prendreDegat(int degats) {
+        int vieperdu = this.bouclier - degats;
+        if (this.bouclier = 0) {
+            perteVie(degats);
+        } else if (vieperdu > 0) {
+            this.bouclier -= degats;
+        } else {
+            this.bouclier = 0;
+            // mettre une animation pour montrer que le bouclier casse
+            casserBouclier();
+            perteVie(vieperdu);
+        }
+    }
+
     // Méthode pour enlever des points de vies et afficher "Game over" lorsque le personnage meurt
-    public void recevoirDegats(int degats) {
+    public void perteVie(int degats) {
         if (personnage.enVie()) {
-            hp -= degats;
+            this.vie -= degats;
         } else {
             Gdx.gl.glClearColor(0, 0, 0, 1);
             Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
@@ -40,14 +90,20 @@ public class personnage implements entite {
 
     // Méthode pour vérifier l'état du personnage
     private void enVie() {
-        if (hp > 0) {
-            return true
+        if (this.getVie() > 0) {
+            return true;
         } else {
-            return false
+            return false;
         }
     }
 
-    
+    public void attaquer(int manadepense) throws ManaInsuffisant{
+        if (this.mana - manadepense > 0){
+            this.mana-= manadepense;
+        } else {
+            throw new ManaInsuffisant();
+        }
+    }
 
     private SpriteBatch batch;
     private BitmapFont font;
