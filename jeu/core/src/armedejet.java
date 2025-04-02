@@ -46,7 +46,7 @@ public class armedejet implements arme extends ApplicationAdapter {
 
         float delta = Gdx.graphics.getDeltaTime();
 
-        // Mettre à jour les projectiles
+        // Mettre à jour les projectiles, les directions
         for (Projectile projectile : projectiles) {
             projectile.update(delta);
         }
