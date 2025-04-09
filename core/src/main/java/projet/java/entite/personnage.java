@@ -5,6 +5,9 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.Input;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Vector;
@@ -15,6 +18,10 @@ public class personnage extends ApplicationAdapter implements entite {
     private String nom;
     private Texture skin;
     Vector2 position = new Vector2(0f, 0f);
+    private int mana_max;
+    private int vie_max;
+    private int bouclier_max;
+
 
     @Override
     public int getMana(){
@@ -41,6 +48,9 @@ public class personnage extends ApplicationAdapter implements entite {
         this.vie = vie;
         this.mana = mana;
         this.skin = skin;
+        this.mana_max = mana;
+        this.vie_max = vie;
+        this.bouclier_max = bouclier;
     }
     
 
@@ -55,7 +65,7 @@ public class personnage extends ApplicationAdapter implements entite {
     Texture bouclierIntact;
     Texture bouclierCasse;
     BitmapFont font;
-    boolean etatbouclier = true;
+    boolean etatbouclier = false;
     // SpriteBatch batch2;
     // BitmapFont font2;
     boolean gameOver =false;
@@ -64,8 +74,11 @@ public class personnage extends ApplicationAdapter implements entite {
     int hauteur_ecran = Gdx.graphics.getHeight();
     int acceleration = 2;
     //timer pour savoir tous les combiens de temps il peut utiliser son dash, cooldown
-    int timer = 3;
     boolean dashOk = true;
+
+    Timer timer;
+    Timer timer_mana;
+    boolean prendre_des_degats = false;
     // on pourra créer deux images si le bouclier est cassé ou non
     @Override
     public void create() {
@@ -92,25 +105,50 @@ public class personnage extends ApplicationAdapter implements entite {
 
         SpriteBatch batch2 = new SpriteBatch();
         BitmapFont font2 = new BitmapFont();
+    
+        int decompte = 3;
+        int decompte_bouclier = 6;
+
+        timer = new Timer();
     }
 
-    public void casserBouclier() {
-        etatbouclier = true;
-    }
-
-    Timer decompte = new Timer();
-    decompte.scheduleAtFixedRate(new TimerTask() {
-        @Override
-        public void run() {
-            if (timer == 0) {
-                decompte.cancel();
-                dashOk = true;
-            } else {
-                dashOk = false;
-                timer--;
+    public void decompter() {
+        timer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                Gdx.app.postRunnable(new Runnable() {
+                    @Override
+                    public void run() {
+                        decompte--;
+                        if (decompte < 0) {
+                            timer.cancel();
+                            dashOk = true;
+                        }
+                    }
+                });
             }
-        }
-    } , 0, 1000); //afin d'executer toutes les secondes, 1000ms = 1s
+        }, 0, 1000);
+    }
+    
+
+    //     decompte.scheduleAtFixedRate(new TimerTask() {
+    //         @Override
+    //         public void run() {
+    //             if (timer == 0) {
+    //                 decompte.cancel();
+    //                 dashOk = true;
+    //             } else {
+    //                 dashOk = false;
+    //                 timer--;
+    //             }
+    //         }
+    //     } , 0, 1000); //afin d'executer toutes les secondes, 1000ms = 1s
+    // public void casserBouclier() {
+    //     etatbouclier = true;
+    // }
+
+
+    
 
     @Override
     public void render() {
@@ -155,10 +193,10 @@ public class personnage extends ApplicationAdapter implements entite {
         //     batch.draw(bouclierIntact, getPosition().x, getPosition().y);
         // }
 
-        for (int i = 1; i <= personnage.getVie(); i++) {
+        for (int i = 1; i <= this.getVie(); i++) {
             batch.draw(coeur_plein, largeur_coeur + i, hauteur_ecran - hauteur_coeur);
         }
-        for (int i = 1; i <= personnage.getBouclier(); i++) {
+        for (int i = 1; i <= this.getBouclier(); i++) {
             if (etatbouclier) {
                 batch.draw(coeur_plein, largeur_bouclier + i, hauteur_ecran - hauteur_bouclier - 1 - hauteur_coeur);
             } else {
@@ -201,6 +239,8 @@ public class personnage extends ApplicationAdapter implements entite {
                 } else if (Gdx.input.isKeyPressed(Input.Keys.Q)) {
                     batch.draw(dash, this.getPosition.x, position.y, largeur_dash, hauteur_dash, largeur_dash, hauteur_dash, 1, 1, -90);
                 }
+                decompte = 3;
+                decompter();
             }
         }
         batch.draw(this.skin, this.getPosition().x, this.getPosition().y);
@@ -243,6 +283,34 @@ public class personnage extends ApplicationAdapter implements entite {
             return true;
         } else {
             return false;
+        }
+    }
+
+    //Methode pour récupérer le bouclier
+
+    public void recupBouclier() {
+        decompte_bouclier = this.bouclier_max - this.bouclier + 3;
+        if (this.bouclier < this.bouclier_max) {
+            if (!prendre_des_degats) {
+                timer2.scheduleAtFixedRate(new TimerTask() {
+                @Override
+                public void run() {
+                    Gdx.app.postRunnable(new Runnable() {
+                        @Override
+                        public void run() {
+                            decompte_bouclier--;
+                            if (decompte_bouclier < 0) {
+                                timer2.cancel();
+                            }
+                            if (decompte_bouclier == 3) {
+                                this.bouclier = this.getBouclier() + 1;
+                            }
+                        }
+                    });
+                }
+                }, 0, 500);
+            }
+           
         }
     }
 
