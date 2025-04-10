@@ -1,26 +1,63 @@
-import com.badlogic.gdx.ApplicationAdapter;
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
+package entite;
+
+//import com.badlogic.gdx.ApplicationAdapter;
+import com.badlogic.gdx.graphics.Texture;
+
+
+//import com.badlogic.gdx.Gdx;
+//import com.badlogic.gdx.graphics.GL20;
+//import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.utils.Disposable;
+
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+//import java.util.Vector;
 import java.util.Vector;
 
 
-public class personnage extends ApplicationAdapter implements entite {
+public class Personnage extends ApplicationAdapter implements Entite {
 
+    private int vie;
+    private int bouclier;
+    private int mana;
     private String nom;
     private Texture skin;
-    Vector2 position = new Vector2(0f, 0f);
+    private Vector2 position; // = new Vector2(0f, 0f);
     private int mana_max;
     private int vie_max;
+
     private int bouclier_max;
+
+    private boolean etatbouclier = false;
+    private boolean dashOk = true;
+    //timer pour savoir tous les combiens de temps il peut utiliser son dash, cooldown
+    
+
+    Timer timer;
+    Timer timer2;
+    Timer timer_mana;
+    boolean prendre_des_degats = false;
+    int decompte = 3;
+    int decompte_bouclier = 6;
+
+    // draw(Texture texture, float x, float y, float originX, float originY, float width, float height, float scaleX, float scaleY, float rotation)
+
+    // on perd d'abord en bouclier et ensuite en vide si on n'a plus de vie
+    // j'ajoute des obstacles
+    List<Rectangle> obstacles;
+    
+
+    SpriteBatch batch;
+    Texture bouclierIntact;
+    Texture bouclierCasse;
+    BitmapFont font;
 
 
     @Override
@@ -43,7 +80,7 @@ public class personnage extends ApplicationAdapter implements entite {
         return this.position;
     }
 
-    public personnage(int mana, int vie, String nom, Texture skin) {
+    public Personnage(int mana, int vie, String nom, Texture skin, Vector2 position) {
         this.nom = nom;
         this.vie = vie;
         this.mana = mana;
@@ -51,65 +88,69 @@ public class personnage extends ApplicationAdapter implements entite {
         this.mana_max = mana;
         this.vie_max = vie;
         this.bouclier_max = bouclier;
+        this.position = position;
     }
     
 
-    // draw(Texture texture, float x, float y, float originX, float originY, float width, float height, float scaleX, float scaleY, float rotation)
+    // largeur et longueur
 
-    // on perd d'abord en bouclier et ensuite en vide si on n'a plus de vie
-    // j'ajoute des obstacles
-    List<Rectangle> obstacles;
+    private int largeur_coeur;
+    private int hauteur_coeur;
+    private int largeur_bouclier;
+    private int hauteur_bouclier;
+    private int largeur_dash;
+    private int hauteur_dash;
+
+    //texture 
+
+    private Texture coeurplein;
+    private Texture dash;
+    private Texture dash_gris;
+    private Texture obstacles_texture;
     
-
-    SpriteBatch batch;
-    Texture bouclierIntact;
-    Texture bouclierCasse;
-    BitmapFont font;
-    boolean etatbouclier = false;
+    
     // SpriteBatch batch2;
     // BitmapFont font2;
-    boolean gameOver =false;
+
+    private SpriteBatch batch2;
+    private BitmapFont font2;
+    private boolean gameOver =false;
 
     int largeur_ecran = Gdx.graphics.getWidth();
     int hauteur_ecran = Gdx.graphics.getHeight();
     int acceleration = 2;
-    //timer pour savoir tous les combiens de temps il peut utiliser son dash, cooldown
-    boolean dashOk = true;
-
-    Timer timer;
-    Timer timer_mana;
-    boolean prendre_des_degats = false;
+    
     // on pourra créer deux images si le bouclier est cassé ou non
-    @Override
-    public void create() {
-        batch = new SpriteBatch();
+    //@Override
+    public void create(SpriteBatch batch) {
+        this.batch = batch;
         bouclierIntact = new Texture("bouclier.png"); 
         bouclierCasse = new Texture("bouclier_casse.png");  
-        Texture coeurplein = new Texture("coeur_plein.png");
+        coeurplein = new Texture("coeur_plein.png");
         // sprint ou dash
-        Texture dash = new Texture("dash.png");
-        int largeur_coeur = coeur_plein.getWidth();
-        int hauteur_coeur = coeur_plein.getHeight();
-        int largeur_bouclier = bouclierIntact.getWidth();
-        int hauteur_bouclier = bouclierIntact.getHeight();
+        dash = new Texture("dash.png");
+        largeur_coeur = coeur_plein.getWidth();
+        hauteur_coeur = coeur_plein.getHeight();
+        largeur_bouclier = bouclierIntact.getWidth();
+        hauteur_bouclier = bouclierIntact.getHeight();
         //coeurvide = new Texture("coeur_vide.png");
         //mettre un boutton dash pour montrer quand il a de nouveau acces au dash, par exemple dans un coin le symbole de dash gris si il n'y a pas acces et en couleur sinon
-        Texture dash_gris = new Texture("dash_gris.png");
-        int largeur_dash = dash.getWidth();
-        int hauteur_dash = dash.getHeight();
+        dash_gris = new Texture("dash_gris.png");
+        largeur_dash = dash.getWidth();
+        hauteur_dash = dash.getHeight();
         font = new BitmapFont();
         obstacles = new ArrayList<>();
         obstacles.add(new Rectangle(100, 100, 32, 32));
         obstacles.add(new Rectangle(200, 200, 64, 32));
-        Texture obstacles_texture = new Texture("texture_obstacles.png");
+        obstacles_texture = new Texture("texture_obstacles.png");
 
-        SpriteBatch batch2 = new SpriteBatch();
-        BitmapFont font2 = new BitmapFont();
+        batch2 = new SpriteBatch();
+        font2 = new BitmapFont();
     
-        int decompte = 3;
-        int decompte_bouclier = 6;
+        
 
         timer = new Timer();
+        timer2 = new Timer();
     }
 
     public void decompter() {
@@ -150,7 +191,7 @@ public class personnage extends ApplicationAdapter implements entite {
 
     
 
-    @Override
+    //@Override
     public void render() {
         Gdx.gl.glClearColor(1, 1, 1, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
@@ -240,6 +281,7 @@ public class personnage extends ApplicationAdapter implements entite {
                     batch.draw(dash, this.getPosition.x, position.y, largeur_dash, hauteur_dash, largeur_dash, hauteur_dash, 1, 1, -90);
                 }
                 decompte = 3;
+                dashOk = false;
                 decompter();
             }
         }
@@ -329,6 +371,11 @@ public class personnage extends ApplicationAdapter implements entite {
     public void dispose() {
         batch2.dispose();
         font2.dispose();
+        bouclierIntact.dispose();
+        bouclierCasse.dispose();
+        dash.dispose();
+        dash_gris.dispose();
+
     }
 
 
