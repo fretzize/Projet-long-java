@@ -37,14 +37,16 @@ public class Menu implements Screen {
         game.batch.draw(backgroundTexture, 0, 0, game.viewport.getWorldWidth(), game.viewport.getWorldHeight());
 
         // Ajuster la taille de la police pour agrandir les options du menu
-        game.font.getData().setScale(3.0f); // Augmentez l'échelle selon vos besoins
+        game.font.getData().setScale(1.5f); // Augmentez l'échelle selon vos besoins
 
         // Afficher les options du menu
         for (int i = 0; i < menuOptions.length; i++) {
             String option = menuOptions[i];
-            float textWidth = game.font.getRegion().getRegionWidth();
+            //float textWidth = game.font.getRegion().getRegionWidth();
+            float textWidth = game.font.draw(game.batch,option,0,0).width; // Largeur du texte
+            float textHeight = game.font.draw(game.batch,option,0,0).height; // Hauteur du texte
             float x = (screenWidth - textWidth) / 2;
-            float y = screenHeight / 2 - i * 50; // Espacement entre les options
+            float y = (screenHeight + 5*textHeight) / 2 - i * 100; // Espacement entre les options
 
             // Changer la couleur pour l'option sélectionnée
             if (i == selectedIndex) {
