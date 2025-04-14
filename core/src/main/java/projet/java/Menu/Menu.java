@@ -22,7 +22,7 @@ public class Menu implements Screen {
     }
 
     @Override
-    public void renderMenu(float delta) {
+    public void render(float delta) {
         ScreenUtils.clear(Color.BLACK);
 
         game.viewport.apply();
