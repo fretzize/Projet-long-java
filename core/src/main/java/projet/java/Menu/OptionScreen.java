@@ -4,35 +4,34 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.InputProcessor;
-import com.badlogic.gdx.audio.Music;
-
+import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector3;
 
 import projet.java.Main;
 
-public class Menu implements Screen {
+public class OptionScreen implements Screen {
     
     final Main game;
 
     private Texture backgroundTexture;
-    private int selectedIndex = 0; // Index de l'option sélectionnée
-    private final String[] menuOptions = {"Commencer", "Options", "Quitter"};
+    private int selectedIndex = 0;
+    private final String[] optionItems = {"Son", "Touches", "Retour"};
     private Rectangle[] optionBounds; // Pour stocker les zones cliquables
-    
 
 
-    public Menu(final Main game) {
+    public OptionScreen(final Main game) {
         this.game = game;
+
         // Initialiser les rectangles pour chaque option
-        optionBounds = new Rectangle[menuOptions.length];
-        for (int i = 0; i < menuOptions.length; i++) {
+        optionBounds = new Rectangle[optionItems.length];
+        for (int i = 0; i < optionItems.length; i++) {
             optionBounds[i] = new Rectangle();
         }
+
     }
+
 
     @Override
     public void render(float delta) {
@@ -41,37 +40,31 @@ public class Menu implements Screen {
         game.viewport.apply();
         game.batch.setProjectionMatrix(game.viewport.getCamera().combined);
 
-        game.batch.begin(); // Assurez-vous que le batch commence avant tout dessin
+        game.batch.begin();
+        game.batch.draw(backgroundTexture, 0, 0, game.viewport.getWorldWidth(), game.viewport.getWorldHeight());
 
         // Calculer les dimensions de l'écran
         float screenWidth = game.viewport.getWorldWidth();
         float screenHeight = game.viewport.getWorldHeight();
 
-        game.batch.draw(backgroundTexture, 0, 0, game.viewport.getWorldWidth(), game.viewport.getWorldHeight());
-
-        game.font.getData().setScale(3.0f); // Plus grand que les options du menu
-        game.font.setColor(Color.GOLD); // Couleur dorée pour le titre
-        String title = "Héraclès";
+        // Titre
+        game.font.getData().setScale(2.0f);
+        game.font.setColor(Color.GOLD);
+        String title = "Options générales";
         float titleWidth = game.font.draw(game.batch, title, 0, 0).width;
-        float titleX = (screenWidth - titleWidth) / 2;
-        float titleY = screenHeight - 100; // Position en haut de l'écran
-        game.font.draw(game.batch, title, titleX, titleY);
+        game.font.draw(game.batch, title, (screenWidth - titleWidth) / 2, screenHeight - 100);
 
-        // Réinitialiser l'échelle pour les options du menu
         game.font.getData().setScale(1.5f);
-
-
-        // Ajuster la taille de la police pour agrandir les options du menu
-        game.font.getData().setScale(1.5f); // Augmentez l'échelle selon vos besoins
+        game.font.setColor(Color.WHITE);
 
         // Afficher les options du menu
-        for (int i = 0; i < menuOptions.length; i++) {
-            String option = menuOptions[i];
+        for (int i = 0; i < optionItems.length; i++) {
+            String option = optionItems[i];
+            //float textWidth = game.font.getRegion().getRegionWidth();
             float textWidth = game.font.draw(game.batch,option,0,0).width; // Largeur du texte
             float textHeight = game.font.draw(game.batch,option,0,0).height; // Hauteur du texte
             float x = (screenWidth - textWidth) / 2;
             float y = (screenHeight + 5*textHeight) / 2 - i * 100; // Espacement entre les options
-            //float y = screenHeight / 2 + ((menuOptions.length/2) - i) * 100; // Modifié le calcul de y
 
             // Mettre à jour la zone cliquable
             optionBounds[i].set(x, y - textHeight, textWidth, textHeight);
@@ -90,7 +83,7 @@ public class Menu implements Screen {
             } else {
                 game.font.setColor(Color.WHITE);
             }
-
+        
             game.font.draw(game.batch, option, x, y);
         }
 
@@ -98,31 +91,32 @@ public class Menu implements Screen {
 
         // Gérer les entrées clavier
         if (Gdx.input.isKeyJustPressed(Input.Keys.UP)) {
-            selectedIndex = (selectedIndex - 1 + menuOptions.length) % menuOptions.length;
+            selectedIndex = (selectedIndex - 1 + optionItems.length) % optionItems.length;
         } else if (Gdx.input.isKeyJustPressed(Input.Keys.DOWN)) {
-            selectedIndex = (selectedIndex + 1) % menuOptions.length;
+            selectedIndex = (selectedIndex + 1) % optionItems.length;
         } else if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
             handleMenuSelection();
+        }
+        else if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
+            game.setScreen(new Menu(game));
+            dispose();
         }
     }
 
     private void handleMenuSelection() {
         switch (selectedIndex) {
             case 0:
-                game.stopMenuMusic(); // Arrêter la musique de fond
-                game.setScreen(new GameScreen(game));
+                game.setScreen(new SonScreen(game));
                 dispose();
                 break;
             case 1:
                 // Implémenter l'écran des options
-                game.setScreen(new OptionScreen(game));
-                dispose();
-                // Pour l'instant, on va juste afficher un message dans la console
-                //System.out.println("Options sélectionnées !");
-                
+                //game.setScreen(new TouchesScreen(game));
+                //dispose();               
                 break;
             case 2:
-                Gdx.app.exit();
+                game.setScreen(new Menu(game));
+                dispose();
                 break;
         }
     }
@@ -138,10 +132,6 @@ public class Menu implements Screen {
         return bounds.contains(worldCoords.x, worldCoords.y);
     }
 
-    @Override
-    public void resize(int width, int height) {
-        game.viewport.update(width, height, true);
-    }
 
     @Override
     public void show() {
@@ -149,20 +139,22 @@ public class Menu implements Screen {
     }
 
     @Override
-    public void hide() {
-        // TODO Auto-generated method stub
-        
+    public void resize(int width, int height) {
+        game.viewport.update(width, height, true);
     }
 
     @Override
     public void pause() {
-        // TODO Auto-generated method stub
         
     }
 
     @Override
     public void resume() {
-        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void hide() {
         
     }
 
@@ -171,6 +163,5 @@ public class Menu implements Screen {
         if (backgroundTexture != null) {
             backgroundTexture.dispose();
         }
-        
     }
 }
