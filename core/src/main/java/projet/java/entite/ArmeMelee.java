@@ -71,20 +71,44 @@ public class ArmeMelee extends ArmeBase {
         );
         
         // Détecte les collisions avec les ennemis
-        detecterCollisions();
+        detecterCollisions(position, normalizedDirection);
     }
     
     /**
      * Détecte les collisions entre la zone d'attaque et les ennemis.
      * À adapter selon votre système de gestion des entités.
      */
-    private void detecterCollisions() {
-        // Exemple de détection avec une liste d'ennemis (à adapter)
-        // for (Ennemi ennemi : listeEnnemis) {
-        //     if (zoneAttaque.overlaps(ennemi.getHitbox())) {
-        //         ennemi.prendreDegat(degats);  // Inflige des dégâts à l'ennemi
-        //     }
-        // }
+    private void detecterCollisions(Vector2 position, Vector2 normalizedDirection) {
+        // Obtenir la liste des ennemis
+        Array<Ennemi> ennemis = niveau.getEnnemis();
+        
+        // Calculer l'angle de l'attaque basé sur la direction
+        float angle = new Vector2(normalizedDirection).angle();
+        
+        for (Ennemi ennemi : ennemis) {
+            // Vérification simple avec le rectangle
+            if (zoneAttaque.overlaps(ennemi.getHitbox())) {
+                // Vérification supplémentaire: l'ennemi est-il dans l'arc d'attaque?
+                Vector2 directionVersEnnemi = new Vector2(ennemi.getPosition()).sub(position).nor();
+                float angleVersEnnemi = directionVersEnnemi.angle();
+                float angleDifference = Math.abs(angle - angleVersEnnemi);
+                angleDifference = angleDifference > 180 ? 360 - angleDifference : angleDifference;
+                
+                // Si l'ennemi est dans l'arc d'attaque (défini par angleAttaque)
+                if (angleDifference <= angleAttaque / 2) {
+                    ennemi.prendreDegat(degats);
+                    
+                    // Effet visuel: projection de sang ou particules
+                    spawnParticules(ennemi.getPosition(), 10); // 10 particules
+                }
+            }
+        }
+    }
+    
+    // Méthode pour créer un effet de particules
+    private void spawnParticules(Vector2 position, int count) {
+        // Code pour générer des particules d'impact
+        // À implémenter avec le système de particules de LibGDX
     }
     
     /**

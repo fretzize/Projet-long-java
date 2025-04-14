@@ -110,4 +110,14 @@ public class Projectile {
     public Vector2 getPosition() {
         return position;
     }
+    
+    /**
+     * Renvoie le vecteur vitesse du projectile.
+     * Utile pour calculer la direction de l'impact.
+     * 
+     * @return Le vecteur vitesse
+     */
+    public Vector2 getVitesse() {
+        return vitesse;
+    }
 }
