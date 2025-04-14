@@ -124,7 +124,7 @@ public class OptionScreen implements Screen {
     private boolean isMouseOver(Rectangle bounds) {
         // Convertir les coordonnées de la souris en coordonnées du monde
         float mouseX = Gdx.input.getX();
-        float mouseY = Gdx.input.getY(); // Inverser Y car LibGDX utilise un repère bas-gauche
+        float mouseY = Gdx.input.getY(); 
         
         // Convertir en coordonnées du viewport
         Vector3 worldCoords = game.viewport.getCamera().unproject(new Vector3(mouseX, mouseY, 0));

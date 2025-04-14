@@ -61,11 +61,14 @@ public class SonScreen implements Screen {
     // Labels
     game.font.getData().setScale(1.5f);
     game.font.setColor(Color.WHITE);
-    game.font.draw(game.batch, "Musique du menu: " + (int)(menuMusicVolume * 100) + "%", screenWidth/2 - 400, screenHeight/2 + 50);
-    game.font.draw(game.batch, "Sons du jeu: " + (int)(gameSoundVolume * 100) + "%", screenWidth/2 - 400, screenHeight/2 - 50);
+    game.font.draw(game.batch, "Musique du menu: " , screenWidth/2 - 720, screenHeight/2 + 78);
+    game.font.draw(game.batch, "Son du jeu: " , screenWidth/2 - 510, screenHeight/2 - 22);
 
     // Bouton retour
-    game.font.draw(game.batch, "Retour", 50, 50);
+    game.font.getData().setScale(1.5f);
+    String retour = "Retour";
+    float retourWidth = game.font.draw(game.batch, retour, 0, 0).width;
+    game.font.draw(game.batch, retour, (screenWidth - retourWidth) / 2, 245); // Position en bas centrée
     game.batch.end();
 
     // Dessiner les curseurs
@@ -110,7 +113,13 @@ public class SonScreen implements Screen {
             }
 
             // Zone du bouton retour
-            if (touch.x < 150 && touch.y < 70) {
+            Rectangle retourBounds = new Rectangle(
+                (screenWidth - 100) / 2, // Position X centrée
+                200, // Position Y en bas
+                100, // Largeur approximative du bouton
+                50  // Hauteur approximative du bouton
+            );
+            if (retourBounds.contains(touch.x, touch.y)) {
                 game.setScreen(new OptionScreen(game));
                 dispose();
             }
