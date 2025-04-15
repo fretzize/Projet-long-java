@@ -5,7 +5,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.Array;
 
-public class armedejet extends ApplicationAdapter implements arme {
+public class Armedejet extends ApplicationAdapter implements arme {
     private String nom;
     private int degats;
     private int manadepense;

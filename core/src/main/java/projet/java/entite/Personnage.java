@@ -80,15 +80,15 @@ public class Personnage extends ApplicationAdapter implements Entite {
         return this.position;
     }
 
-    public Personnage(int mana, int vie, String nom, Texture skin, Vector2 position) {
+    public Personnage(int mana, int vie, String nom) { //}, Texture skin, Vector2 position) {
         this.nom = nom;
         this.vie = vie;
         this.mana = mana;
-        this.skin = skin;
+        // this.skin = skin;
         this.mana_max = mana;
         this.vie_max = vie;
         this.bouclier_max = bouclier;
-        this.position = position;
+        // this.position = position;
     }
     
 

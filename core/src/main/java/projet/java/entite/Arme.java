@@ -1,4 +1,4 @@
-public interface arme {
+public interface Arme {
     void attaquer_arme();
 }
     
