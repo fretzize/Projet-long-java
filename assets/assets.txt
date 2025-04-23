@@ -1,5 +1,8 @@
+bouclier.png
 coeur_heracles.png
 coeur_plein.png
+dash.png
+dash_gris.png
 image_heracles.png
 image_heracles_normal.png
 libgdx.png

@@ -1,26 +1,21 @@
 package entite;
 
 
-//import com.badlogic.gdx.ApplicationAdapter;
+import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.graphics.Texture;
-
-
-//import com.badlogic.gdx.Gdx;
-//import com.badlogic.gdx.graphics.GL20;
-//import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Disposable;
-
 import projet.java.Main;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
-//import java.util.Vector;
 import java.util.Vector;
 
 
@@ -81,7 +76,7 @@ public class Personnage extends ApplicationAdapter implements Entite {
         return this.position;
     }
 
-    public Personnage(int mana, int vie, String nom, Texture skin, Vector2 position) {
+    public Personnage(int mana, int vie, String nom, Texture skin) {//}, Vector2 position) {
         this.nom = nom;
         this.vie = vie;
         this.mana = mana;
@@ -164,27 +159,27 @@ public class Personnage extends ApplicationAdapter implements Entite {
     public void input() {
         if (Gdx.input.isKeyPressed(Input.Keys.Z)) {
             System.out.println("La touche Z est pressée !, le personnage avance");
-            personnage1.getPosition().add(personnage1.getPosition().x, personnage1.getPosition().y + 0.5f );
+            this.getPosition().add(this.getPosition().x, this.getPosition().y + 0.5f );
         }
 
         if (Gdx.input.isKeyPressed(Input.Keys.Q)) {
             System.out.println("La touche Q est pressée !, le personnage va vers la gauche");
-            personnage1.getPosition().add(personnage1.getPosition().x -0.5f, personnage1.getPosition().y);
+            this.getPosition().add(this.getPosition().x -0.5f, this.getPosition().y);
         }
 
         if (Gdx.input.isKeyPressed(Input.Keys.D)) {
             System.out.println("La touche D est pressée !, le personnage va vers la droite");
-            personnage1.getPosition().add(personnage1.getPosition().x +0.5f, personnage1.getPosition().y );
+            this.getPosition().add(this.getPosition().x +0.5f, this.getPosition().y );
         }
 
         if (Gdx.input.isKeyPressed(Input.Keys.S)) {
             System.out.println("La touche S est pressée !, le personnage va vers le bas");
-            personnage1.getPosition().add(personnage1.getPosition().x, personnage1.getPosition().y - 0.5f );
+            this.getPosition().add(this.getPosition().x, this.getPosition().y - 0.5f );
         }
 
         if (Gdx.input.isKeyPressed(Input.Keys.SPACE)) {
             System.out.println("La touche espace est pressée !, le personnage dash");
-            personnage1.getPosition().add(personnage1.getPosition().x * acceleration, personnage1.getPosition().y * acceleration);
+            this.getPosition().add(this.getPosition().x * acceleration, this.getPosition().y * acceleration);
         }
 
         int sourisX = Gdx.input.getX();
@@ -194,21 +189,21 @@ public class Personnage extends ApplicationAdapter implements Entite {
         if (Gdx.input.isKeyPressed(Input.Keys.SPACE)) {
             if (dashOk) {
                 if (Gdx.input.isKeyPressed(Input.Keys.Z) && Gdx.input.isKeyPressed(Input.Keys.D)){
-                    game.batch.draw(dash, personnage1.getPosition().x, personnage1.getPosition().y, largeur_dash, hauteur_dash, largeur_dash, hauteur_dash, 1, 1, 45);
+                    game.batch.draw(dash, this.getPosition().x, this.getPosition().y, largeur_dash, hauteur_dash, largeur_dash, hauteur_dash, 1, 1, 45);
                 } else if (Gdx.input.isKeyPressed(Input.Keys.Z) && Gdx.input.isKeyPressed(Input.Keys.Q)) {
-                    game.batch.draw(dash, personnage1.getPosition().x, personnage1.getPosition().y, largeur_dash, hauteur_dash, largeur_dash, hauteur_dash, 1, 1, -45);
+                    game.batch.draw(dash, this.getPosition().x, this.getPosition().y, largeur_dash, hauteur_dash, largeur_dash, hauteur_dash, 1, 1, -45);
                 } else if (Gdx.input.isKeyPressed(Input.Keys.S) && Gdx.input.isKeyPressed(Input.Keys.D)) {
-                    game.batch.draw(dash, personnage1.getPosition().x, personnage1.getPosition().y, largeur_dash, hauteur_dash, largeur_dash, hauteur_dash, 1, 1, 135);
+                    game.batch.draw(dash, this.getPosition().x, this.getPosition().y, largeur_dash, hauteur_dash, largeur_dash, hauteur_dash, 1, 1, 135);
                 } else if (Gdx.input.isKeyPressed(Input.Keys.S) && Gdx.input.isKeyPressed(Input.Keys.Q)) {
-                    game.batch.draw(dash, personnage1.getPosition().x, personnage1.getPosition().y, largeur_dash, hauteur_dash, largeur_dash, hauteur_dash, 1, 1, -135);
+                    game.batch.draw(dash, this.getPosition().x, this.getPosition().y, largeur_dash, hauteur_dash, largeur_dash, hauteur_dash, 1, 1, -135);
                 } else if (Gdx.input.isKeyPressed(Input.Keys.Z)) {
-                    game.batch.draw(dash, personnage1.getPosition().x, personnage1.getPosition().y, largeur_dash, hauteur_dash, largeur_dash, hauteur_dash, 1, 1, 0);
+                    game.batch.draw(dash, this.getPosition().x, this.getPosition().y, largeur_dash, hauteur_dash, largeur_dash, hauteur_dash, 1, 1, 0);
                 } else if (Gdx.input.isKeyPressed(Input.Keys.Q)) {
-                    game.batch.draw(dash, personnage1.getPosition().x, personnage1.getPosition().y, largeur_dash, hauteur_dash, largeur_dash, hauteur_dash, 1, 1, 90);
+                    game.batch.draw(dash, this.getPosition().x, this.getPosition().y, largeur_dash, hauteur_dash, largeur_dash, hauteur_dash, 1, 1, 90);
                 } else if (Gdx.input.isKeyPressed(Input.Keys.S)) {
-                    game.batch.draw(dash, personnage1.getPosition.x, personnage1.getPosition.y, largeur_dash, hauteur_dash, largeur_dash, hauteur_dash, 1, 1, 180);
+                    game.batch.draw(dash, this.getPosition.x, this.getPosition.y, largeur_dash, hauteur_dash, largeur_dash, hauteur_dash, 1, 1, 180);
                 } else if (Gdx.input.isKeyPressed(Input.Keys.Q)) {
-                    game.batch.draw(dash, personnage1.getPosition().x, personnage1.getPosition().y, largeur_dash, hauteur_dash, largeur_dash, hauteur_dash, 1, 1, -90);
+                    game.batch.draw(dash, this.getPosition().x, this.getPosition().y, largeur_dash, hauteur_dash, largeur_dash, hauteur_dash, 1, 1, -90);
                 }
                 decompte = 3;
                 dashOk = false;
@@ -221,23 +216,23 @@ public class Personnage extends ApplicationAdapter implements Entite {
     public void draw(Main game) {
         game.batch.begin();
         for (int i = 1; i <= this.getVie(); i++) {
-            batch.draw(coeur_plein, largeur_coeur + i, hauteur_ecran - hauteur_coeur);
+            game.batch.draw(coeur_plein, largeur_coeur + i, hauteur_ecran - hauteur_coeur);
         }
         for (int i = 1; i <= this.getBouclier(); i++) {
             if (etatbouclier) {
-                batch.draw(coeur_plein, largeur_bouclier + i, hauteur_ecran - hauteur_bouclier - 1 - hauteur_coeur);
+                game.batch.draw(coeur_plein, largeur_bouclier + i, hauteur_ecran - hauteur_bouclier - 1 - hauteur_coeur);
             } else {
-                batch.draw(coeur_plein, largeur_bouclier + i, hauteur_ecran - hauteur_bouclier - 1 - hauteur_coeur);
+                game.batch.draw(coeur_plein, largeur_bouclier + i, hauteur_ecran - hauteur_bouclier - 1 - hauteur_coeur);
             }
         }
 
         if (dashOk) {
-            batch.draw(dash, largeur_dash, hauteur_dash);
+            game.batch.draw(dash, largeur_dash, hauteur_dash);
         } else {
-            batch.draw(dash_gris, largeur_dash, hauteur_dash);
+            game.batch.draw(dash_gris, largeur_dash, hauteur_dash);
         }
 
-        game.batch.draw(skin, personnage1.getPosition().x, personnage1.getPosition().y);
+        game.batch.draw(skin, this.getPosition().x, this.getPosition().y);
     }
 
     

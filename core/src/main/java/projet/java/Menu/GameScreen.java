@@ -29,11 +29,11 @@ public class GameScreen implements Screen {
     float largeur_ecran = game.viewport.getWorldWidth();
     float hauteur_ecran = game.viewport.getWorldHeight();
     
-
+    Texture skin = new Texture("image_heracles_normal");
     
 
     // Personnage exemple
-    Entite personnage1 = new Personnage(4, 2, "mathis");
+    Entite personnage1 = new Personnage(4, 2, "mathis", skin);
 
     public GameScreen(final Main game) {
         this.game = game;
