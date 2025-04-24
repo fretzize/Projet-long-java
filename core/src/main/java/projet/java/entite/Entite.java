@@ -1,5 +1,6 @@
-package entite;
+package projet.java.entite;
 import com.badlogic.gdx.math.Vector2;
+
 import projet.java.Main;
 
 // import com.badlogic.gdx.math.Vector2;

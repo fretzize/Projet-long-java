@@ -1,4 +1,4 @@
-package entite;
+package projet.java.entite;
 
 
 import com.badlogic.gdx.ApplicationAdapter;

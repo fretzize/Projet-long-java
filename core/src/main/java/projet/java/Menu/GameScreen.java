@@ -1,24 +1,14 @@
 package projet.java.Menu;
 
 
-import java.util.TimerTask;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.audio.Music;
-import com.badlogic.gdx.audio.Sound;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.ScreenUtils;
 
-import entite.Entite;
-import entite.Personnage;
+import projet.java.entite.Entite;
+import projet.java.entite.Personnage;
 import projet.java.Main;
 
 
@@ -29,7 +19,7 @@ public class GameScreen implements Screen {
     // float largeur_ecran = game.viewport.getWorldWidth();
     // float hauteur_ecran = game.viewport.getWorldHeight();
     
-    Texture skin = new Texture("image_heracles_normal");
+    Texture skin = new Texture("image_heracles_normal.png");
     
 
     // Personnage exemple
@@ -37,6 +27,8 @@ public class GameScreen implements Screen {
 
     public GameScreen(final Main game) {
         this.game = game;
+        personnage1.create_entite();
+
     }
 
     // @Override
@@ -48,7 +40,6 @@ public class GameScreen implements Screen {
     @Override
     public void show() {
         // TODO Auto-generated method stub
-        personnage1.create_entite();
         // throw new UnsupportedOperationException("Unimplemented method 'show'");
     }
 
@@ -62,9 +53,6 @@ public class GameScreen implements Screen {
     private void input() {
         // Handle input here
         if (Gdx.input.isKeyPressed(Input.Keys.ESCAPE)) {
-            Gdx.app.exit();
-        }
-        if (Gdx.input.isTouched()) {
             game.setScreen(new Menu(game));
             dispose();
         }
