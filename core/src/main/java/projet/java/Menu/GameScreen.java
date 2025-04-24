@@ -26,29 +26,30 @@ public class GameScreen implements Screen {
 
     final Main game;
 
-    float largeur_ecran = game.viewport.getWorldWidth();
-    float hauteur_ecran = game.viewport.getWorldHeight();
+    // float largeur_ecran = game.viewport.getWorldWidth();
+    // float hauteur_ecran = game.viewport.getWorldHeight();
     
     Texture skin = new Texture("image_heracles_normal");
     
 
     // Personnage exemple
-    Entite personnage1 = new Personnage(4, 2, "mathis", skin);
+    Entite personnage1 = new Personnage(4, 2, 3, "mathis", skin);
 
     public GameScreen(final Main game) {
         this.game = game;
     }
 
-    @Override
-    public void create() {
-        personnage1.create();
-    }
+    // @Override
+    // public void create() {
+    //     personnage1.create_entite();
+    // }
 
 
     @Override
     public void show() {
         // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'show'");
+        personnage1.create_entite();
+        // throw new UnsupportedOperationException("Unimplemented method 'show'");
     }
 
     @Override
@@ -67,7 +68,7 @@ public class GameScreen implements Screen {
             game.setScreen(new Menu(game));
             dispose();
         }
-        personnage1.input();
+        personnage1.input_entite();
     }
 
 
@@ -79,7 +80,7 @@ public class GameScreen implements Screen {
     private void draw() {
         // TODO Auto-generated method stub
         // game.batch.begin();
-        personnage1.draw(this.game);
+        personnage1.draw_entite(this.game);
 
         throw new UnsupportedOperationException("Unimplemented method 'draw'");
     }
@@ -110,7 +111,7 @@ public class GameScreen implements Screen {
     @Override
     public void dispose() {
         // TODO Auto-generated method stub
-        personnage1.dispose();
+        personnage1.dispose_entite(game);
         throw new UnsupportedOperationException("Unimplemented method 'dispose'");
     }
 

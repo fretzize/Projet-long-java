@@ -3,6 +3,7 @@ package entite;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -76,7 +77,7 @@ public class Personnage extends ApplicationAdapter implements Entite {
         return this.position;
     }
 
-    public Personnage(int mana, int vie, String nom, Texture skin) {//}, Vector2 position) {
+    public Personnage(int mana, int vie, int bouclier, String nom, Texture skin) {//}, Vector2 position) {
         this.nom = nom;
         this.vie = vie;
         this.mana = mana;
@@ -84,7 +85,7 @@ public class Personnage extends ApplicationAdapter implements Entite {
         this.mana_max = mana;
         this.vie_max = vie;
         this.bouclier_max = bouclier;
-        this.position = Vector2(0f, 0f);
+        this.position = new Vector2(0f, 0f);
     }
     
 
@@ -97,13 +98,11 @@ public class Personnage extends ApplicationAdapter implements Entite {
     float largeur_dash;
     float hauteur_dash;
 
-    float largeur_ecran = game.viewport.getWorldWidth();
-    float hauteur_ecran = game.viewport.getWorldHeight();
-
     //texture 
 
-    Texture coeurplein;
-    Texture dash;
+    Texture coeur_plein;
+    Texture dash_texture;
+    TextureRegion dash;
     Texture dash_gris;
     Texture bouclierIntact;
     
@@ -111,8 +110,8 @@ public class Personnage extends ApplicationAdapter implements Entite {
     
     
     // on pourra créer deux images si le bouclier est cassé ou non
-    //@Override
-    public void create() {
+    @Override
+    public void create_entite() {
 
         bouclierIntact = new Texture("bouclier.png"); 
         largeur_bouclier = bouclierIntact.getWidth();
@@ -121,16 +120,17 @@ public class Personnage extends ApplicationAdapter implements Entite {
         // bouclierCasse = new Texture("bouclier_casse.png"); 
         // coeurvide = new Texture("coeur_vide.png");
         
-        coeurplein = new Texture("coeur_plein.png");
+        coeur_plein = new Texture("coeur_plein.png");
         largeur_coeur = coeur_plein.getWidth();
         hauteur_coeur = coeur_plein.getHeight();
 
         // sprint ou dash   //mettre un boutton dash pour montrer quand il a de nouveau acces au dash, par exemple dans un coin le symbole de dash gris si il n'y a pas acces et en couleur sinon
 
-        dash = new Texture("dash.png");
+        dash_texture = new Texture("dash.png");
+        dash = new TextureRegion(dash_texture);
         dash_gris = new Texture("dash_gris.png");
-        largeur_dash = dash.getWidth();
-        hauteur_dash = dash.getHeight();
+        largeur_dash = dash_texture.getWidth();
+        hauteur_dash = dash_texture.getHeight();
         
         
         timer = new Timer();
@@ -155,8 +155,8 @@ public class Personnage extends ApplicationAdapter implements Entite {
         }, 0, 1000); // 1000 ms = 1s
     }
     
-
-    public void input() {
+    @Override
+    public void input_entite() {
         if (Gdx.input.isKeyPressed(Input.Keys.Z)) {
             System.out.println("La touche Z est pressée !, le personnage avance");
             this.getPosition().add(this.getPosition().x, this.getPosition().y + 0.5f );
@@ -185,35 +185,13 @@ public class Personnage extends ApplicationAdapter implements Entite {
         int sourisX = Gdx.input.getX();
         int sourisY = Gdx.input.getY();
 
-        // afficher le dash selon la direction, on fera une image du dash du haut vers le bas
-        if (Gdx.input.isKeyPressed(Input.Keys.SPACE)) {
-            if (dashOk) {
-                if (Gdx.input.isKeyPressed(Input.Keys.Z) && Gdx.input.isKeyPressed(Input.Keys.D)){
-                    game.batch.draw(dash, this.getPosition().x, this.getPosition().y, largeur_dash, hauteur_dash, largeur_dash, hauteur_dash, 1, 1, 45);
-                } else if (Gdx.input.isKeyPressed(Input.Keys.Z) && Gdx.input.isKeyPressed(Input.Keys.Q)) {
-                    game.batch.draw(dash, this.getPosition().x, this.getPosition().y, largeur_dash, hauteur_dash, largeur_dash, hauteur_dash, 1, 1, -45);
-                } else if (Gdx.input.isKeyPressed(Input.Keys.S) && Gdx.input.isKeyPressed(Input.Keys.D)) {
-                    game.batch.draw(dash, this.getPosition().x, this.getPosition().y, largeur_dash, hauteur_dash, largeur_dash, hauteur_dash, 1, 1, 135);
-                } else if (Gdx.input.isKeyPressed(Input.Keys.S) && Gdx.input.isKeyPressed(Input.Keys.Q)) {
-                    game.batch.draw(dash, this.getPosition().x, this.getPosition().y, largeur_dash, hauteur_dash, largeur_dash, hauteur_dash, 1, 1, -135);
-                } else if (Gdx.input.isKeyPressed(Input.Keys.Z)) {
-                    game.batch.draw(dash, this.getPosition().x, this.getPosition().y, largeur_dash, hauteur_dash, largeur_dash, hauteur_dash, 1, 1, 0);
-                } else if (Gdx.input.isKeyPressed(Input.Keys.Q)) {
-                    game.batch.draw(dash, this.getPosition().x, this.getPosition().y, largeur_dash, hauteur_dash, largeur_dash, hauteur_dash, 1, 1, 90);
-                } else if (Gdx.input.isKeyPressed(Input.Keys.S)) {
-                    game.batch.draw(dash, this.getPosition.x, this.getPosition.y, largeur_dash, hauteur_dash, largeur_dash, hauteur_dash, 1, 1, 180);
-                } else if (Gdx.input.isKeyPressed(Input.Keys.Q)) {
-                    game.batch.draw(dash, this.getPosition().x, this.getPosition().y, largeur_dash, hauteur_dash, largeur_dash, hauteur_dash, 1, 1, -90);
-                }
-                decompte = 3;
-                dashOk = false;
-                decompter();
-            }
-        }
+        
     }
     
-
-    public void draw(Main game) {
+    @Override
+    public void draw_entite(Main game) {
+        float largeur_ecran = game.viewport.getWorldWidth();
+        float hauteur_ecran = game.viewport.getWorldHeight();
         game.batch.begin();
         for (int i = 1; i <= this.getVie(); i++) {
             game.batch.draw(coeur_plein, largeur_coeur + i, hauteur_ecran - hauteur_coeur);
@@ -233,20 +211,50 @@ public class Personnage extends ApplicationAdapter implements Entite {
         }
 
         game.batch.draw(skin, this.getPosition().x, this.getPosition().y);
+
+
+        // afficher le dash selon la direction, on fera une image du dash du haut vers le bas
+        if (Gdx.input.isKeyPressed(Input.Keys.SPACE)) {
+            if (dashOk) {
+                if (Gdx.input.isKeyPressed(Input.Keys.Z) && Gdx.input.isKeyPressed(Input.Keys.D)){
+                    game.batch.draw(dash, this.getPosition().x, this.getPosition().y, largeur_dash, hauteur_dash, largeur_dash, hauteur_dash, 1, 1, 45);
+                } else if (Gdx.input.isKeyPressed(Input.Keys.Z) && Gdx.input.isKeyPressed(Input.Keys.Q)) {
+                    game.batch.draw(dash, this.getPosition().x, this.getPosition().y, largeur_dash, hauteur_dash, largeur_dash, hauteur_dash, 1, 1, -45);
+                } else if (Gdx.input.isKeyPressed(Input.Keys.S) && Gdx.input.isKeyPressed(Input.Keys.D)) {
+                    game.batch.draw(dash, this.getPosition().x, this.getPosition().y, largeur_dash, hauteur_dash, largeur_dash, hauteur_dash, 1, 1, 135);
+                } else if (Gdx.input.isKeyPressed(Input.Keys.S) && Gdx.input.isKeyPressed(Input.Keys.Q)) {
+                    game.batch.draw(dash, this.getPosition().x, this.getPosition().y, largeur_dash, hauteur_dash, largeur_dash, hauteur_dash, 1, 1, -135);
+                } else if (Gdx.input.isKeyPressed(Input.Keys.Z)) {
+                    game.batch.draw(dash, this.getPosition().x, this.getPosition().y, largeur_dash, hauteur_dash, largeur_dash, hauteur_dash, 1, 1, 0);
+                } else if (Gdx.input.isKeyPressed(Input.Keys.Q)) {
+                    game.batch.draw(dash, this.getPosition().x, this.getPosition().y, largeur_dash, hauteur_dash, largeur_dash, hauteur_dash, 1, 1, 90);
+                } else if (Gdx.input.isKeyPressed(Input.Keys.S)) {
+                    game.batch.draw(dash, this.getPosition().x, this.getPosition().y, largeur_dash, hauteur_dash, largeur_dash, hauteur_dash, 1, 1, 180);
+                } else if (Gdx.input.isKeyPressed(Input.Keys.Q)) {
+                    game.batch.draw(dash, this.getPosition().x, this.getPosition().y, largeur_dash, hauteur_dash, largeur_dash, hauteur_dash, 1, 1, -90);
+                }
+                decompte = 3;
+                dashOk = false;
+                decompter();
+            }
+        }
+
+        game.batch.end();
+
     }
 
     
 
     public void prendreDegat(int degats) {
-        int vieperdu = this.bouclier - degats;
-        if (this.bouclier == 0) {
+        int vieperdu = this.getBouclier() - degats;
+        if (this.getBouclier() == 0) {
             perteVie(degats);
         } else if (vieperdu > 0) {
             this.bouclier -= degats;
         } else {
             this.bouclier = 0;
             // mettre une animation pour montrer que le bouclier casse
-            casserBouclier();
+            // casserBouclier();
             perteVie(vieperdu);
         }
     }
@@ -275,8 +283,8 @@ public class Personnage extends ApplicationAdapter implements Entite {
     //Methode pour récupérer le bouclier
 
     public void recupBouclier() {
-        decompte_bouclier = this.bouclier_max - this.bouclier + 3;
-        if (this.bouclier < this.bouclier_max) {
+        decompte_bouclier = this.bouclier_max - this.getBouclier() + 3;
+        if (this.getBouclier() < this.bouclier_max) {
             if (!prendre_des_degats) {
                 timer2.scheduleAtFixedRate(new TimerTask() {
                 @Override
@@ -288,17 +296,18 @@ public class Personnage extends ApplicationAdapter implements Entite {
                             if (decompte_bouclier < 0) {
                                 timer2.cancel();
                             }
-                            if (decompte_bouclier == 3) {
-                                this.bouclier = this.getBouclier() + 1;
+                            if (decompte_bouclier == bouclier_max - bouclier) {
+                                bouclier++;
                             }
                         }
                     });
                 }
-                }, 0, 500);
+                }, 0, 1000);
             }
            
         }
     }
+
 
     // public void attaquer(int manadepense) throws ManaInsuffisant{
     //     if (this.mana - manadepense > 0){
@@ -311,8 +320,12 @@ public class Personnage extends ApplicationAdapter implements Entite {
    
 
     
-
-    public void dispose(Main game) {
+    @Override
+    public void dispose_entite(Main game) {
+        coeur_plein.dispose();
+        dash_texture.dispose();
+        dash_gris.dispose();
+        bouclierIntact.dispose();
         game.batch.end();
     }
 
