@@ -6,6 +6,7 @@ dash_gris.png
 image_heracles.png
 image_heracles_normal.png
 libgdx.png
+map.png
 menubackground.png
 menumusic.mp3
 png-transparent-pink-pixel-art-pixelation-iphone-sticker-character-drawing-cartoon-thumbnail.png

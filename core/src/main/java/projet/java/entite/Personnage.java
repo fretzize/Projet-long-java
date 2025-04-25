@@ -28,7 +28,9 @@ public class Personnage extends ApplicationAdapter implements Entite {
     private int mana;
     private String nom;
     private Texture skin;
-    private Vector2 position; // = new Vector2(0f, 0f);
+    private float positionX;
+    private float positionY;
+    // private Vector2 position; // = new Vector2(0f, 0f);
     private int mana_max;
     private int vie_max;
     private int bouclier_max;
@@ -50,7 +52,7 @@ public class Personnage extends ApplicationAdapter implements Entite {
 
     boolean prendre_des_degats = false;
     boolean gameOver =false;
-    int acceleration = 2;
+    int acceleration = 2000;
 
     // draw(Texture texture, float x, float y, float originX, float originY, float width, float height, float scaleX, float scaleY, float rotation)
 
@@ -73,8 +75,13 @@ public class Personnage extends ApplicationAdapter implements Entite {
     }
     
     @Override
-    public Vector2 getPosition(){
-        return this.position;
+    public float getPositionX(){
+        return this.positionX;
+    }
+
+    @Override
+    public float getPositionY(){
+        return this.positionY;
     }
 
     public Personnage(int mana, int vie, int bouclier, String nom, Texture skin) {//}, Vector2 position) {
@@ -84,27 +91,30 @@ public class Personnage extends ApplicationAdapter implements Entite {
         // this.skin = skin;
         this.mana_max = mana;
         this.vie_max = vie;
+        this.bouclier = bouclier;
         this.bouclier_max = bouclier;
-        this.position = new Vector2(0f, 0f);
+        this.positionY = 0;
+        this.positionX = 0;
     }
     
 
-    // largeur et longueur
+    // // largeur et longueur
 
-    float largeur_coeur;
-    float hauteur_coeur;
-    float largeur_bouclier;
-    float hauteur_bouclier;
-    float largeur_dash;
-    float hauteur_dash;
+    // float largeur_coeur;
+    // float hauteur_coeur;
+    // float largeur_bouclier;
+    // float hauteur_bouclier;
+    
 
     //texture 
 
-    Texture coeur_plein;
-    Texture dash_texture;
-    TextureRegion dash;
-    Texture dash_gris;
-    Texture bouclierIntact;
+    private Texture coeur_plein;
+    private Texture dash_texture;
+    private TextureRegion dash;
+    private Texture dash_gris;
+    private float largeur_dash;
+    private float hauteur_dash;
+    private Texture bouclierIntact;
     
     // Texture bouclierCasse;    
     
@@ -113,18 +123,16 @@ public class Personnage extends ApplicationAdapter implements Entite {
     @Override
     public void create_entite() {
 
-        bouclierIntact = new Texture("bouclier.png"); 
-        largeur_bouclier = bouclierIntact.getWidth();
-        hauteur_bouclier = bouclierIntact.getHeight();
+        // bouclierIntact = new Texture("bouclier.png"); 
+        // largeur_bouclier = bouclierIntact.getWidth();
+        // hauteur_bouclier = bouclierIntact.getHeight();
         
         // bouclierCasse = new Texture("bouclier_casse.png"); 
         // coeurvide = new Texture("coeur_vide.png");
         
-        coeur_plein = new Texture("coeur_plein.png");
-        largeur_coeur = coeur_plein.getWidth();
-        hauteur_coeur = coeur_plein.getHeight();
-
-        // sprint ou dash   //mettre un boutton dash pour montrer quand il a de nouveau acces au dash, par exemple dans un coin le symbole de dash gris si il n'y a pas acces et en couleur sinon
+        // coeur_plein = new Texture("coeur_plein.png");
+        // largeur_coeur = coeur_plein.getWidth();
+        // hauteur_coeur = coeur_plein.getHeight();
 
         dash_texture = new Texture("dash.png");
         dash = new TextureRegion(dash_texture);
@@ -137,50 +145,32 @@ public class Personnage extends ApplicationAdapter implements Entite {
         timer2 = new Timer();
     }
 
-    public void decompter() {
-        timer.scheduleAtFixedRate(new TimerTask() {
-            @Override
-            public void run() {
-                Gdx.app.postRunnable(new Runnable() {
-                    @Override
-                    public void run() {
-                        decompte--;
-                        if (decompte < 0) {
-                            timer.cancel();
-                            dashOk = true;
-                        }
-                    }
-                });
-            }
-        }, 0, 1000); // 1000 ms = 1s
-    }
+    // public void decompter() {
+    //     timer.scheduleAtFixedRate(new TimerTask() {
+    //         @Override
+    //         public void run() {
+    //             Gdx.app.postRunnable(new Runnable() {
+    //                 @Override
+    //                 public void run() {
+    //                     decompte--;
+    //                     if (decompte < 0) {
+    //                         timer.cancel();
+    //                         dashOk = true;
+    //                     }
+    //                 }
+    //             });
+    //         }
+    //     }, 0, 1000); // 1000 ms = 1s
+    // }
     
     @Override
-    public void input_entite() {
-        if (Gdx.input.isKeyPressed(Input.Keys.Z)) {
-            System.out.println("La touche Z est pressée !, le personnage avance");
-            this.getPosition().add(this.getPosition().x, this.getPosition().y + 0.5f );
-        }
-
-        if (Gdx.input.isKeyPressed(Input.Keys.Q)) {
-            System.out.println("La touche Q est pressée !, le personnage va vers la gauche");
-            this.getPosition().add(this.getPosition().x -0.5f, this.getPosition().y);
-        }
-
-        if (Gdx.input.isKeyPressed(Input.Keys.D)) {
-            System.out.println("La touche D est pressée !, le personnage va vers la droite");
-            this.getPosition().add(this.getPosition().x +0.5f, this.getPosition().y );
-        }
-
-        if (Gdx.input.isKeyPressed(Input.Keys.S)) {
-            System.out.println("La touche S est pressée !, le personnage va vers le bas");
-            this.getPosition().add(this.getPosition().x, this.getPosition().y - 0.5f );
-        }
-
-        if (Gdx.input.isKeyPressed(Input.Keys.SPACE)) {
-            System.out.println("La touche espace est pressée !, le personnage dash");
-            this.getPosition().add(this.getPosition().x * acceleration, this.getPosition().y * acceleration);
-        }
+    public void input_entite(float avance) {
+        
+        // if (Gdx.input.isKeyPressed(Input.Keys.SPACE)) {
+        //     // System.out.println("La touche espace est pressée !, le personnage dash");
+        //     // this.getPosition().add(this.getPositionX() * acceleration, this.getPositionY() * acceleration);
+        //     this.positionY += this.getPositionY()*avance;
+        // }
 
         int sourisX = Gdx.input.getX();
         int sourisY = Gdx.input.getY();
@@ -190,56 +180,28 @@ public class Personnage extends ApplicationAdapter implements Entite {
     
     @Override
     public void draw_entite(Main game) {
-        float largeur_ecran = game.viewport.getWorldWidth();
-        float hauteur_ecran = game.viewport.getWorldHeight();
-        game.batch.begin();
-        for (int i = 1; i <= this.getVie(); i++) {
-            game.batch.draw(coeur_plein, largeur_coeur + i, hauteur_ecran - hauteur_coeur);
-        }
-        for (int i = 1; i <= this.getBouclier(); i++) {
-            if (etatbouclier) {
-                game.batch.draw(coeur_plein, largeur_bouclier + i, hauteur_ecran - hauteur_bouclier - 1 - hauteur_coeur);
-            } else {
-                game.batch.draw(coeur_plein, largeur_bouclier + i, hauteur_ecran - hauteur_bouclier - 1 - hauteur_coeur);
-            }
-        }
+        float largeur_ecran = 2000;//game.viewport.getWorldWidth();
+        float hauteur_ecran = 2000;//game.viewport.getWorldHeight();
+        // game.batch.begin();
+        // for (int i = 0; i < this.vie; i++) {
+        //     game.batch.draw(coeur_plein, i*largeur_coeur +10, hauteur_ecran - hauteur_coeur);
+        // }
+        // for (int i = 0; i < this.bouclier; i++) {
+        //     game.batch.draw(bouclierIntact, i*largeur_bouclier +10, hauteur_ecran - hauteur_bouclier - 1 - hauteur_coeur);
+        // }
 
-        if (dashOk) {
-            game.batch.draw(dash, largeur_dash, hauteur_dash);
-        } else {
-            game.batch.draw(dash_gris, largeur_dash, hauteur_dash);
-        }
+        // if (dashOk) {
+        //     game.batch.draw(dash, largeur_dash, hauteur_dash);
+        // } else {
+        //     game.batch.draw(dash_gris, largeur_dash, hauteur_dash);
+        // }
 
-        game.batch.draw(skin, this.getPosition().x, this.getPosition().y);
+        // game.batch.draw(skin, this.getPositionX(), this.getPositionY());
 
 
-        // afficher le dash selon la direction, on fera une image du dash du haut vers le bas
-        if (Gdx.input.isKeyPressed(Input.Keys.SPACE)) {
-            if (dashOk) {
-                if (Gdx.input.isKeyPressed(Input.Keys.Z) && Gdx.input.isKeyPressed(Input.Keys.D)){
-                    game.batch.draw(dash, this.getPosition().x, this.getPosition().y, largeur_dash, hauteur_dash, largeur_dash, hauteur_dash, 1, 1, 45);
-                } else if (Gdx.input.isKeyPressed(Input.Keys.Z) && Gdx.input.isKeyPressed(Input.Keys.Q)) {
-                    game.batch.draw(dash, this.getPosition().x, this.getPosition().y, largeur_dash, hauteur_dash, largeur_dash, hauteur_dash, 1, 1, -45);
-                } else if (Gdx.input.isKeyPressed(Input.Keys.S) && Gdx.input.isKeyPressed(Input.Keys.D)) {
-                    game.batch.draw(dash, this.getPosition().x, this.getPosition().y, largeur_dash, hauteur_dash, largeur_dash, hauteur_dash, 1, 1, 135);
-                } else if (Gdx.input.isKeyPressed(Input.Keys.S) && Gdx.input.isKeyPressed(Input.Keys.Q)) {
-                    game.batch.draw(dash, this.getPosition().x, this.getPosition().y, largeur_dash, hauteur_dash, largeur_dash, hauteur_dash, 1, 1, -135);
-                } else if (Gdx.input.isKeyPressed(Input.Keys.Z)) {
-                    game.batch.draw(dash, this.getPosition().x, this.getPosition().y, largeur_dash, hauteur_dash, largeur_dash, hauteur_dash, 1, 1, 0);
-                } else if (Gdx.input.isKeyPressed(Input.Keys.Q)) {
-                    game.batch.draw(dash, this.getPosition().x, this.getPosition().y, largeur_dash, hauteur_dash, largeur_dash, hauteur_dash, 1, 1, 90);
-                } else if (Gdx.input.isKeyPressed(Input.Keys.S)) {
-                    game.batch.draw(dash, this.getPosition().x, this.getPosition().y, largeur_dash, hauteur_dash, largeur_dash, hauteur_dash, 1, 1, 180);
-                } else if (Gdx.input.isKeyPressed(Input.Keys.Q)) {
-                    game.batch.draw(dash, this.getPosition().x, this.getPosition().y, largeur_dash, hauteur_dash, largeur_dash, hauteur_dash, 1, 1, -90);
-                }
-                decompte = 3;
-                dashOk = false;
-                decompter();
-            }
-        }
+        
 
-        game.batch.end();
+        // game.batch.end();
 
     }
 
@@ -323,8 +285,8 @@ public class Personnage extends ApplicationAdapter implements Entite {
     @Override
     public void dispose_entite(Main game) {
         coeur_plein.dispose();
-        dash_texture.dispose();
-        dash_gris.dispose();
+        // dash_texture.dispose();
+        // dash_gris.dispose();
         bouclierIntact.dispose();
         game.batch.end();
     }
