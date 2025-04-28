@@ -24,6 +24,8 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.utils.TimeUtils;
+
 
 
 public class GameScreen implements Screen {
@@ -32,8 +34,8 @@ public class GameScreen implements Screen {
     private Texture skin;
     private float playerX = 0;
     private float playerY = 0;
-    private float playerSpeed = 1000; // Vitesse en pixels par seconde
-    private float speed = 5000;
+    private float playerSpeed = 500; // Vitesse en pixels par seconde
+    private float speed = 10000;
     private float mapSize = 2000; // Taille de la map carrée
     private OrthographicCamera camera;
     private Entite personnage1; // = new Personnage(4, 2, 3, "mathis", skin);
@@ -45,6 +47,18 @@ public class GameScreen implements Screen {
     private Texture coeur_plein;
     private Texture bouclierIntact;
 
+    // état du personnage
+
+    private Texture Hercule_bas;
+    private Texture Hercule_haut;
+    private Texture Hercule_gauche;
+    private Texture Hercule_droite;
+
+
+    // texture pour le cooldown
+
+    private Texture barre_vide;
+    private Texture barre_pleine;
 
     // largeur et longueur
 
@@ -52,6 +66,8 @@ public class GameScreen implements Screen {
     float hauteur_coeur;
     float largeur_bouclier;
     float hauteur_bouclier;
+    float largeur_skin;
+    float hauteur_skin;
 
     float cameraHalfWidth;
     float cameraHalfHeight;
@@ -60,6 +76,8 @@ public class GameScreen implements Screen {
     // etat bouclier et dash personnage
     private boolean etatbouclier = false;
     private boolean dashOk = true;
+    // je rajoute un dash_texture car le dashOk se met trop vite à false donc il affiche pas le dash
+    private boolean dash_afficher = true;
 
 
     // cooldown fash et combien de temps se remet le bouclier
@@ -70,6 +88,14 @@ public class GameScreen implements Screen {
     
     Timer timer;
     Timer timer2;
+
+    // nouveau timer avec update
+
+    // private long startTime;
+    // private final long temps_recharge = 3000;
+    private float tempsDash = 3;
+    private float dashCooldown = 2f;
+
     public GameScreen(final Main game) {
         this.game = game;
         camera = new OrthographicCamera();
@@ -80,6 +106,9 @@ public class GameScreen implements Screen {
     public void show() {
         mapTexture = new Texture(Gdx.files.internal("map.png")); // Créez une image "map.png"
         skin = new Texture(Gdx.files.internal("image_heracles_normal.png")); // Créez une image "player.png"
+        largeur_skin = skin.getWidth();
+        hauteur_skin = skin.getHeight();
+
         personnage1 = new Personnage(4, 3, 4, "mathis", skin);
         personnage1.create_entite();
 
@@ -98,18 +127,35 @@ public class GameScreen implements Screen {
         coeur_plein = new Texture("coeur_plein.png");
         largeur_coeur = coeur_plein.getWidth();
         hauteur_coeur = coeur_plein.getHeight();
+
+        Hercule_haut = new Texture("Hercule_haut.png");
+        Hercule_bas = new Texture("Hercule_bas.png");
+        Hercule_gauche = new Texture("Hercule_gauche.png");
+        Hercule_droite = new Texture("Hercule_droite.png");
+
+        barre_pleine = new Texture("barres_pleine.png");
+        barre_vide = new Texture("barres_vide.png");
     }
+
+    int touche = 51; // 51= W
 
     @Override
     public void render(float delta) {
         input(delta);
+        // personnage1.update(delta, dashOk);
         logic();
         draw();
+        if (!dashOk) {
+            tempsDash += delta;
+        }
+        if (tempsDash > dashCooldown) {
+            dashOk = true;
+        }
     }
 
     private void input(float avance) {
         // Déplacement du joueur
-        if (Gdx.input.isKeyPressed(Input.Keys.W) || Gdx.input.isKeyPressed(Input.Keys.UP)) {
+        if (Gdx.input.isKeyPressed(touche) || Gdx.input.isKeyPressed(Input.Keys.UP)) {
             // System.out.println("La touche Z est pressée !, le personnage avance");
             // this.getPosition().add(this.getPositionX(), this.getPositionY() + 0.5f );
             playerY += playerSpeed * avance;
@@ -133,10 +179,10 @@ public class GameScreen implements Screen {
             playerY -= playerSpeed * avance;
         }
         
-        
-        // afficher le dash selon la direction, on fera une image du dash du haut vers le bas
+        // mettre le dash
+
         if (Gdx.input.isKeyPressed(Input.Keys.SPACE)) {
-            // if (dashOk) {
+            if (dashOk) {
                 if (Gdx.input.isKeyPressed(Input.Keys.W)  || Gdx.input.isKeyPressed(Input.Keys.UP)) {
                     playerY += speed * avance;
                 } else if (Gdx.input.isKeyPressed(Input.Keys.A)  || Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
@@ -147,9 +193,11 @@ public class GameScreen implements Screen {
                     playerX += speed * avance;
                 }
                 // decompte = 3;
-                // dashOk = false;
+                dashOk = false;
+                tempsDash = 0;
+                dash_afficher = true;
                 // decompter();
-            // }
+            }
         }
 
         // Limiter le joueur à la map
@@ -186,16 +234,25 @@ public class GameScreen implements Screen {
         game.batch.begin();
         // Dessiner la map
         game.batch.draw(mapTexture, 0, 0, mapSize, mapSize);
+
         // Dessiner le joueur
-        game.batch.draw(skin, playerX, playerY);
-        personnage1.draw_entite(game);
+
+        if (Gdx.input.isKeyPressed(Input.Keys.A) || Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
+            game.batch.draw(Hercule_gauche, playerX, playerY, largeur_skin, hauteur_skin);
+        } else if (Gdx.input.isKeyPressed(Input.Keys.D) || Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
+            game.batch.draw(Hercule_droite, playerX, playerY, largeur_skin, hauteur_skin);
+        } else if (Gdx.input.isKeyPressed(touche) || Gdx.input.isKeyPressed(Input.Keys.UP)) {
+            game.batch.draw(Hercule_haut, playerX, playerY, largeur_skin, hauteur_skin);
+        } else {
+            game.batch.draw(Hercule_bas, playerX, playerY, largeur_skin, hauteur_skin);
+        }
 
         // afficher le dash selon la direction, on fera une image du dash du haut vers le bas
         if (Gdx.input.isKeyPressed(Input.Keys.SPACE)) {
-            // if (dashOk) {
-                if ((Gdx.input.isKeyPressed(Input.Keys.W) && Gdx.input.isKeyPressed(Input.Keys.D)) || (Gdx.input.isKeyPressed(Input.Keys.UP) && Gdx.input.isKeyPressed(Input.Keys.RIGHT))) {
+            if (dash_afficher) {
+                if ((Gdx.input.isKeyPressed(Input.Keys.W) && Gdx.input.isKeyPressed(Input.Keys.D)) || (Gdx.input.isKeyPressed(Input.Keys.RIGHT) && Gdx.input.isKeyPressed(Input.Keys.UP))) {
                     game.batch.draw(dash, playerX, playerY, largeur_dash, hauteur_dash, largeur_dash, hauteur_dash, 1, 1, 45);
-                } else if ((Gdx.input.isKeyPressed(Input.Keys.W) && Gdx.input.isKeyPressed(Input.Keys.A))  || (Gdx.input.isKeyPressed(Input.Keys.UP) && Gdx.input.isKeyPressed(Input.Keys.LEFT))) {
+                } else if ((Gdx.input.isKeyPressed(Input.Keys.W) && Gdx.input.isKeyPressed(Input.Keys.A))  || (Gdx.input.isKeyPressed(Input.Keys.LEFT) && Gdx.input.isKeyPressed(Input.Keys.UP))) {
                     game.batch.draw(dash, playerX, playerY, largeur_dash, hauteur_dash, largeur_dash, hauteur_dash, 1, 1, -45);
                 } else if ((Gdx.input.isKeyPressed(Input.Keys.S) && Gdx.input.isKeyPressed(Input.Keys.D))  || (Gdx.input.isKeyPressed(Input.Keys.DOWN) && Gdx.input.isKeyPressed(Input.Keys.RIGHT))) {
                     game.batch.draw(dash, playerX, playerY, largeur_dash, hauteur_dash, largeur_dash, hauteur_dash, 1, 1, 135);
@@ -210,17 +267,30 @@ public class GameScreen implements Screen {
                 } else if ((Gdx.input.isKeyPressed(Input.Keys.D))   || Gdx.input.isKeyPressed(Input.Keys.RIGHT)){
                     game.batch.draw(dash, playerX, playerY, largeur_dash, hauteur_dash, largeur_dash, hauteur_dash, 1, 1, 180);
                 }
+                // startTime = TimeUtils.millis();
                 // decompte = 3;
                 // dashOk = false;
                 // decompter();
+                dash_afficher = false;
+            }
         }
 
+        //cooldown
+
+        float progress = tempsDash / dashCooldown;
+        float barWidth = 30; 
+        float barHeight = 5; 
+        float x = playerX - 8;
+        float y = playerY - 8;
+
+        game.batch.draw(barre_vide, x, y, barWidth, barHeight);
+        game.batch.draw(barre_pleine, x, y, barWidth*progress, barHeight);
 
         for (int i = 0; i < personnage1.getVie(); i++) {
-            game.batch.draw(coeur_plein, camera.position.x - cameraHalfWidth + i*largeur_coeur +10, camera.position.y + cameraHalfHeight - hauteur_coeur);
+            game.batch.draw(coeur_plein, camera.position.x - cameraHalfWidth + i*hauteur_skin +10, camera.position.y + cameraHalfHeight - hauteur_skin, hauteur_skin, hauteur_skin);
         }
         for (int i = 0; i < personnage1.getBouclier(); i++) {
-            game.batch.draw(bouclierIntact, camera.position.x - cameraHalfWidth + i*largeur_bouclier +10, camera.position.y + cameraHalfHeight - hauteur_bouclier - 1 - hauteur_coeur);
+            game.batch.draw(bouclierIntact, camera.position.x - cameraHalfWidth + i*hauteur_skin +10, camera.position.y + cameraHalfHeight - hauteur_skin - 1 - hauteur_skin, hauteur_skin, hauteur_skin);
         }
 
 
@@ -254,6 +324,14 @@ public class GameScreen implements Screen {
 
     @Override
     public void hide() {}
+
+    // public void update() {
+    //     if (TimeUtils.timeSinceMillis(startTime) >= temps_recharge) {
+    //         // System.out.println("Tâche exécutée après " + DELAY + " millisecondes !");
+    //         dashOk = true;
+    //         startTime = TimeUtils.millis(); // Réinitialiser le timer
+    //     }
+    // }
 
     public void decompter() {
         timer.scheduleAtFixedRate(new TimerTask() {

@@ -271,6 +271,30 @@ public class Personnage extends ApplicationAdapter implements Entite {
     }
 
 
+    // parametre ooldown
+
+    // private float dashDuration = 0.2f;
+    // private float dashCooldown = 2f;
+    // private float cooldownTimer = 0f;
+
+    // public void update(float deltaTime, boolean dashOk, float tempsDash) {
+
+    //     // Mettre à jour le timer du dash
+    //     if (!dashOk) {
+    //         tempsDash += deltaTime;
+    //         // if (tempsDash >= dashDuration) {
+    //         //     dashTimer = 0; // Réinitialiser le timer du dash
+    //         //     isDashing = false; // Fin du dash
+    //         // cooldownTimer = dashCooldown; // Démarrer le cooldown
+    //         // }
+    //     }
+
+    //     // Mettre à jour le timer du cooldown
+    //     if (tempsDash > dashCooldown) {
+    //         dashOk = true;
+    //     }
+    // }
+
     // public void attaquer(int manadepense) throws ManaInsuffisant{
     //     if (this.mana - manadepense > 0){
     //         this.mana-= manadepense;

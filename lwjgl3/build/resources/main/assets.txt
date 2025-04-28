@@ -1,3 +1,9 @@
+Hercule_bas.png
+Hercule_droite.png
+Hercule_gauche.png
+Hercule_haut.png
+barres_pleine.png
+barres_vide.png
 bouclier.png
 coeur_heracles.png
 coeur_plein.png
