@@ -32,7 +32,7 @@ public class GameScreen implements Screen {
     private Texture skin;
     private float playerX = 0;
     private float playerY = 0;
-    private float playerSpeed = 2000; // Vitesse en pixels par seconde
+    private float playerSpeed = 1000; // Vitesse en pixels par seconde
     private float speed = 5000;
     private float mapSize = 2000; // Taille de la map carrée
     private OrthographicCamera camera;
@@ -137,13 +137,13 @@ public class GameScreen implements Screen {
         // afficher le dash selon la direction, on fera une image du dash du haut vers le bas
         if (Gdx.input.isKeyPressed(Input.Keys.SPACE)) {
             // if (dashOk) {
-                if (Gdx.input.isKeyPressed(Input.Keys.W)) {
+                if (Gdx.input.isKeyPressed(Input.Keys.W)  || Gdx.input.isKeyPressed(Input.Keys.UP)) {
                     playerY += speed * avance;
-                } else if (Gdx.input.isKeyPressed(Input.Keys.A)) {
+                } else if (Gdx.input.isKeyPressed(Input.Keys.A)  || Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
                     playerX -= speed * avance;
-                } else if (Gdx.input.isKeyPressed(Input.Keys.S)) {
+                } else if (Gdx.input.isKeyPressed(Input.Keys.S) || Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
                     playerY -= speed * avance;
-                } else if (Gdx.input.isKeyPressed(Input.Keys.D)) {
+                } else if (Gdx.input.isKeyPressed(Input.Keys.D)  || Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
                     playerX += speed * avance;
                 }
                 // decompte = 3;
@@ -193,21 +193,21 @@ public class GameScreen implements Screen {
         // afficher le dash selon la direction, on fera une image du dash du haut vers le bas
         if (Gdx.input.isKeyPressed(Input.Keys.SPACE)) {
             // if (dashOk) {
-                if (Gdx.input.isKeyPressed(Input.Keys.W) && Gdx.input.isKeyPressed(Input.Keys.D)){
+                if ((Gdx.input.isKeyPressed(Input.Keys.W) && Gdx.input.isKeyPressed(Input.Keys.D)) || (Gdx.input.isKeyPressed(Input.Keys.UP) && Gdx.input.isKeyPressed(Input.Keys.RIGHT))) {
                     game.batch.draw(dash, playerX, playerY, largeur_dash, hauteur_dash, largeur_dash, hauteur_dash, 1, 1, 45);
-                } else if (Gdx.input.isKeyPressed(Input.Keys.W) && Gdx.input.isKeyPressed(Input.Keys.A)) {
+                } else if ((Gdx.input.isKeyPressed(Input.Keys.W) && Gdx.input.isKeyPressed(Input.Keys.A))  || (Gdx.input.isKeyPressed(Input.Keys.UP) && Gdx.input.isKeyPressed(Input.Keys.LEFT))) {
                     game.batch.draw(dash, playerX, playerY, largeur_dash, hauteur_dash, largeur_dash, hauteur_dash, 1, 1, -45);
-                } else if (Gdx.input.isKeyPressed(Input.Keys.S) && Gdx.input.isKeyPressed(Input.Keys.D)) {
+                } else if ((Gdx.input.isKeyPressed(Input.Keys.S) && Gdx.input.isKeyPressed(Input.Keys.D))  || (Gdx.input.isKeyPressed(Input.Keys.DOWN) && Gdx.input.isKeyPressed(Input.Keys.RIGHT))) {
                     game.batch.draw(dash, playerX, playerY, largeur_dash, hauteur_dash, largeur_dash, hauteur_dash, 1, 1, 135);
-                } else if (Gdx.input.isKeyPressed(Input.Keys.S) && Gdx.input.isKeyPressed(Input.Keys.A)) {
+                } else if ((Gdx.input.isKeyPressed(Input.Keys.S) && Gdx.input.isKeyPressed(Input.Keys.A))  || (Gdx.input.isKeyPressed(Input.Keys.DOWN) && Gdx.input.isKeyPressed(Input.Keys.LEFT))) {
                     game.batch.draw(dash, playerX, playerY, largeur_dash, hauteur_dash, largeur_dash, hauteur_dash, 1, 1, -135);
-                } else if (Gdx.input.isKeyPressed(Input.Keys.W)) {
+                } else if ((Gdx.input.isKeyPressed(Input.Keys.W))  || Gdx.input.isKeyPressed(Input.Keys.UP)){
                     game.batch.draw(dash, playerX, playerY, largeur_dash, hauteur_dash, largeur_dash, hauteur_dash, 1, 1, 90);
-                } else if (Gdx.input.isKeyPressed(Input.Keys.A)) {
+                } else if ((Gdx.input.isKeyPressed(Input.Keys.A))   || Gdx.input.isKeyPressed(Input.Keys.LEFT)){
                     game.batch.draw(dash, playerX, playerY, largeur_dash, hauteur_dash, largeur_dash, hauteur_dash, 1, 1, 0);
-                } else if (Gdx.input.isKeyPressed(Input.Keys.S)) {
+                } else if ((Gdx.input.isKeyPressed(Input.Keys.S))   || Gdx.input.isKeyPressed(Input.Keys.DOWN)){
                     game.batch.draw(dash, playerX, playerY, largeur_dash, hauteur_dash, largeur_dash, hauteur_dash, 1, 1, -90);
-                } else if (Gdx.input.isKeyPressed(Input.Keys.D)) {
+                } else if ((Gdx.input.isKeyPressed(Input.Keys.D))   || Gdx.input.isKeyPressed(Input.Keys.RIGHT)){
                     game.batch.draw(dash, playerX, playerY, largeur_dash, hauteur_dash, largeur_dash, hauteur_dash, 1, 1, 180);
                 }
                 // decompte = 3;
