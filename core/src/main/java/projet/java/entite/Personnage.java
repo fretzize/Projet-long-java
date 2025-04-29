@@ -56,6 +56,64 @@ public class Personnage extends ApplicationAdapter implements Entite {
 
     // draw(Texture texture, float x, float y, float originX, float originY, float width, float height, float scaleX, float scaleY, float rotation)
 
+    // les quatres touches pour bouger sont dans personnage
+
+    private int touche_haut = 51;
+    private int touche_bas = 47;
+    private int touche_droite = 32;
+    private int touche_gauche = 29;
+    private int touche_dash = 62;
+
+    @Override
+    public void setHaut(int haut) {
+        this.touche_haut = haut;
+    }
+
+    @Override
+    public void setBas(int bas) {
+        this.touche_bas = bas;
+    }
+
+    @Override
+    public void setDroite(int droite) {
+        this.touche_droite = droite;
+    }
+
+    @Override
+    public void setGauche(int gauche) {
+        this.touche_gauche = gauche;
+    }
+
+    @Override
+    public void setDash(int dash) {
+        this.touche_dash = dash;
+    }
+
+    @Override
+    public int getHaut() {
+        return this.touche_haut;
+    }
+
+    @Override
+    public int getBas() {
+        return this.touche_bas;
+    }
+
+    @Override
+    public int getDroite() {
+        return this.touche_droite;
+    }
+
+    @Override
+    public int getGauche() {
+        return this.touche_gauche;
+    }
+
+    @Override
+    public int getDash() {
+        return this.touche_dash;
+    }
+
     // on perd d'abord en bouclier et ensuite en vide si on n'a plus de vie
 
 
@@ -98,13 +156,6 @@ public class Personnage extends ApplicationAdapter implements Entite {
     }
     
 
-    // // largeur et longueur
-
-    // float largeur_coeur;
-    // float hauteur_coeur;
-    // float largeur_bouclier;
-    // float hauteur_bouclier;
-    
 
     //texture 
 

@@ -8,6 +8,8 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
+import projet.java.entite.Entite;
+import projet.java.entite.Personnage;
 
 import projet.java.Main;
 
@@ -110,9 +112,9 @@ public class OptionScreen implements Screen {
                 dispose();
                 break;
             case 1:
-                // Implémenter l'écran des options
-                //game.setScreen(new TouchesScreen(game));
-                //dispose();               
+                // //Implémenter l'écran des options
+                // game.setScreen(new TouchesScreen(game));
+                // dispose();               
                 break;
             case 2:
                 game.setScreen(new Menu(game));

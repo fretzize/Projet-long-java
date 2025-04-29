@@ -32,8 +32,8 @@ public class GameScreen implements Screen {
     final Main game;
     private Texture mapTexture;
     private Texture skin;
-    private float playerX = 0;
-    private float playerY = 0;
+    private float playerX = 50;
+    private float playerY = 50;
     private float playerSpeed = 500; // Vitesse en pixels par seconde
     private float speed = 10000;
     private float mapSize = 2000; // Taille de la map carrée
@@ -89,7 +89,13 @@ public class GameScreen implements Screen {
     Timer timer;
     Timer timer2;
 
-    // nouveau timer avec update
+    //touche
+
+    int touche_haut;
+    int touche_bas;
+    int touche_gauche;
+    int touche_droite;
+    int touche_dash;
 
     // private long startTime;
     // private final long temps_recharge = 3000;
@@ -135,9 +141,16 @@ public class GameScreen implements Screen {
 
         barre_pleine = new Texture("barres_pleine.png");
         barre_vide = new Texture("barres_vide.png");
+
+        touche_haut = personnage1.getHaut(); // 51= W
+        touche_bas = personnage1.getBas();
+        touche_gauche = personnage1.getGauche();
+        touche_droite = personnage1.getDroite();
+        touche_dash = personnage1.getDash();
     }
 
-    int touche = 51; // 51= W
+    
+    
 
     @Override
     public void render(float delta) {
@@ -155,25 +168,25 @@ public class GameScreen implements Screen {
 
     private void input(float avance) {
         // Déplacement du joueur
-        if (Gdx.input.isKeyPressed(touche) || Gdx.input.isKeyPressed(Input.Keys.UP)) {
+        if (Gdx.input.isKeyPressed(touche_haut) || Gdx.input.isKeyPressed(Input.Keys.UP)) {
             // System.out.println("La touche Z est pressée !, le personnage avance");
             // this.getPosition().add(this.getPositionX(), this.getPositionY() + 0.5f );
             playerY += playerSpeed * avance;
         }
 
-        if (Gdx.input.isKeyPressed(Input.Keys.A) || Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
+        if (Gdx.input.isKeyPressed(touche_gauche) || Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
             // System.out.println("La touche Q est pressée !, le personnage va vers la gauche");
             // this.getPosition().add(this.getPositionX() -0.5f, this.getPositionY());
             playerX -= playerSpeed * avance;
         }
 
-        if (Gdx.input.isKeyPressed(Input.Keys.D) || Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
+        if (Gdx.input.isKeyPressed(touche_droite) || Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
             // System.out.println("La touche D est pressée !, le personnage va vers la droite");
             // this.getPosition().add(this.getPositionX() +0.5f, this.getPositionY() );
             playerX += playerSpeed * avance;
         }
 
-        if (Gdx.input.isKeyPressed(Input.Keys.S) || Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
+        if (Gdx.input.isKeyPressed(touche_bas) || Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
             // System.out.println("La touche S est pressée !, le personnage va vers le bas");
             // this.getPosition().add(this.getPositionX(), this.getPositionY() - 0.5f );
             playerY -= playerSpeed * avance;
@@ -181,15 +194,15 @@ public class GameScreen implements Screen {
         
         // mettre le dash
 
-        if (Gdx.input.isKeyPressed(Input.Keys.SPACE)) {
+        if (Gdx.input.isKeyPressed(touche_dash)) {
             if (dashOk) {
-                if (Gdx.input.isKeyPressed(Input.Keys.W)  || Gdx.input.isKeyPressed(Input.Keys.UP)) {
+                if (Gdx.input.isKeyPressed(touche_haut)  || Gdx.input.isKeyPressed(Input.Keys.UP)) {
                     playerY += speed * avance;
-                } else if (Gdx.input.isKeyPressed(Input.Keys.A)  || Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
+                } else if (Gdx.input.isKeyPressed(touche_gauche)  || Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
                     playerX -= speed * avance;
-                } else if (Gdx.input.isKeyPressed(Input.Keys.S) || Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
+                } else if (Gdx.input.isKeyPressed(touche_bas) || Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
                     playerY -= speed * avance;
-                } else if (Gdx.input.isKeyPressed(Input.Keys.D)  || Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
+                } else if (Gdx.input.isKeyPressed(touche_droite)  || Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
                     playerX += speed * avance;
                 }
                 // decompte = 3;
@@ -237,34 +250,34 @@ public class GameScreen implements Screen {
 
         // Dessiner le joueur
 
-        if (Gdx.input.isKeyPressed(Input.Keys.A) || Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
+        if (Gdx.input.isKeyPressed(touche_gauche) || Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
             game.batch.draw(Hercule_gauche, playerX, playerY, largeur_skin, hauteur_skin);
-        } else if (Gdx.input.isKeyPressed(Input.Keys.D) || Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
+        } else if (Gdx.input.isKeyPressed(touche_droite) || Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
             game.batch.draw(Hercule_droite, playerX, playerY, largeur_skin, hauteur_skin);
-        } else if (Gdx.input.isKeyPressed(touche) || Gdx.input.isKeyPressed(Input.Keys.UP)) {
+        } else if (Gdx.input.isKeyPressed(touche_haut) || Gdx.input.isKeyPressed(Input.Keys.UP)) {
             game.batch.draw(Hercule_haut, playerX, playerY, largeur_skin, hauteur_skin);
         } else {
             game.batch.draw(Hercule_bas, playerX, playerY, largeur_skin, hauteur_skin);
         }
 
         // afficher le dash selon la direction, on fera une image du dash du haut vers le bas
-        if (Gdx.input.isKeyPressed(Input.Keys.SPACE)) {
+        if (Gdx.input.isKeyPressed(touche_dash)) {
             if (dash_afficher) {
-                if ((Gdx.input.isKeyPressed(Input.Keys.W) && Gdx.input.isKeyPressed(Input.Keys.D)) || (Gdx.input.isKeyPressed(Input.Keys.RIGHT) && Gdx.input.isKeyPressed(Input.Keys.UP))) {
+                if ((Gdx.input.isKeyPressed(touche_haut) && Gdx.input.isKeyPressed(touche_droite)) || (Gdx.input.isKeyPressed(Input.Keys.RIGHT) && Gdx.input.isKeyPressed(Input.Keys.UP))) {
                     game.batch.draw(dash, playerX, playerY, largeur_dash, hauteur_dash, largeur_dash, hauteur_dash, 1, 1, 45);
-                } else if ((Gdx.input.isKeyPressed(Input.Keys.W) && Gdx.input.isKeyPressed(Input.Keys.A))  || (Gdx.input.isKeyPressed(Input.Keys.LEFT) && Gdx.input.isKeyPressed(Input.Keys.UP))) {
+                } else if ((Gdx.input.isKeyPressed(touche_haut) && Gdx.input.isKeyPressed(touche_gauche))  || (Gdx.input.isKeyPressed(Input.Keys.LEFT) && Gdx.input.isKeyPressed(Input.Keys.UP))) {
                     game.batch.draw(dash, playerX, playerY, largeur_dash, hauteur_dash, largeur_dash, hauteur_dash, 1, 1, -45);
-                } else if ((Gdx.input.isKeyPressed(Input.Keys.S) && Gdx.input.isKeyPressed(Input.Keys.D))  || (Gdx.input.isKeyPressed(Input.Keys.DOWN) && Gdx.input.isKeyPressed(Input.Keys.RIGHT))) {
+                } else if ((Gdx.input.isKeyPressed(touche_bas) && Gdx.input.isKeyPressed(touche_droite))  || (Gdx.input.isKeyPressed(Input.Keys.DOWN) && Gdx.input.isKeyPressed(Input.Keys.RIGHT))) {
                     game.batch.draw(dash, playerX, playerY, largeur_dash, hauteur_dash, largeur_dash, hauteur_dash, 1, 1, 135);
-                } else if ((Gdx.input.isKeyPressed(Input.Keys.S) && Gdx.input.isKeyPressed(Input.Keys.A))  || (Gdx.input.isKeyPressed(Input.Keys.DOWN) && Gdx.input.isKeyPressed(Input.Keys.LEFT))) {
+                } else if ((Gdx.input.isKeyPressed(touche_bas) && Gdx.input.isKeyPressed(touche_gauche))  || (Gdx.input.isKeyPressed(Input.Keys.DOWN) && Gdx.input.isKeyPressed(Input.Keys.LEFT))) {
                     game.batch.draw(dash, playerX, playerY, largeur_dash, hauteur_dash, largeur_dash, hauteur_dash, 1, 1, -135);
-                } else if ((Gdx.input.isKeyPressed(Input.Keys.W))  || Gdx.input.isKeyPressed(Input.Keys.UP)){
+                } else if ((Gdx.input.isKeyPressed(touche_haut))  || Gdx.input.isKeyPressed(Input.Keys.UP)){
                     game.batch.draw(dash, playerX, playerY, largeur_dash, hauteur_dash, largeur_dash, hauteur_dash, 1, 1, 90);
-                } else if ((Gdx.input.isKeyPressed(Input.Keys.A))   || Gdx.input.isKeyPressed(Input.Keys.LEFT)){
+                } else if ((Gdx.input.isKeyPressed(touche_gauche))   || Gdx.input.isKeyPressed(Input.Keys.LEFT)){
                     game.batch.draw(dash, playerX, playerY, largeur_dash, hauteur_dash, largeur_dash, hauteur_dash, 1, 1, 0);
-                } else if ((Gdx.input.isKeyPressed(Input.Keys.S))   || Gdx.input.isKeyPressed(Input.Keys.DOWN)){
+                } else if ((Gdx.input.isKeyPressed(touche_bas))   || Gdx.input.isKeyPressed(Input.Keys.DOWN)){
                     game.batch.draw(dash, playerX, playerY, largeur_dash, hauteur_dash, largeur_dash, hauteur_dash, 1, 1, -90);
-                } else if ((Gdx.input.isKeyPressed(Input.Keys.D))   || Gdx.input.isKeyPressed(Input.Keys.RIGHT)){
+                } else if ((Gdx.input.isKeyPressed(touche_droite))   || Gdx.input.isKeyPressed(Input.Keys.RIGHT)){
                     game.batch.draw(dash, playerX, playerY, largeur_dash, hauteur_dash, largeur_dash, hauteur_dash, 1, 1, 180);
                 }
                 // startTime = TimeUtils.millis();
@@ -280,7 +293,7 @@ public class GameScreen implements Screen {
         float progress = tempsDash / dashCooldown;
         float barWidth = 30; 
         float barHeight = 5; 
-        float x = playerX - 8;
+        float x = playerX - 3;
         float y = playerY - 8;
 
         game.batch.draw(barre_vide, x, y, barWidth, barHeight);
