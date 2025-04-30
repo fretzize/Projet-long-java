@@ -39,7 +39,7 @@ public class sbire implements entite{
     private Rectangle hitbox; // Hitbox du sbire
 
 
-    public sbire(float x, float y,float vitesseDeplacement,float cooldown,Rectangle hitbox, float porteeMax,float porteeCaC, int degats, int degatsCaC,Texture projectileTexture) {
+    public sbire(float x, float y,float vitesseDeplacement,float cooldown,Rectangle hitbox, float porteeMax,float porteeCaC, int degats, int degatsCaC, personnage cible, ComportementSbire comportement,Texture projectileTexture) {
         this.position = new Vector2(x, y);
         this.projectileTexture = projectileTexture;
         this.cooldown = cooldown;
@@ -49,6 +49,8 @@ public class sbire implements entite{
         this.porteeCaC = porteeCaC;
         this.degatsCaC = degatsCaC;
         this.degats = degats;
+        this.cible = cible;
+        this.comportement = comportement;
     }
 
     public void setCible(personnage cible) {
@@ -215,8 +217,9 @@ public class sbire implements entite{
         }
     }
 
-
-    public void agir(){
-        
+    public void agir(float deltaTime, List<Projectile> projectiles) {
+        if (comportement != null) {
+            comportement.executerAction(this, deltaTime, projectiles);
+        }
     }
 }
