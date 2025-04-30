@@ -175,7 +175,9 @@ public class sbire implements entite{
     }
 
     public void attaquerMelee(){
-        cible.prendreDegat(degatsCaC);
+        if (cible != null && estAPorteeCaC()) {
+            cible.prendreDegat(degatsCaC);
+        }
     }
 
     public void prendreDegats(int degats) {

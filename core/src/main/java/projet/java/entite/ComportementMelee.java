@@ -1,13 +1,20 @@
 package projet.java.entite;
 
 import java.util.List;
+import com.badlogic.gdx.math.Vector2;
 
-//Comportement d'un sbire qui attaque principalement au corps à corps et qui doit se rapprocher de la cible pour attaquer
 public class ComportementMelee implements ComportementSbire {
-    public void executerAction(sbire sbire, float deltaTime, List<Projectile> projectiles){
-        while(sbire.enVie() && sbire.cibleenVie()){
-            sbire.deplacerVersCible(deltaTime);
-            sbire.update(deltaTime, projectiles);
+    @Override
+    public void executerAction(sbire sbire, float deltaTime, List<Projectile> projectiles) {
+        // Vérifier si le sbire et la cible sont en vie
+        if (!sbire.enVie() || !sbire.cibleenVie()) {
+            return;
         }
+
+        // Se déplacer vers la cible
+        sbire.deplacerVersCible(deltaTime);
+        
+        // Mettre à jour l'état et attaquer si possible
+        sbire.update(deltaTime, projectiles);
     }
 }
