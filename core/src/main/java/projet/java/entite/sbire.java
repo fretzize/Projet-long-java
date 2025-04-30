@@ -21,25 +21,34 @@ public class sbire implements entite{
     //La position du sbire
     private Vector2 position;
 
+    //Le comportement du sbire
+    private ComportementSbire comportement;
+
     private float vitesseDeplacement; // Vitesse de déplacement du sbire
     private float vitesseProjectile; // Vitesse des projectiles
+
+    private int degatsCaC;
+    private float porteeCaC;
 
     //Texture du projectile lancé par le sbire
     private Texture projectileTexture;
     private float porteeMax;
-    private int degats = 10;
+    private int degats;
     private float cooldown; // temps entre deux tirs (en secondes)
     private float tempsDepuisDernierTir = 0f;
     private Rectangle hitbox; // Hitbox du sbire
 
 
-    public sbire(float x, float y,float vitesseDeplacement,float cooldown,Rectangle hitbox, float porteeMax,Texture projectileTexture) {
+    public sbire(float x, float y,float vitesseDeplacement,float cooldown,Rectangle hitbox, float porteeMax,float porteeCaC, int degats, int degatsCaC,Texture projectileTexture) {
         this.position = new Vector2(x, y);
         this.projectileTexture = projectileTexture;
         this.cooldown = cooldown;
         this.vitesseDeplacement = vitesseDeplacement;
         this.hitbox = hitbox;
         this.porteeMax = porteeMax;
+        this.porteeCaC = porteeCaC;
+        this.degatsCaC = degatsCaC;
+        this.degats = degats;
     }
 
     public void setCible(personnage cible) {
@@ -60,6 +69,10 @@ public class sbire implements entite{
 
     public Vector2 getPosition(){
         return this.position;
+    }
+
+    public personnage getCible(){
+        return this.cible;
     }
 
     public void augmenterMana(int mana){
@@ -88,6 +101,13 @@ public class sbire implements entite{
         return false;
     }
 
+    public boolean cibleenVie(){
+        if(this.cible != null && this.cible.getVie() > 0){
+            return true;
+        }
+        return false;
+    }
+
     //Pour linstant ne sert pas a grand chose, mais apres y aura des sons et des animations quand il meurt
     public void mourir() {
         this.vie = 0;
@@ -99,9 +119,15 @@ public class sbire implements entite{
     public void update(float delta, List<Projectile> projectiles) {
         tempsDepuisDernierTir += delta;
 
-        if (cible != null && peutAttaquer() && estAPortee()) {
-            tirerSurCible(projectiles);
-            tempsDepuisDernierTir = 0;
+        if (cible != null && peutAttaquer()) {
+            if(estAPorteeCaC()){
+                attaquerMelee();
+                tempsDepuisDernierTir = 0;
+            }
+            else if(estAPortee()){
+                tirerSurCible(projectiles);
+                tempsDepuisDernierTir = 0;
+            }
         }
     }
 
@@ -112,12 +138,22 @@ public class sbire implements entite{
 
     // Vérifie si la cible est à portée (si la distance est inférieure à la portée maximale)
     private boolean estAPortee() {
-        if (cible == null) return false;
+        if (cible == null){
+            return false;
+        }
         float distance = position.dst(cible.getPosition());
         return distance <= porteeMax;
     }
 
-    private void tirerSurCible(List<Projectile> projectiles) {
+    private boolean estAPorteeCaC(){
+        if(cible == null){
+            return false;
+        }
+        float distance = position.dst(cible.getPosition());
+        return distance <= porteeCaC;
+    }
+
+    public void tirerSurCible(List<Projectile> projectiles) {
         Vector2 positionCible = this.cible.getPosition();  // récupère la position du personnage
     
         // Calcule la direction normalisée du projectile (du sbire vers la cible)
@@ -138,6 +174,10 @@ public class sbire implements entite{
         projectiles.add(projectile);
     }
 
+    public void attaquerMelee(){
+        cible.prendreDegat(degatsCaC);
+    }
+
     public void prendreDegats(int degats) {
         this.vie -= degats;
         if (this.vie <= 0) {
@@ -149,10 +189,11 @@ public class sbire implements entite{
         return hitbox;
     }
 
-    public void deplacer(float deltaTime) {
+    //Méthode pour se déplacer où l'on veut
+    public void deplacer(float deltaTime, Vector2 direction) {
         if (cible != null) {
             // Calcul de la direction vers la cible
-            Vector2 direction = new Vector2(cible.getPosition()).sub(position).nor();
+            direction.nor();
             
             // Déplacement
             position.x += direction.x * vitesseDeplacement * deltaTime;
@@ -161,5 +202,19 @@ public class sbire implements entite{
             // Mise à jour de la hitbox
             hitbox.setPosition(position.x, position.y);
         }
+    }
+
+    //Méthode pour se déplacer explicitement vers la cible
+    public void deplacerVersCible(float deltaTime) {
+        if (cible != null) {
+            // Calcul de la direction vers la cible
+            Vector2 direction = new Vector2(cible.getPosition()).sub(position);
+            deplacer(deltaTime, direction);
+        }
+    }
+
+
+    public void agir(){
+        
     }
 }
