@@ -2,12 +2,13 @@ package projet.java;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
+import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.audio.Music;
-
 
 import projet.java.Menu.MenuScreen;
 
@@ -18,6 +19,23 @@ public class Main extends Game {
     public FitViewport viewport;
     public BitmapFont font;
     public Music menuMusic; // Musique de fond
+    
+    // Ajout des touches configurables
+    public int toucheHaut = Input.Keys.W;
+    public int toucheBas = Input.Keys.S;
+    public int toucheGauche = Input.Keys.A;
+    public int toucheDroite = Input.Keys.D;
+    public int toucheDash = Input.Keys.SPACE;
+
+    public void setTouche(int index, int keycode) {
+        switch(index) {
+            case 0: toucheHaut = keycode; break;
+            case 1: toucheBas = keycode; break;
+            case 2: toucheGauche = keycode; break;
+            case 3: toucheDroite = keycode; break;
+            case 4: toucheDash = keycode; break;
+        }
+    }
 
     public void stopMenuMusic() {
         if (menuMusic != null && menuMusic.isPlaying()) {
@@ -62,10 +80,16 @@ public class Main extends Game {
 
     @Override
     public void dispose() {
+        Screen screen = this.getScreen();
+        if (screen != null) {
+            screen.dispose();
+        }
         batch.dispose();
         font.dispose();
         if (menuMusic != null) {
-            menuMusic.dispose(); // Libérer les ressources de la musique
+            menuMusic.stop();
+            menuMusic.dispose();
         }
+        Gdx.app.exit();
     }
 }

@@ -8,22 +8,18 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.InputProcessor;
-import com.badlogic.gdx.audio.Music;
 
 
 import projet.java.Main;
 
 public class MenuScreen implements Screen {
-    
+
     final Main game;
 
     private Texture backgroundTexture;
     private int selectedIndex = 0; // Index de l'option sélectionnée
-    private final String[] menuOptions = {"Commencer", "Options", "Quitter"};
+    private final String[] menuOptions = { "Commencer", "Options", "Quitter" };
     private Rectangle[] optionBounds; // Pour stocker les zones cliquables
-    
-
 
     public MenuScreen(final Main game) {
         this.game = game;
@@ -60,18 +56,18 @@ public class MenuScreen implements Screen {
         // Réinitialiser l'échelle pour les options du menu
         game.font.getData().setScale(1.5f);
 
-
         // Ajuster la taille de la police pour agrandir les options du menu
         game.font.getData().setScale(1.5f); // Augmentez l'échelle selon vos besoins
 
         // Afficher les options du menu
         for (int i = 0; i < menuOptions.length; i++) {
             String option = menuOptions[i];
-            float textWidth = game.font.draw(game.batch,option,0,0).width; // Largeur du texte
-            float textHeight = game.font.draw(game.batch,option,0,0).height; // Hauteur du texte
+            float textWidth = game.font.draw(game.batch, option, 0, 0).width; // Largeur du texte
+            float textHeight = game.font.draw(game.batch, option, 0, 0).height; // Hauteur du texte
             float x = (screenWidth - textWidth) / 2;
-            float y = (screenHeight + 5*textHeight) / 2 - i * 100; // Espacement entre les options
-            //float y = screenHeight / 2 + ((menuOptions.length/2) - i) * 100; // Modifié le calcul de y
+            float y = (screenHeight + 5 * textHeight) / 2 - i * 100; // Espacement entre les options
+            // float y = screenHeight / 2 + ((menuOptions.length/2) - i) * 100; // Modifié
+            // le calcul de y
 
             // Mettre à jour la zone cliquable
             optionBounds[i].set(x, y - textHeight, textWidth, textHeight);
@@ -109,19 +105,18 @@ public class MenuScreen implements Screen {
     private void handleMenuSelection() {
         switch (selectedIndex) {
             case 0:
-                game.stopMenuMusic(); // Arrêter la musique de fond
+                game.stopMenuMusic();
                 game.setScreen(new GameScreen(game));
                 dispose();
                 break;
             case 1:
-                // Implémenter l'écran des options
                 game.setScreen(new OptionScreen(game));
                 dispose();
-                // Pour l'instant, on va juste afficher un message dans la console
-                //System.out.println("Options sélectionnées !");
-                
                 break;
             case 2:
+                // S'assurer que toutes les ressources sont libérées avant de quitter
+                dispose();
+                game.dispose();
                 Gdx.app.exit();
                 break;
         }
@@ -131,10 +126,10 @@ public class MenuScreen implements Screen {
         // Convertir les coordonnées de la souris en coordonnées du monde
         float mouseX = Gdx.input.getX();
         float mouseY = Gdx.input.getY(); // Inverser Y car LibGDX utilise un repère bas-gauche
-        
+
         // Convertir en coordonnées du viewport
         Vector3 worldCoords = game.viewport.getCamera().unproject(new Vector3(mouseX, mouseY, 0));
-        
+
         return bounds.contains(worldCoords.x, worldCoords.y);
     }
 
@@ -151,19 +146,19 @@ public class MenuScreen implements Screen {
     @Override
     public void hide() {
         // TODO Auto-generated method stub
-        
+
     }
 
     @Override
     public void pause() {
         // TODO Auto-generated method stub
-        
+
     }
 
     @Override
     public void resume() {
         // TODO Auto-generated method stub
-        
+
     }
 
     @Override
@@ -171,6 +166,6 @@ public class MenuScreen implements Screen {
         if (backgroundTexture != null) {
             backgroundTexture.dispose();
         }
-        
+
     }
 }
