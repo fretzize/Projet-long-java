@@ -9,7 +9,7 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.audio.Music;
 
 
-import projet.java.Menu.Menu;
+import projet.java.Menu.MenuScreen;
 
 /** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
 public class Main extends Game {
@@ -52,7 +52,7 @@ public class Main extends Game {
 
         font.setUseIntegerPositions(false);
         font.getData().setScale(viewport.getWorldHeight() / Gdx.graphics.getHeight());
-        this.setScreen(new Menu(this));
+        this.setScreen(new MenuScreen(this));
     }
 
     @Override
