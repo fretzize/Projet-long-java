@@ -1,7 +1,6 @@
 package projet.java.entite;
 
 import java.util.List;
-import com.badlogic.gdx.math.Vector2;
 
 public class ComportementMelee implements ComportementSbire {
     @Override

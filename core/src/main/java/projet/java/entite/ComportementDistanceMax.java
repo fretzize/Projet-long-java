@@ -4,8 +4,9 @@ import java.util.List;
 
 import com.badlogic.gdx.math.Vector2;
 
-//Comportement d'un sbire qui veut s'éloigner en permanence au plus loin de sa cible
+//Comportement d'un sbire qui veut s'éloigner en permanence au plus loin de sa cible (exemple arme portee infinie)
 public class ComportementDistanceMax implements ComportementSbire{
+    @Override
     public void executerAction(sbire sbire, float deltaTime, List<Projectile> projectiles){
         if(sbire.enVie() && sbire.cibleenVie()){
             Vector2 direction = new Vector2(sbire.getCible().getPosition()).sub(sbire.getPosition());
