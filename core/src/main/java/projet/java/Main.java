@@ -18,6 +18,7 @@ public class Main extends Game {
     public FitViewport viewport;
     public BitmapFont font;
     public Music menuMusic; // Musique de fond
+    public Entrees entrees;
 
     public void stopMenuMusic() {
         if (menuMusic != null && menuMusic.isPlaying()) {
@@ -47,8 +48,8 @@ public class Main extends Game {
         font = generator.generateFont(parameter);
         generator.dispose(); // Libérer les ressources du générateur
 
-
-
+        // Intitalisier les entrées
+        entrees = new Entrees();
 
         font.setUseIntegerPositions(false);
         font.getData().setScale(viewport.getWorldHeight() / Gdx.graphics.getHeight());

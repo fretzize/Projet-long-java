@@ -7,6 +7,7 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.Vector2;
 import projet.java.entite.Entite;
 import projet.java.entite.Personnage;
 import projet.java.Main;
@@ -14,6 +15,8 @@ import projet.java.Main;
 import java.util.TimerTask;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.Vector;
+
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
@@ -32,8 +35,9 @@ public class GameScreen implements Screen {
     private Texture skin;
     private float playerX = 0;
     private float playerY = 0;
+    private Vector2 vecteurDirection = new Vector2();
     private float playerSpeed = 1000; // Vitesse en pixels par seconde
-    private float speed = 5000;
+    private float speed = 1000;
     private float mapSize = 2000; // Taille de la map carrée
     private OrthographicCamera camera;
     private Entite personnage1; // = new Personnage(4, 2, 3, "mathis", skin);
@@ -108,56 +112,54 @@ public class GameScreen implements Screen {
     }
 
     private void input(float avance) {
+        // Réinitialisation du vecteur déplacement
+        vecteurDirection.setZero();
         // Déplacement du joueur
-        if (Gdx.input.isKeyPressed(Input.Keys.W) || Gdx.input.isKeyPressed(Input.Keys.UP)) {
+        if (game.entrees.actionEstChoisie("HAUT")) {
             // System.out.println("La touche Z est pressée !, le personnage avance");
             // this.getPosition().add(this.getPositionX(), this.getPositionY() + 0.5f );
-            playerY += playerSpeed * avance;
+            vecteurDirection.add(0, 1);
         }
 
-        if (Gdx.input.isKeyPressed(Input.Keys.A) || Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
+        if (game.entrees.actionEstChoisie("GAUCHE")) {
             // System.out.println("La touche Q est pressée !, le personnage va vers la gauche");
             // this.getPosition().add(this.getPositionX() -0.5f, this.getPositionY());
-            playerX -= playerSpeed * avance;
+            vecteurDirection.sub(1, 0);
         }
 
-        if (Gdx.input.isKeyPressed(Input.Keys.D) || Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
+        if (game.entrees.actionEstChoisie("DROITE")) {
             // System.out.println("La touche D est pressée !, le personnage va vers la droite");
             // this.getPosition().add(this.getPositionX() +0.5f, this.getPositionY() );
-            playerX += playerSpeed * avance;
+            vecteurDirection.add(1, 0);
         }
 
-        if (Gdx.input.isKeyPressed(Input.Keys.S) || Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
+        if (game.entrees.actionEstChoisie("BAS")) {
             // System.out.println("La touche S est pressée !, le personnage va vers le bas");
             // this.getPosition().add(this.getPositionX(), this.getPositionY() - 0.5f );
-            playerY -= playerSpeed * avance;
+            vecteurDirection.sub(0, 1);
         }
-        
+
+        // Normaliser le vecteur pour que la vitesse soit toujours la même peu importe la direction
+        vecteurDirection.nor();
+
+        // Multiplier le vecteur par la vitesse
+        vecteurDirection.scl(avance * speed);
         
         // afficher le dash selon la direction, on fera une image du dash du haut vers le bas
-        if (Gdx.input.isKeyPressed(Input.Keys.SPACE)) {
-            // if (dashOk) {
-                if (Gdx.input.isKeyPressed(Input.Keys.W)  || Gdx.input.isKeyPressed(Input.Keys.UP)) {
-                    playerY += speed * avance;
-                } else if (Gdx.input.isKeyPressed(Input.Keys.A)  || Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
-                    playerX -= speed * avance;
-                } else if (Gdx.input.isKeyPressed(Input.Keys.S) || Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
-                    playerY -= speed * avance;
-                } else if (Gdx.input.isKeyPressed(Input.Keys.D)  || Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
-                    playerX += speed * avance;
-                }
-                // decompte = 3;
-                // dashOk = false;
-                // decompter();
-            // }
+        if (game.entrees.actionEstChoisie("DASH")) {
+            vecteurDirection.scl(2);
         }
+
+        // Mise à jour de la position du joueur
+        playerX += MathUtils.cosDeg(vecteurDirection.angleDeg()) * vecteurDirection.len();
+        playerY += MathUtils.sinDeg(vecteurDirection.angleDeg()) * vecteurDirection.len();
 
         // Limiter le joueur à la map
         playerX = MathUtils.clamp(playerX, 0, mapSize - skin.getWidth());
         playerY = MathUtils.clamp(playerY, 0, mapSize - skin.getHeight());
 
         // Retour au menu
-        if (Gdx.input.isKeyPressed(Input.Keys.ESCAPE)) {
+        if (game.entrees.actionEstChoisie("RETOUR")) {
             game.startMenuMusic();
             game.setScreen(new Menu(game));
             dispose();
