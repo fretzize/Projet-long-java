@@ -1,14 +1,32 @@
-import java.util.Vector;
+package projet.java.entite;
+import com.badlogic.gdx.math.Vector2;
 
-public interface entite {
-    int vie;
-    int bouclier;
-    int mana;
-    Vector2 position;
+import projet.java.Main;
 
-    public int getMana();
-    public int getBouclier();
-    public int getVie();
-    public Vector2 getPosition();
-    
+// import com.badlogic.gdx.math.Vector2;
+
+public interface Entite {
+    int getMana();
+    int getBouclier();
+    int getVie();
+    float getPositionX();
+    float getPositionY();
+
+    void create_entite();
+    void input_entite(float avance);
+    void draw_entite(Main game);
+    void dispose_entite(Main game);
+
+    void setHaut(int haut);
+    void setBas(int bas);
+    void setDroite(int droite);
+    void setGauche(int gauche);
+    void setDash(int dash);
+
+    int getHaut();
+    int getBas();
+    int getDroite();
+    int getGauche();
+    int getDash();
+
 }
