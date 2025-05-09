@@ -15,6 +15,7 @@ public class ArmeMelee extends ArmeBase {
     private float tempsAnimation;    // Compteur pour l'animation
     private boolean enAnimation;     // Indique si l'arme est en train d'effectuer une animation d'attaque
     private Rectangle zoneAttaque;   // Zone de collision de l'attaque
+    private float forceKnockback;    // Force de recul appliquée aux ennemis touchés
     
     /**
      * Constructeur d'une arme de mêlée.
@@ -26,13 +27,23 @@ public class ArmeMelee extends ArmeBase {
      * @param vitesseAttaque Délai entre deux attaques
      * @param texturePath Chemin vers la texture
      * @param angleAttaque Angle d'arc de l'attaque en degrés
+     * @param forceKnockback Force de recul appliquée aux ennemis (0 pour pas de recul)
      */
     public ArmeMelee(String nom, int degats, int manaRequis, float portee, float vitesseAttaque, 
-                     String texturePath, float angleAttaque) {
+                     String texturePath, float angleAttaque, float forceKnockback) {
         super(nom, degats, manaRequis, portee, vitesseAttaque, texturePath);
         this.angleAttaque = angleAttaque;
         this.dureeAnimation = 0.3f;  // 300ms par défaut pour l'animation d'attaque
         this.zoneAttaque = new Rectangle();  // Zone de collision initialement vide
+        this.forceKnockback = forceKnockback;  // Force du recul
+    }
+    
+    /**
+     * Constructeur alternatif sans knockback (par défaut à 0)
+     */
+    public ArmeMelee(String nom, int degats, int manaRequis, float portee, float vitesseAttaque, 
+                     String texturePath, float angleAttaque) {
+        this(nom, degats, manaRequis, portee, vitesseAttaque, texturePath, angleAttaque, 0);
     }
     
     /**
@@ -76,7 +87,7 @@ public class ArmeMelee extends ArmeBase {
     
     /**
      * Détecte les collisions entre la zone d'attaque et les ennemis.
-     * À adapter selon votre système de gestion des entités.
+     * Applique dégâts et knockback aux ennemis touchés.
      */
     private void detecterCollisions(Vector2 position, Vector2 normalizedDirection) {
         // Obtenir la liste des ennemis
@@ -96,7 +107,15 @@ public class ArmeMelee extends ArmeBase {
                 
                 // Si l'ennemi est dans l'arc d'attaque (défini par angleAttaque)
                 if (angleDifference <= angleAttaque / 2) {
+                    // Appliquer les dégâts à l'ennemi
                     ennemi.prendreDegat(degats);
+                    
+                    // Appliquer le knockback si la force est > 0
+                    if (forceKnockback > 0) {
+                        // Direction du knockback = direction de l'attaque
+                        // Alternative: directionVersEnnemi pour pousser dans la direction exacte de l'ennemi
+                        ennemi.appliquerKnockback(normalizedDirection, forceKnockback);
+                    }
                     
                     // Effet visuel: projection de sang ou particules
                     spawnParticules(ennemi.getPosition(), 10); // 10 particules
@@ -109,6 +128,23 @@ public class ArmeMelee extends ArmeBase {
     private void spawnParticules(Vector2 position, int count) {
         // Code pour générer des particules d'impact
         // À implémenter avec le système de particules de LibGDX
+    }
+    
+    /**
+     * Modifie la force du knockback de l'arme.
+     * Utile pour les améliorations d'armes en cours de jeu.
+     * 
+     * @param force Nouvelle force de knockback
+     */
+    public void setForceKnockback(float force) {
+        this.forceKnockback = force;
+    }
+    
+    /**
+     * @return Force actuelle du knockback
+     */
+    public float getForceKnockback() {
+        return forceKnockback;
     }
     
     /**
