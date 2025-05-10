@@ -8,7 +8,7 @@ import com.badlogic.gdx.math.Vector2;
  * Classe abstraite implémentant les fonctionnalités communes à toutes les armes.
  * Sert de base pour les classes concrètes d'armes.
  */
-public abstract class ArmeBase implements arme {
+public abstract class ArmeBase implements Arme {
     // Attributs communs à toutes les armes
     protected String nom;                     // Nom de l'arme
     protected int degats;                     // Dégâts infligés par l'arme
@@ -18,6 +18,7 @@ public abstract class ArmeBase implements arme {
     protected Texture texture;                // Représentation visuelle de l'arme
     protected float tempsDepuisDerniereAttaque;  // Compteur pour le cooldown
     protected boolean peutAttaquer;           // Indique si l'arme peut être utilisée actuellement
+    protected Niveau niveau;                  // Référence au niveau actuel (pour accéder aux ennemis)
     
     /**
      * Constructeur pour initialiser les propriétés communes à toutes les armes.
@@ -94,6 +95,16 @@ public abstract class ArmeBase implements arme {
      */
     @Override
     public Texture getTexture() { return texture; }
+    
+    /**
+     * Définit le niveau actuel pour accéder aux ennemis.
+     * 
+     * @param niveau Niveau actuel du jeu
+     */
+    @Override
+    public void setNiveau(Niveau niveau) {
+        this.niveau = niveau;
+    }
     
     /**
      * Libère les ressources utilisées par l'arme.

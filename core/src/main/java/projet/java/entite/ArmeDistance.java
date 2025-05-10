@@ -16,7 +16,6 @@ public class ArmeDistance extends ArmeBase {
     private float vitesseProjectile;        // Vitesse des projectiles
     private int nbProjectilesParTir;        // Nombre de projectiles tirés à chaque utilisation
     private float angleDispersion;          // Angle de dispersion entre projectiles (shotgun, etc.)
-    private Niveau niveau;                  // Référence au niveau actuel (pour accéder aux ennemis)
     private Sound sonTir;                   // Son joué lors du tir
     private Sound sonImpact;                // Son joué lors d'un impact
 
@@ -37,18 +36,41 @@ public class ArmeDistance extends ArmeBase {
      */
     public ArmeDistance(String nom, int degats, int manaRequis, float portee, float vitesseAttaque,
                        String texturePath, String projectileTexturePath, float vitesseProjectile, 
-                       int nbProjectiles, float angleDispersion, Niveau niveau) {
+                       int nbProjectiles, float angleDispersion) {
         super(nom, degats, manaRequis, portee, vitesseAttaque, texturePath);
         this.projectileTexture = new Texture(projectileTexturePath);
         this.projectiles = new Array<>();
         this.vitesseProjectile = vitesseProjectile;
         this.nbProjectilesParTir = nbProjectiles;
         this.angleDispersion = angleDispersion;
-        this.niveau = niveau;
+
         
         // Chargement des sons (à adapter selon votre système de gestion des assets)
         // this.sonTir = Gdx.audio.newSound(Gdx.files.internal("sons/tir_" + nom + ".wav"));
         // this.sonImpact = Gdx.audio.newSound(Gdx.files.internal("sons/impact_projectile.wav"));
+    }
+    
+    /**
+     * Constructeur alternatif avec niveau.
+     * 
+     * @param nom Nom de l'arme
+     * @param degats Dégâts infligés par chaque projectile
+     * @param manaRequis Coût en mana pour utiliser l'arme
+     * @param portee Distance maximale des projectiles
+     * @param vitesseAttaque Délai entre deux tirs
+     * @param texturePath Chemin vers la texture de l'arme
+     * @param projectileTexturePath Chemin vers la texture des projectiles
+     * @param vitesseProjectile Vitesse de déplacement des projectiles
+     * @param nbProjectiles Nombre de projectiles tirés à chaque utilisation
+     * @param angleDispersion Angle de dispersion entre les projectiles (en degrés)
+     * @param niveau Référence au niveau actuel
+     */
+    public ArmeDistance(String nom, int degats, int manaRequis, float portee, float vitesseAttaque,
+                       String texturePath, String projectileTexturePath, float vitesseProjectile, 
+                       int nbProjectiles, float angleDispersion, Niveau niveau) {
+        this(nom, degats, manaRequis, portee, vitesseAttaque, texturePath, projectileTexturePath, 
+             vitesseProjectile, nbProjectiles, angleDispersion);
+        this.niveau = niveau;
     }
     
     /**
