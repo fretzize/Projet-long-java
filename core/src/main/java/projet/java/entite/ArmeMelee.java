@@ -15,7 +15,7 @@ public class ArmeMelee extends ArmeBase {
     private float tempsAnimation;    // Compteur pour l'animation
     private boolean enAnimation;     // Indique si l'arme est en train d'effectuer une animation d'attaque
     private Rectangle zoneAttaque;   // Zone de collision de l'attaque
-    private float forceKnockback;    // Force de recul appliquée aux ennemis touchés
+    private float forceKnockback;    // Force de recul appliquée aux sbires touchés
     
     /**
      * Constructeur d'une arme de mêlée.
@@ -27,7 +27,7 @@ public class ArmeMelee extends ArmeBase {
      * @param vitesseAttaque Délai entre deux attaques
      * @param texturePath Chemin vers la texture
      * @param angleAttaque Angle d'arc de l'attaque en degrés
-     * @param forceKnockback Force de recul appliquée aux ennemis (0 pour pas de recul)
+     * @param forceKnockback Force de recul appliquée aux sbires (0 pour pas de recul)
      */
     public ArmeMelee(String nom, int degats, int manaRequis, float portee, float vitesseAttaque, 
                      String texturePath, float angleAttaque, float forceKnockback) {
@@ -81,44 +81,44 @@ public class ArmeMelee extends ArmeBase {
             zoneHeight  // Hauteur
         );
         
-        // Détecte les collisions avec les ennemis
+        // Détecte les collisions avec les sbires
         detecterCollisions(position, normalizedDirection);
     }
     
     /**
-     * Détecte les collisions entre la zone d'attaque et les ennemis.
-     * Applique dégâts et knockback aux ennemis touchés.
+     * Détecte les collisions entre la zone d'attaque et les sbires.
+     * Applique dégâts et knockback aux sbires touchés.
      */
     private void detecterCollisions(Vector2 position, Vector2 normalizedDirection) {
-        // Obtenir la liste des ennemis
-        Array<Ennemi> ennemis = niveau.getEnnemis();
+        // Obtenir la liste des sbires
+        Array<Sbire> sbires = niveau.getSbires();
         
         // Calculer l'angle de l'attaque basé sur la direction
-        float angle = new Vector2(normalizedDirection).angle();
+        float angle = new Vector2(normalizedDirection).angleDeg();
         
-        for (Ennemi ennemi : ennemis) {
+        for (Sbire sbire : sbires) {
             // Vérification simple avec le rectangle
-            if (zoneAttaque.overlaps(ennemi.getHitbox())) {
-                // Vérification supplémentaire: l'ennemi est-il dans l'arc d'attaque?
-                Vector2 directionVersEnnemi = new Vector2(ennemi.getPosition()).sub(position).nor();
-                float angleVersEnnemi = directionVersEnnemi.angle();
-                float angleDifference = Math.abs(angle - angleVersEnnemi);
+            if (zoneAttaque.overlaps(sbire.getHitbox())) {
+                // Vérification supplémentaire: l'sbire est-il dans l'arc d'attaque?
+                Vector2 directionVersSbire = new Vector2(sbire.getPositionX(),sbire.getPositionY()).sub(position).nor();
+                float angleVersSbire = directionVersSbire.angleDeg();
+                float angleDifference = Math.abs(angle - angleVersSbire);
                 angleDifference = angleDifference > 180 ? 360 - angleDifference : angleDifference;
                 
-                // Si l'ennemi est dans l'arc d'attaque (défini par angleAttaque)
+                // Si l'sbire est dans l'arc d'attaque (défini par angleAttaque)
                 if (angleDifference <= angleAttaque / 2) {
-                    // Appliquer les dégâts à l'ennemi
-                    ennemi.prendreDegat(degats);
+                    // Appliquer les dégâts à l'sbire
+                    sbire.prendreDegats(degats);
                     
                     // Appliquer le knockback si la force est > 0
                     if (forceKnockback > 0) {
                         // Direction du knockback = direction de l'attaque
-                        // Alternative: directionVersEnnemi pour pousser dans la direction exacte de l'ennemi
-                        ennemi.appliquerKnockback(normalizedDirection, forceKnockback);
+                        // Alternative: directionVersSbire pour pousser dans la direction exacte de l'sbire
+                        sbire.appliquerKnockback(normalizedDirection, forceKnockback);
                     }
                     
                     // Effet visuel: projection de sang ou particules
-                    spawnParticules(ennemi.getPosition(), 10); // 10 particules
+                    spawnParticules(new Vector2(sbire.getPositionX(),sbire.getPositionY()), 10); // 10 particules
                 }
             }
         }

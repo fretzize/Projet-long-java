@@ -99,7 +99,7 @@ public class ArmeDistance extends ArmeBase {
             
             for (int i = 0; i < nbProjectilesParTir; i++) {
                 float currentAngle = startAngle + (angleStep * i);  // Angle courant
-                Vector2 rotatedDir = new Vector2(dir).rotate(currentAngle);  // Direction rotée
+                Vector2 rotatedDir = new Vector2(dir).rotateDeg(currentAngle);  // Direction rotée
                 creerProjectile(position, rotatedDir);  // Crée un projectile dans cette direction
             }
         }
@@ -127,7 +127,7 @@ public class ArmeDistance extends ArmeBase {
     
     /**
      * Met à jour l'état de l'arme à distance et de ses projectiles.
-     * Gère aussi la détection des collisions avec les ennemis.
+     * Gère aussi la détection des collisions avec les sbires.
      * 
      * @param delta Temps écoulé depuis la dernière mise à jour
      */
@@ -140,7 +140,7 @@ public class ArmeDistance extends ArmeBase {
             Projectile projectile = projectiles.get(i);
             projectile.update(delta);  // Met à jour la position du projectile
             
-            // Vérifier les collisions avec les ennemis
+            // Vérifier les collisions avec les sbires
             verifierCollisionProjectile(projectile);
             
             // Supprimer les projectiles qui ont dépassé leur portée ou touché une cible
@@ -151,25 +151,25 @@ public class ArmeDistance extends ArmeBase {
     }
     
     /**
-     * Vérifie si un projectile entre en collision avec un ennemi et applique les dégâts si nécessaire.
+     * Vérifie si un projectile entre en collision avec un sbire et applique les dégâts si nécessaire.
      * 
      * @param projectile Le projectile à vérifier
      */
     private void verifierCollisionProjectile(Projectile projectile) {
         if (niveau == null) return; // Sécurité
         
-        Array<Ennemi> ennemis = niveau.getEnnemis();
+        Array<Sbire> sbires = niveau.getSbires();
         
-        for (Ennemi ennemi : ennemis) {
-            // Vérifier si l'ennemi est vivant et si le projectile touche son hitbox
-            if (ennemi.enVie() && projectile.getHitbox().overlaps(ennemi.getHitbox())) {
-                // Appliquer les dégâts à l'ennemi
-                ennemi.prendreDegat(projectile.getDegats());
+        for (Sbire sbire : sbires) {
+            // Vérifier si le sbire est vivant et si le projectile touche son hitbox
+            if (sbire.enVie() && projectile.getHitbox().overlaps(sbire.getHitbox())) {
+                // Appliquer les dégâts au sbire
+                sbire.prendreDegats(projectile.getDegats());
                 
                 // Effet de recul (knockback) - optionnel
                 Vector2 directionKnockback = new Vector2(projectile.getVitesse()).nor();
                 float forceKnockback = 50f; // À ajuster selon votre gameplay
-                ennemi.appliquerKnockback(directionKnockback, forceKnockback);
+                sbire.appliquerKnockback(directionKnockback, forceKnockback);
                 
                 // Effet visuel au point d'impact
                 creerEffetImpact(projectile.getPosition());
@@ -182,7 +182,7 @@ public class ArmeDistance extends ArmeBase {
                 // Marquer le projectile comme touché (pour le supprimer)
                 projectile.toucher();
                 
-                // Sort de la boucle car un projectile ne touche qu'un seul ennemi
+                // Sort de la boucle car un projectile ne touche qu'un seul sbire
                 // (à moins que vous vouliez des projectiles perforants)
                 break;
             }

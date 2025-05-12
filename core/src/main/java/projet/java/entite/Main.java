@@ -1,4 +1,4 @@
-package projet.java.lon;
+package projet.java.entite;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
