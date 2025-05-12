@@ -15,6 +15,9 @@ import projet.java.Main;
 public class OptionScreen implements Screen {
     
     final Main game;
+    private GameScreen gameScreen;
+    private PauseScreen pauseScreen;
+    private boolean fromPause;
 
     private Texture backgroundTexture;
     private int selectedIndex = 0;
@@ -33,6 +36,13 @@ public class OptionScreen implements Screen {
 
     }
 
+    // Constructeur lorsqu'on vient de l'écran pause
+    public OptionScreen(final Main game, PauseScreen pauseScreen, GameScreen gameScreen) {
+        this(game);
+        this.pauseScreen = pauseScreen;
+        this.gameScreen = gameScreen;
+        this.fromPause = true;
+    }
 
     @Override
     public void render(float delta) {
@@ -107,15 +117,27 @@ public class OptionScreen implements Screen {
     private void handleMenuSelection() {
         switch (selectedIndex) {
             case 0:
-                game.setScreen(new SonScreen(game));
+                if (fromPause) {
+                    game.setScreen(new SonScreen(game, this, pauseScreen, gameScreen));
+                } else {
+                    game.setScreen(new SonScreen(game, this));
+                }
                 dispose();
                 break;
             case 1:
-                game.setScreen(new TouchesScreen(game));
+                if (fromPause) {
+                    game.setScreen(new TouchesScreen(game, this, pauseScreen, gameScreen));
+                } else {
+                    game.setScreen(new TouchesScreen(game, this));
+                }
                 dispose();               
                 break;
             case 2:
-                game.setScreen(new MenuScreen(game));
+                if (fromPause) {
+                    game.setScreen(new PauseScreen(game, gameScreen));
+                } else {
+                    game.setScreen(new MenuScreen(game));
+                }
                 dispose();
                 break;
         }

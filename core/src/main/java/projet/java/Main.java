@@ -19,7 +19,11 @@ public class Main extends Game {
     public FitViewport viewport;
     public BitmapFont font;
     public Music menuMusic; // Musique de fond
+
+    private float menuMusicVolume = 0.5f;
+    private float gameSoundVolume = 0.5f;
     
+
     // Ajout des touches configurables
     public int toucheHaut = Input.Keys.W;
     public int toucheBas = Input.Keys.S;
@@ -47,15 +51,33 @@ public class Main extends Game {
             menuMusic.play(); // Démarrer la musique de fond
         }
     }
+
+    public void saveAudioSettings(float menuVolume, float gameVolume) {
+        this.menuMusicVolume = menuVolume;
+        this.gameSoundVolume = gameVolume;
+        
+        if (menuMusic != null) {
+            menuMusic.setVolume(menuMusicVolume);
+        }
+    }
+    
+    public float getSoundVolume() {
+        return gameSoundVolume;
+    }
+    
+    public void setSoundVolume(float volume) {
+        this.gameSoundVolume = volume;
+    }
+    
     @Override
     public void create() {
         batch = new SpriteBatch();
         viewport = new FitViewport(1920, 1080);
         font = new BitmapFont();
-        // Initialiser la musique une seule fois
+
         menuMusic = Gdx.audio.newMusic(Gdx.files.internal("menumusic.mp3"));
         menuMusic.setLooping(true);
-        menuMusic.setVolume(0.5F);
+        menuMusic.setVolume(menuMusicVolume);
         menuMusic.play(); // Démarrer la musique de fond
         
         // Charger une police vectorielle

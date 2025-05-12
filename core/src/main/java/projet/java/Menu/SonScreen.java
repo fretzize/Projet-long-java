@@ -16,7 +16,11 @@ import projet.java.Main;
 public class SonScreen implements Screen {
 
     final Main game;
-
+    private OptionScreen optionScreen;
+    private PauseScreen pauseScreen;
+    private GameScreen gameScreen;
+    private boolean fromPause;
+    
     private Texture backgroundTexture;
     private ShapeRenderer shapeRenderer;
     private Rectangle menuMusicSlider;
@@ -26,15 +30,29 @@ public class SonScreen implements Screen {
     private float menuMusicVolume = 0.5f; // Volume de la musique de fond
     private float gameSoundVolume = 0.5f; // Volume du son du jeu
 
-    public SonScreen(final Main game) {
+
+    // Constructeur standard depuis les options
+    public SonScreen(final Main game,OptionScreen optionScreen) {
         this.game = game;
-        this.shapeRenderer = new ShapeRenderer();
-        menuMusicSlider = new Rectangle(0, 0, 300, 20); // Initialiser la zone du curseur de volume de la musique
-        gameSoundSlider = new Rectangle(0, 0, 300, 20); // Initialiser la zone du curseur de volume du son du jeu
-        menuMusicVolume = game.menuMusic.getVolume(); // Volume de la musique de fond   
+        this.optionScreen = optionScreen;
+        this.fromPause = false;        this.shapeRenderer = new ShapeRenderer();
+        menuMusicSlider = new Rectangle(0, 0, 300, 20); 
+        gameSoundSlider = new Rectangle(0, 0, 300, 20); 
+        menuMusicVolume = game.menuMusic.getVolume(); 
     }
 
-
+    // Constructeur spécial depuis la pause
+    public SonScreen(final Main game,OptionScreen optionScreen,PauseScreen pauseScreen, GameScreen gameScreen) {
+        this.game = game;
+        this.optionScreen = optionScreen;
+        this.pauseScreen = pauseScreen;
+        this.gameScreen = gameScreen;
+        this.fromPause = true;
+        this.shapeRenderer = new ShapeRenderer();
+        menuMusicSlider = new Rectangle(0, 0, 300, 20); 
+        gameSoundSlider = new Rectangle(0, 0, 300, 20); 
+        menuMusicVolume = game.menuMusic.getVolume();   
+    }
 
 
     @Override
@@ -127,7 +145,13 @@ public class SonScreen implements Screen {
 
         // Gestion des touches clavier
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
-            game.setScreen(new OptionScreen(game));
+            //game.setScreen(new OptionScreen(game));
+            game.saveAudioSettings(menuMusicVolume, gameSoundVolume);
+            if (fromPause) {
+                game.setScreen(new OptionScreen(game, pauseScreen, gameScreen));
+            } else {
+                game.setScreen(new OptionScreen(game));
+            }
             dispose();
         }
     }
