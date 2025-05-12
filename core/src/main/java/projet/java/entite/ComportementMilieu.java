@@ -13,7 +13,9 @@ public class ComportementMilieu implements ComportementSbire{
         if(sbire.enVie() && sbire.cibleenVie()){
 
             Vector2 positionCible = new Vector2(sbire.getCible().getPositionX(), sbire.getCible().getPositionY()); //Position de la cible
-            Vector2 direction = new Vector2(positionCible).sub(sbire.getPosition()); //Direction vers la cible
+            Vector2 positionSbire = new Vector2(sbire.getPositionX(), sbire.getPositionY()); //Position du sbire
+            
+            Vector2 direction = new Vector2(positionCible).sub(positionSbire); //Direction vers la cible
             float porteeProjectile = sbire.getPorteeProjectile(); //Portée à distance du sbire
             
             //Se rapprocher de la cible si elle est hors de portée

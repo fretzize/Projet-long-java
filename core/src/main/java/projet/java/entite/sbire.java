@@ -172,7 +172,7 @@ public class Sbire implements entite{
     public void tirerSurCible(List<Projectile> projectiles) {
         Vector2 positionCible = new Vector2(this.cible.getPositionX(), this.cible.getPositionY());  // récupère la position du personnage
     
-
+        Vector2 position = new Vector2(this.positionX, this.positionY); //Position du sbire
         // Calcule la direction normalisée du projectile (du sbire vers la cible)
         Vector2 direction = new Vector2(positionCible).sub(position).nor();
     
@@ -219,7 +219,7 @@ public class Sbire implements entite{
             positionY += direction.y * vitesseDeplacement * deltaTime;
             
             // Mise à jour de la hitbox
-            hitbox.setPosition(position.x, position.y);
+            hitbox.setPosition(positionX, positionY);
         }
     }
 
