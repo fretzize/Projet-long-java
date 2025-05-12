@@ -155,6 +155,14 @@ public class Personnage extends ApplicationAdapter implements Entite {
         this.positionX = 0;
     }
     
+    public void changePositionX(float X){
+        this.positionX += X;
+    }
+
+    public void changePositionY(float Y){
+        this.positionY += Y;
+    }
+
 
 
     //texture 
