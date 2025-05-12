@@ -8,7 +8,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;
 import java.util.List;
 
-public class sbire implements entite{
+public class Sbire implements entite{
 
     // Attributs de santé de l'entité sbire
     int vie;
@@ -16,10 +16,11 @@ public class sbire implements entite{
     int mana;
 
     //La cible du sbire
-    private personnage cible;
+    private Personnage cible;
 
     //La position du sbire
-    private Vector2 position;
+    private float positionX ;
+    private float positionY ;
 
     //Le comportement du sbire
     private ComportementSbire comportement;
@@ -32,20 +33,21 @@ public class sbire implements entite{
 
     //Texture du projectile lancé par le sbire
     private Texture projectileTexture;
-    private float porteeMax;
+    private float porteeProjectile;  //Portée du projectile
     private int degats;
     private float cooldown; // temps entre deux tirs (en secondes)
     private float tempsDepuisDernierTir = 0f;
     private Rectangle hitbox; // Hitbox du sbire
 
 
-    public sbire(float x, float y,float vitesseDeplacement,float cooldown,Rectangle hitbox, float porteeMax,float porteeCaC, int degats, int degatsCaC, personnage cible, ComportementSbire comportement,Texture projectileTexture) {
-        this.position = new Vector2(x, y);
+    public Sbire(float x, float y,float vitesseDeplacement,float cooldown,Rectangle hitbox, float porteeProjectile,float porteeCaC, int degats, int degatsCaC, Personnage cible, ComportementSbire comportement,Texture projectileTexture) {
+        this.positionX = x;
+        this.positionY = y;
         this.projectileTexture = projectileTexture;
         this.cooldown = cooldown;
         this.vitesseDeplacement = vitesseDeplacement;
         this.hitbox = hitbox;
-        this.porteeMax = porteeMax;
+        this.porteeProjectile = porteeProjectile;
         this.porteeCaC = porteeCaC;
         this.degatsCaC = degatsCaC;
         this.degats = degats;
@@ -53,8 +55,12 @@ public class sbire implements entite{
         this.comportement = comportement;
     }
 
-    public void setCible(personnage cible) {
+    public void setCible(Personnage cible) {
         this.cible = cible;
+    }
+
+    public float getPorteeProjectile() {
+        return this.porteeProjectile;
     }
 
     public int getMana(){
@@ -73,8 +79,14 @@ public class sbire implements entite{
         return this.position;
     }
 
-    public personnage getCible(){
+    public Personnage getCible(){
         return this.cible;
+    }
+
+    public float getDistanceCible(){
+        float dx = this.positionX - cible.getPositionX();
+        float dy = this.positionY - cible.getPositionY();
+        return (float) Math.sqrt(dx * dx + dy * dy);
     }
 
     public void augmenterMana(int mana){
@@ -143,20 +155,18 @@ public class sbire implements entite{
         if (cible == null){
             return false;
         }
-        float distance = position.dst(cible.getPosition());
-        return distance <= porteeMax;
+        return getDistanceCible() <= porteeProjectile;
     }
 
     private boolean estAPorteeCaC(){
         if(cible == null){
             return false;
         }
-        float distance = position.dst(cible.getPosition());
-        return distance <= porteeCaC;
+        return getDistanceCible() <= porteeCaC;
     }
 
     public void tirerSurCible(List<Projectile> projectiles) {
-        Vector2 positionCible = this.cible.getPosition();  // récupère la position du personnage
+        Vector2 positionCible = new Vector2(this.cible.getPositionX(), this.cible.getPositionY());  // récupère la position du personnage
     
         // Calcule la direction normalisée du projectile (du sbire vers la cible)
         Vector2 direction = new Vector2(positionCible).sub(position).nor();
@@ -170,7 +180,7 @@ public class sbire implements entite{
             vitesseVecteur.y,
             projectileTexture,
             degats,
-            porteeMax
+            porteeProjectile
         );
     
         projectiles.add(projectile);
@@ -211,8 +221,11 @@ public class sbire implements entite{
     //Méthode pour se déplacer explicitement vers la cible
     public void deplacerVersCible(float deltaTime) {
         if (cible != null) {
+
+            //Position de la cible
+            Vector2 positionCible = new Vector2(cible.getPositionX(), cible.getPositionY());
             // Calcul de la direction vers la cible
-            Vector2 direction = new Vector2(cible.getPosition()).sub(position);
+            Vector2 direction = new Vector2(positionCible).sub(position);
             deplacer(deltaTime, direction);
         }
     }
