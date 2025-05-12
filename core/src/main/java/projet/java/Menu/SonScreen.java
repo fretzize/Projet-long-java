@@ -145,7 +145,6 @@ public class SonScreen implements Screen {
 
         // Gestion des touches clavier
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
-            //game.setScreen(new OptionScreen(game));
             game.saveAudioSettings(menuMusicVolume, gameSoundVolume);
             if (fromPause) {
                 game.setScreen(new OptionScreen(game, pauseScreen, gameScreen));

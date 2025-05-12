@@ -109,7 +109,11 @@ public class OptionScreen implements Screen {
             handleMenuSelection();
         }
         else if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
-            game.setScreen(new MenuScreen(game));
+            if (fromPause) {
+                game.setScreen(new PauseScreen(game, gameScreen));
+            } else {
+                game.setScreen(new MenuScreen(game));
+            }
             dispose();
         }
     }
