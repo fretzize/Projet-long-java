@@ -75,8 +75,12 @@ public class Sbire implements entite{
         return this.vie;
     }
 
-    public Vector2 getPosition(){
-        return this.position;
+    public float getPositionX(){
+        return this.positionX;
+    }
+
+    public float getPositionY(){
+        return this.positionY;
     }
 
     public Personnage getCible(){
@@ -168,14 +172,15 @@ public class Sbire implements entite{
     public void tirerSurCible(List<Projectile> projectiles) {
         Vector2 positionCible = new Vector2(this.cible.getPositionX(), this.cible.getPositionY());  // récupère la position du personnage
     
+
         // Calcule la direction normalisée du projectile (du sbire vers la cible)
         Vector2 direction = new Vector2(positionCible).sub(position).nor();
     
         Vector2 vitesseVecteur = direction.scl(vitesseProjectile);
 
         Projectile projectile = new Projectile(
-            position.x,
-            position.y,
+            positionX,
+            positionY,
             vitesseVecteur.x,
             vitesseVecteur.y,
             projectileTexture,
@@ -210,8 +215,8 @@ public class Sbire implements entite{
             direction.nor();
             
             // Déplacement
-            position.x += direction.x * vitesseDeplacement * deltaTime;
-            position.y += direction.y * vitesseDeplacement * deltaTime;
+            positionX += direction.x * vitesseDeplacement * deltaTime;
+            positionY += direction.y * vitesseDeplacement * deltaTime;
             
             // Mise à jour de la hitbox
             hitbox.setPosition(position.x, position.y);
@@ -222,6 +227,7 @@ public class Sbire implements entite{
     public void deplacerVersCible(float deltaTime) {
         if (cible != null) {
 
+            Vector2 position = new Vector2(this.positionX, this.positionY); //Position du sbire
             //Position de la cible
             Vector2 positionCible = new Vector2(cible.getPositionX(), cible.getPositionY());
             // Calcul de la direction vers la cible
