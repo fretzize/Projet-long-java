@@ -1,14 +1,12 @@
 package projet.java.entite;
 
+import java.util.List;
+
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 
 import projet.java.Main;
-
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.math.Vector2;
-import java.util.List;
 
 public class Sbire implements Entite{
 
