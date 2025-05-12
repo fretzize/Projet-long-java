@@ -143,6 +143,11 @@ public class GameScreen implements Screen {
     }
 
     private void input(float avance) {
+        // Gestion de la pause
+        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE) || Gdx.input.isKeyJustPressed(Input.Keys.P)) {
+            game.setScreen(new PauseScreen(game, this));
+            return; // Sortir de la méthode pour éviter de traiter d'autres entrées
+        }
         // Gestion du dash
         if (Gdx.input.isKeyPressed(game.toucheDash)) {
             if (dashOk && !isDashing) {
@@ -182,18 +187,6 @@ public class GameScreen implements Screen {
         playerX = MathUtils.clamp(playerX, 0, mapSize - skin.getWidth());
         playerY = MathUtils.clamp(playerY, 0, mapSize - skin.getHeight());
 
-        // Retour au menu
-        if (Gdx.input.isKeyPressed(Input.Keys.ESCAPE)) {
-            game.startMenuMusic();
-            game.setScreen(new MenuScreen(game));
-            game.startMenuMusic();
-            game.setScreen(new MenuScreen(game));
-            game.startMenuMusic();
-            game.setScreen(new MenuScreen(game));
-            game.startMenuMusic();
-            game.setScreen(new MenuScreen(game));
-            dispose();
-        }
     }
 
     private void logic() {
