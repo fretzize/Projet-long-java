@@ -8,25 +8,23 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.InputProcessor;
-import com.badlogic.gdx.audio.Music;
-
 
 import projet.java.Main;
 
-public class Menu implements Screen {
-    
+public class PauseScreen implements Screen {
+
     final Main game;
-
-    private Texture backgroundTexture;
-    private int selectedIndex = 0; // Index de l'option sélectionnée
-    private final String[] menuOptions = {"Commencer", "Options", "Quitter"};
-    private Rectangle[] optionBounds; // Pour stocker les zones cliquables
+    private GameScreen gameScreen; 
     
+    private Texture backgroundTexture;
+    private int selectedIndex = 0; 
+    private final String[] menuOptions = { "Reprendre", "Options", "Menu Principal" };
+    private Rectangle[] optionBounds;
 
-
-    public Menu(final Main game) {
+    public PauseScreen(final Main game, GameScreen gameScreen) {
         this.game = game;
+        this.gameScreen = gameScreen; 
+        
         // Initialiser les rectangles pour chaque option
         optionBounds = new Rectangle[menuOptions.length];
         for (int i = 0; i < menuOptions.length; i++) {
@@ -36,42 +34,37 @@ public class Menu implements Screen {
 
     @Override
     public void render(float delta) {
-        ScreenUtils.clear(Color.BLACK);
+        ScreenUtils.clear(0, 0, 0, 0.7f); 
 
         game.viewport.apply();
         game.batch.setProjectionMatrix(game.viewport.getCamera().combined);
 
-        game.batch.begin(); // Assurez-vous que le batch commence avant tout dessin
+        game.batch.begin();
 
         // Calculer les dimensions de l'écran
         float screenWidth = game.viewport.getWorldWidth();
         float screenHeight = game.viewport.getWorldHeight();
+        
+        game.batch.draw(backgroundTexture, 0, 0, screenWidth, screenHeight);
 
-        game.batch.draw(backgroundTexture, 0, 0, game.viewport.getWorldWidth(), game.viewport.getWorldHeight());
-
-        game.font.getData().setScale(3.0f); // Plus grand que les options du menu
-        game.font.setColor(Color.GOLD); // Couleur dorée pour le titre
-        String title = "Héraclès";
+        // Titre
+        game.font.getData().setScale(3.0f);
+        game.font.setColor(Color.GOLD);
+        String title = "Pause";
         float titleWidth = game.font.draw(game.batch, title, 0, 0).width;
         float titleX = (screenWidth - titleWidth) / 2;
-        float titleY = screenHeight - 100; // Position en haut de l'écran
+        float titleY = screenHeight - 100;
         game.font.draw(game.batch, title, titleX, titleY);
 
-        // Réinitialiser l'échelle pour les options du menu
+        // Options du menu
         game.font.getData().setScale(1.5f);
 
-
-        // Ajuster la taille de la police pour agrandir les options du menu
-        game.font.getData().setScale(1.5f); // Augmentez l'échelle selon vos besoins
-
-        // Afficher les options du menu
         for (int i = 0; i < menuOptions.length; i++) {
             String option = menuOptions[i];
-            float textWidth = game.font.draw(game.batch,option,0,0).width; // Largeur du texte
-            float textHeight = game.font.draw(game.batch,option,0,0).height; // Hauteur du texte
+            float textWidth = game.font.draw(game.batch, option, 0, 0).width;
+            float textHeight = game.font.draw(game.batch, option, 0, 0).height;
             float x = (screenWidth - textWidth) / 2;
-            float y = (screenHeight + 5*textHeight) / 2 - i * 100; // Espacement entre les options
-            //float y = screenHeight / 2 + ((menuOptions.length/2) - i) * 100; // Modifié le calcul de y
+            float y = (screenHeight + 5 * textHeight) / 2 - i * 100;
 
             // Mettre à jour la zone cliquable
             optionBounds[i].set(x, y - textHeight, textWidth, textHeight);
@@ -94,7 +87,7 @@ public class Menu implements Screen {
             game.font.draw(game.batch, option, x, y);
         }
 
-        game.batch.end(); // Assurez-vous que le batch se termine après tout dessin
+        game.batch.end();
 
         // Gérer les entrées clavier
         if (Gdx.input.isKeyJustPressed(Input.Keys.UP)) {
@@ -103,44 +96,37 @@ public class Menu implements Screen {
             selectedIndex = (selectedIndex + 1) % menuOptions.length;
         } else if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
             handleMenuSelection();
+        } else if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
+            // Revenir directement au jeu avec Échap
+            game.setScreen(gameScreen);
+            dispose();
         }
     }
 
     private void handleMenuSelection() {
         switch (selectedIndex) {
-            case 0:
-                game.stopMenuMusic(); // Arrêter la musique de fond
-                game.setScreen(new GameScreen(game));
+            case 0: // Reprendre
+                game.setScreen(gameScreen);
                 dispose();
                 break;
-            case 1:
-                // Implémenter l'écran des options
-                game.setScreen(new OptionScreen(game));
+            case 1: // Options
+                game.setScreen(new OptionScreen(game,this, gameScreen));
                 dispose();
-                // Pour l'instant, on va juste afficher un message dans la console
-                //System.out.println("Options sélectionnées !");
-                
                 break;
-            case 2:
-                Gdx.app.exit();
+            case 2: // Menu Principal
+                game.startMenuMusic();
+                game.setScreen(new MenuScreen(game));
+                gameScreen.dispose(); // Libérer les ressources du jeu
+                dispose();
                 break;
         }
     }
 
     private boolean isMouseOver(Rectangle bounds) {
-        // Convertir les coordonnées de la souris en coordonnées du monde
         float mouseX = Gdx.input.getX();
-        float mouseY = Gdx.input.getY(); // Inverser Y car LibGDX utilise un repère bas-gauche
-        
-        // Convertir en coordonnées du viewport
+        float mouseY = Gdx.input.getY();
         Vector3 worldCoords = game.viewport.getCamera().unproject(new Vector3(mouseX, mouseY, 0));
-        
         return bounds.contains(worldCoords.x, worldCoords.y);
-    }
-
-    @Override
-    public void resize(int width, int height) {
-        game.viewport.update(width, height, true);
     }
 
     @Override
@@ -149,28 +135,23 @@ public class Menu implements Screen {
     }
 
     @Override
-    public void hide() {
-        // TODO Auto-generated method stub
-        
+    public void resize(int width, int height) {
+        game.viewport.update(width, height, true);
     }
 
     @Override
-    public void pause() {
-        // TODO Auto-generated method stub
-        
-    }
+    public void pause() {}
 
     @Override
-    public void resume() {
-        // TODO Auto-generated method stub
-        
-    }
+    public void resume() {}
+
+    @Override
+    public void hide() {}
 
     @Override
     public void dispose() {
         if (backgroundTexture != null) {
             backgroundTexture.dispose();
         }
-        
     }
 }
