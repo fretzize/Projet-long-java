@@ -5,7 +5,7 @@ import projet.java.Main;
 
 // import com.badlogic.gdx.math.Vector2;
 
-public interface entite {
+public interface Entite {
     int getMana();
     int getBouclier();
     int getVie();

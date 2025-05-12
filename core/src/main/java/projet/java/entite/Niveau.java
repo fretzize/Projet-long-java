@@ -7,29 +7,29 @@ import com.badlogic.gdx.utils.Array;
  * Gère les entités, les collisions, etc.
  */
 public class Niveau {
-    private Array<Ennemi> ennemis; // Liste des ennemis actifs
+    private Array<Sbire> sbires; // Liste des sbires actifs
     
     /**
      * Constructeur de niveau.
      */
     public Niveau() {
-        ennemis = new Array<>();
+        sbires = new Array<>();
     }
     
     /**
-     * @return Liste des ennemis actifs dans le niveau
+     * @return Liste des sbires actifs dans le niveau
      */
-    public Array<Ennemi> getEnnemis() {
-        return ennemis;
+    public Array<Sbire> getSbires() {
+        return sbires;
     }
     
     /**
-     * Ajoute un ennemi au niveau.
+     * Ajoute un sbire au niveau.
      * 
-     * @param ennemi Ennemi à ajouter
+     * @param sbire Sbire à ajouter
      */
-    public void ajouterEnnemi(Ennemi ennemi) {
-        ennemis.add(ennemi);
+    public void ajouterSbire(Sbire sbire) {
+        sbires.add(sbire);
     }
     
     // Autres méthodes comme mise à jour, rendu, etc.
