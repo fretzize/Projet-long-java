@@ -140,6 +140,17 @@ public class GameScreen implements Screen {
         barre_vide = new Texture("barres_vide.png");
 
         animationHandler = new AnimationHandler();
+
+        if (timer != null) {
+            timer.cancel();
+        }
+        timer = new Timer();
+    
+        if (timer2 != null) {
+            timer2.cancel();
+        }
+        timer2 = new Timer();
+
     }
 
     @Override
@@ -320,27 +331,36 @@ public class GameScreen implements Screen {
 
     @Override
     public void dispose() {
-        mapTexture.dispose();
-        skin.dispose();
-        dash_texture.dispose();
-        dash_gris.dispose();
-        coeur_plein.dispose();
-        bouclierIntact.dispose();
-        Hercule_bas.dispose();
-        Hercule_haut.dispose();
-        Hercule_gauche.dispose();
-        Hercule_droite.dispose();
-        //barre_vide.dispose();
-        //barre_pleine.dispose();
-        if (timer != null) {
-            timer.cancel();
-        }
-        if (timer2 != null) {
-            timer2.cancel();
-        }
-        if (animationHandler != null) {
-            animationHandler.dispose();
-        }
+        
+    mapTexture.dispose();
+    skin.dispose();
+    dash_texture.dispose();
+    dash_gris.dispose();
+    coeur_plein.dispose();
+    bouclierIntact.dispose();
+    Hercule_bas.dispose();
+    Hercule_haut.dispose();
+    Hercule_gauche.dispose();
+    Hercule_droite.dispose();
+    
+    if (barre_vide != null) barre_vide.dispose();
+    if (barre_pleine != null) barre_pleine.dispose();
+    
+    if (timer != null) {
+        timer.cancel();
+        timer.purge();
+        timer = null;
+    }
+    if (timer2 != null) {
+        timer2.cancel();
+        timer2.purge();
+        timer2 = null;
+    }
+    
+    // Libérer l'animation
+    if (animationHandler != null) {
+        animationHandler.dispose();
+    }
     }
 
     @Override
@@ -359,6 +379,14 @@ public class GameScreen implements Screen {
 
     @Override
     public void hide() {
+        if (timer != null) {
+            timer.cancel();
+            timer = null;
+        }
+        if (timer2 != null) {
+            timer2.cancel();
+            timer2 = null;
+        }
     }
 
     // public void update() {

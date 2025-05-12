@@ -112,6 +112,6 @@ public class Main extends Game {
             menuMusic.stop();
             menuMusic.dispose();
         }
-        Gdx.app.exit();
+        System.exit(0); // Quitter l'application
     }
 }
