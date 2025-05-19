@@ -41,7 +41,7 @@ public class GameScreen implements Screen {
     Texture porteH;
     Texture porteV;
     Texture videTexture;
-    int nombreDeChambres = 25;
+    int nombreDeChambres = 6;
     int[] tailleChambre = {70, 70};
     Map carte = new Map(nombreDeChambres, tailleChambre);
     int[][] map;
@@ -53,7 +53,7 @@ public class GameScreen implements Screen {
     private Texture skin;
     private float playerX = 50;
     private float playerY = 50;
-    private float playerSpeed = 500; // Vitesse normale en pixels par seconde
+    private float playerSpeed = 100; // Vitesse normale en pixels par seconde
     private float speed = 2500; // Vitesse du dash réduite (était 10000)
     private float dashDuration = 0.08f; // Durée du dash en secondes pour maintenir la même distance
     private float currentDashTime = 0f; // Pour suivre la durée du dash en cours
@@ -101,7 +101,7 @@ public class GameScreen implements Screen {
     float cameraHalfWidth;
     float cameraHalfHeight;
 
-    private float scalePlayer = 10.0f; // Facteur d'échelle pour le personnage
+    private float scalePlayer = 2.0f; // Facteur d'échelle pour le personnage
 
     // etat bouclier et dash personnage
     private boolean etatbouclier = false;
