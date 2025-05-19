@@ -227,7 +227,6 @@ public class Sbire implements Entite{
             direction.nor();
             
             // Déplacement
-            System.out.println("direction: "+direction.x+" : "+direction.y);
             positionX += direction.x * vitesseDeplacement * deltaTime;
             positionY += direction.y * vitesseDeplacement * deltaTime;
             
@@ -256,8 +255,9 @@ public class Sbire implements Entite{
         }
     }
 
-    public void draw(Main game){
-        game.batch.draw(sbireTexture,this.positionX,this.positionY);
+    //affichage de l'entité
+    public void draw(Main game,float scaledWidth,float scaledHeight){
+        game.batch.draw(sbireTexture,this.positionX,this.positionY,scaledWidth,scaledHeight);
     }
 
     //USELESS

@@ -224,8 +224,8 @@ public class GameScreen implements Screen {
         game.batch.draw(mapTexture, 0, 0, mapSize, mapSize);
 
         // Dessiner le joueur selon la direction avec la nouvelle échelle
-        public final float scaledWidth = largeur_skin * scalePlayer;
-        public final float scaledHeight = hauteur_skin * scalePlayer;
+        float scaledWidth = largeur_skin * scalePlayer;
+        float scaledHeight = hauteur_skin * scalePlayer;
         if (Gdx.input.isKeyPressed(game.toucheGauche) || Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
             game.batch.draw(Hercule_gauche, personnage1.getPositionX(), personnage1.getPositionY(), scaledWidth, scaledHeight);
         } else if (Gdx.input.isKeyPressed(game.toucheDroite) || Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
@@ -238,7 +238,7 @@ public class GameScreen implements Screen {
 
         // TEST SBIRE
         //game.batch.draw(Hercule_haut, sbireTest.getPositionX() , sbireTest.getPositionY(), scaledWidth, scaledHeight);
-        sbireTest.draw(game);
+        sbireTest.draw(game,scaledWidth, scaledHeight);
         //
 
         // afficher le dash selon la direction
