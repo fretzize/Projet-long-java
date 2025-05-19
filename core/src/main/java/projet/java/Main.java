@@ -20,7 +20,7 @@ public class Main extends Game {
     public BitmapFont font;
     public Music menuMusic; // Musique de fond
 
-    private float menuMusicVolume = 0.5f;
+    private float menuMusicVolume = 0.2f;
     private float gameSoundVolume = 0.5f;
     
 
