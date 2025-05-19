@@ -7,6 +7,7 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 
 import projet.java.Main;
+import projet.java.Menu.GameScreen;
 
 public class Sbire implements Entite{
 
@@ -58,6 +59,8 @@ public class Sbire implements Entite{
         this.degats = degats;
         this.cible = cible;
         this.comportement = comportement;
+        this.projectileTexture = projectileTexture;
+        this.sbireTexture = sbireTexture;
     }
 
     public void setCible(Personnage cible) {
@@ -251,6 +254,10 @@ public class Sbire implements Entite{
         if (comportement != null) {
             comportement.executerAction(this, deltaTime, projectiles);
         }
+    }
+
+    public void draw(Main game){
+        game.batch.draw(sbireTexture,this.positionX,this.positionY);
     }
 
     //USELESS

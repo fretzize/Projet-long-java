@@ -106,7 +106,7 @@ public class GameScreen implements Screen {
         personnage1.create_entite();
 
         // TEST SBIRE
-        sbireTest = new Sbire(3,3,3,10, 10,100,2,new Rectangle(0,0, 2,4), 10,2, 1,1, personnage1, new ComportementMelee(),new Texture(Gdx.files.internal("coeur_heracles.png")),new Texture(Gdx.files.internal("coeur_heracles.png")));
+        sbireTest = new Sbire(3,3,3,10, 10,100,2,new Rectangle(0,0, 2,4), 10,2, 1,1, personnage1, new ComportementMelee(),new Texture(Gdx.files.internal("coeur_heracles.png")),new Texture("Hercule_haut.png"));
         
         //
 
@@ -224,8 +224,8 @@ public class GameScreen implements Screen {
         game.batch.draw(mapTexture, 0, 0, mapSize, mapSize);
 
         // Dessiner le joueur selon la direction avec la nouvelle échelle
-        float scaledWidth = largeur_skin * scalePlayer;
-        float scaledHeight = hauteur_skin * scalePlayer;
+        public final float scaledWidth = largeur_skin * scalePlayer;
+        public final float scaledHeight = hauteur_skin * scalePlayer;
         if (Gdx.input.isKeyPressed(game.toucheGauche) || Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
             game.batch.draw(Hercule_gauche, personnage1.getPositionX(), personnage1.getPositionY(), scaledWidth, scaledHeight);
         } else if (Gdx.input.isKeyPressed(game.toucheDroite) || Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
@@ -237,7 +237,8 @@ public class GameScreen implements Screen {
         }
 
         // TEST SBIRE
-        game.batch.draw(Hercule_haut, sbireTest.getPositionX() , sbireTest.getPositionY(), scaledWidth, scaledHeight);
+        //game.batch.draw(Hercule_haut, sbireTest.getPositionX() , sbireTest.getPositionY(), scaledWidth, scaledHeight);
+        sbireTest.draw(game);
         //
 
         // afficher le dash selon la direction
