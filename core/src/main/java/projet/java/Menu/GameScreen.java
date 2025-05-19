@@ -8,6 +8,8 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import projet.java.entite.*;
 import projet.java.Main;
+import projet.java.Map.Chambre;
+import projet.java.Map.Map;
 
 import java.util.TimerTask;
 import java.util.ArrayList;
@@ -21,6 +23,32 @@ import projet.java.animation.AnimationHandler;
 
 public class GameScreen implements Screen {
     final Main game;
+
+    //tout ce qui est utile à la map :
+    Texture solTexture;
+    Texture solTexture2;
+    Texture solTexture3;
+    Texture solTexture4;
+    Texture solTexture5;
+    Texture solTexture6;
+    Texture solTexture7;
+    Texture solTexture8;
+    Texture solTexture9;
+    Texture solTexture10;
+    Texture solTexture11;
+    Texture solTexture12;
+    Texture murTexture;
+    Texture murTexture2;
+    Texture porteH;
+    Texture porteV;
+    Texture videTexture;
+    int nombreDeChambres = 25;
+    int[] tailleChambre = {70, 70};
+    Map carte = new Map(nombreDeChambres, tailleChambre);
+    int[][] map;
+    int[][] mapCollision;
+    final int TILE_SIZE = 16;
+    final float CAMERA_SPEED = 600f;
 
     private Texture mapTexture;
     private Texture skin;
@@ -109,6 +137,38 @@ public class GameScreen implements Screen {
 
     @Override
     public void show() {
+        //map
+        carte.placerChambresGrille();
+        carte.corridor_creator();
+        carte.creuser_couloir();
+        Map carteReduite = carte.reducteur();
+        carteReduite.rotation90Trigo();
+        carteReduite.afficherMap();
+        carteReduite.coupureCoord();
+        carteReduite.creation_vide();
+        carteReduite.afficherMap();
+        mapCollision = carteReduite.getCoord();
+        carteReduite.randomiseur_sol();
+        //carteReduite.naturalisation_mur();
+        map = carteReduite.getCoord();
+videTexture = new Texture(Gdx.files.internal("map/Tile_30.png"));
+solTexture = new Texture(Gdx.files.internal("map/Tile_20.png"));
+murTexture = new Texture(Gdx.files.internal("map/Tile_11.png"));
+murTexture2 = new Texture(Gdx.files.internal("map/Tile_92.png"));
+porteH = new Texture(Gdx.files.internal("map/1.png"));
+porteV = new Texture(Gdx.files.internal("map/2.png"));
+solTexture2 = new Texture(Gdx.files.internal("map/Tile_21.png"));
+solTexture3 = new Texture(Gdx.files.internal("map/Tile_22.png"));
+solTexture4 = new Texture(Gdx.files.internal("map/Tile_36.png"));
+solTexture5 = new Texture(Gdx.files.internal("map/Tile_45.png"));
+solTexture6 = new Texture(Gdx.files.internal("map/Tile_72.png"));
+solTexture7 = new Texture(Gdx.files.internal("map/Tile_74.png"));
+solTexture8 = new Texture(Gdx.files.internal("map/Tile_76.png"));
+solTexture9 = new Texture(Gdx.files.internal("map/Tile_82.png"));
+solTexture10 = new Texture(Gdx.files.internal("map/Tile_83.png"));
+solTexture11 = new Texture(Gdx.files.internal("map/Tile_84.png"));
+solTexture12 = new Texture(Gdx.files.internal("map/Tile_95.png"));
+
         mapTexture = new Texture(Gdx.files.internal("map.png")); // Créez une image "map.png"
         skin = new Texture("HERCULEpng/HERCULEpng/Sword_Idle_front.png"); // Créez une image "player.png"
         largeur_skin = skin.getWidth();
@@ -230,8 +290,8 @@ public class GameScreen implements Screen {
         }
 
         // Limiter le joueur à la map
-        personnage1.changePositionX(MathUtils.clamp(personnage1.getPositionX(), 0, mapSize - skin.getWidth())-personnage1.getPositionX());
-        personnage1.changePositionY(MathUtils.clamp(personnage1.getPositionY(), 0, mapSize - skin.getWidth())-personnage1.getPositionY());
+        //personnage1.changePositionX(MathUtils.clamp(personnage1.getPositionX(), 0, mapSize - skin.getWidth())-personnage1.getPositionX());
+        //personnage1.changePositionY(MathUtils.clamp(personnage1.getPositionY(), 0, mapSize - skin.getWidth())-personnage1.getPositionY());
 
         // TEST SBIRE
         sbireTest.agir(avance, new ArrayList<Projectile>());
@@ -258,7 +318,18 @@ public class GameScreen implements Screen {
 
         game.batch.begin();
         // Dessiner la map
-        game.batch.draw(mapTexture, 0, 0, mapSize, mapSize);
+        for (int y = 0; y < map.length; y++) {
+            for (int x = 0; x < map[0].length; x++) {
+                Texture texture = getTextureForTile(map[y][x]);
+                if (texture != null && texture != porteH && texture != porteV) {
+                    game.batch.draw(texture, x * TILE_SIZE, (map.length - 1 - y) * TILE_SIZE);
+                } else if (texture == porteH || texture == porteV) {
+                    game.batch.draw(solTexture, x * TILE_SIZE, (map.length - 1 - y) * TILE_SIZE);
+                    game.batch.draw(texture, x * TILE_SIZE, (map.length - 1 - y) * TILE_SIZE);
+
+                }
+            }
+        }
 
         // Dessiner le joueur avec l'animation actuelle
 
@@ -426,5 +497,45 @@ public class GameScreen implements Screen {
                 });
             }
         }, 0, 1000); // 1000 ms = 1s
+    }
+
+    private Texture getTextureForTile(int value) {
+        if (value == 0 ) {
+            return murTexture;
+        } else if (value == 3) {
+            return porteH;
+        } else if (value == 2) {
+            return porteV;
+        } else if (value == 4){
+            // return videTexture;
+            return null;
+        } else if (value == 100){
+            return solTexture2;
+        } else if (value == 101){
+            return solTexture3 ;
+        } else if (value == 102) {
+            return solTexture4;
+        } else if (value == 103) {
+            return solTexture5;
+        } else if (value == 104) {
+            return solTexture6;
+        }else if (value == 105) {
+            return solTexture7;
+        }else if (value == 106) {
+            return solTexture8;
+        }else if (value == 107) {
+            return solTexture9;
+        }else if (value == 108) {
+            return solTexture10;
+        }else if (value == 109) {
+            return solTexture11;
+        }else if (value == 110) {
+            return solTexture12;
+        } else if (value == 200) {
+            return murTexture2;
+        } else {
+            return solTexture; // 1 ou autre = sol
+        }
+
     }
 }
