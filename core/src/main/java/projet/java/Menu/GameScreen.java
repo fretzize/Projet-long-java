@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import projet.java.entite.*;
 import projet.java.Main;
@@ -16,8 +17,11 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 
+import projet.java.animation.AnimationHandler;
+
 public class GameScreen implements Screen {
     final Main game;
+
     private Texture mapTexture;
     private Texture skin;
     private float playerSpeed = 500; // Vitesse normale en pixels par seconde
@@ -35,6 +39,14 @@ public class GameScreen implements Screen {
     private float hauteur_dash;
     private Texture coeur_plein;
     private Texture bouclierIntact;
+
+    private AnimationHandler animationHandler;
+
+    // Variables pour le suivi de la dernière direction
+    private boolean wasMovingUp = false;
+    private boolean wasMovingDown = false;
+    private boolean wasMovingLeft = false;
+    private boolean wasMovingRight = false;
 
     // état du personnage
 
@@ -60,7 +72,7 @@ public class GameScreen implements Screen {
     float cameraHalfWidth;
     float cameraHalfHeight;
 
-    private float scalePlayer = 2.0f; // Facteur d'échelle pour le personnage
+    private float scalePlayer = 10.0f; // Facteur d'échelle pour le personnage
 
     // etat bouclier et dash personnage
     private boolean etatbouclier = false;
@@ -101,8 +113,7 @@ public class GameScreen implements Screen {
         largeur_skin = skin.getWidth();
         hauteur_skin = skin.getHeight();
 
-        
-        personnage1 = new Personnage(4, 3, 4, "mathis", skin);
+        personnage1 = new Personnage(4, 4, 4, "mathis", skin);
         personnage1.create_entite();
 
         // TEST SBIRE
@@ -135,12 +146,37 @@ public class GameScreen implements Screen {
 
         barre_pleine = new Texture("barres_pleine.png");
         barre_vide = new Texture("barres_vide.png");
+
+        animationHandler = new AnimationHandler();
+
+        if (timer != null) {
+            timer.cancel();
+        }
+        timer = new Timer();
+    
+        if (timer2 != null) {
+            timer2.cancel();
+        }
+        timer2 = new Timer();
+
     }
 
     @Override
     public void render(float delta) {
         input(delta);
-        // personnage1.update(delta, dashOk);
+        boolean isMovingUp = Gdx.input.isKeyPressed(game.toucheHaut) || Gdx.input.isKeyPressed(Input.Keys.UP);
+        boolean isMovingDown = Gdx.input.isKeyPressed(game.toucheBas) || Gdx.input.isKeyPressed(Input.Keys.DOWN);
+        boolean isMovingLeft = Gdx.input.isKeyPressed(game.toucheGauche) || Gdx.input.isKeyPressed(Input.Keys.LEFT);
+        boolean isMovingRight = Gdx.input.isKeyPressed(game.toucheDroite) || Gdx.input.isKeyPressed(Input.Keys.RIGHT);
+        
+        animationHandler.update(delta, isMovingUp, isMovingDown, isMovingLeft, isMovingRight);
+        
+        // Mémoriser l'état de mouvement pour le dash
+        wasMovingUp = isMovingUp;
+        wasMovingDown = isMovingDown;
+        wasMovingLeft = isMovingLeft;
+        wasMovingRight = isMovingRight;
+        
         logic();
         draw();
         if (!dashOk) {
@@ -223,9 +259,17 @@ public class GameScreen implements Screen {
         // Dessiner la map
         game.batch.draw(mapTexture, 0, 0, mapSize, mapSize);
 
-        // Dessiner le joueur selon la direction avec la nouvelle échelle
-        float scaledWidth = largeur_skin * scalePlayer;
+        // Dessiner le joueur avec l'animation actuelle
+
+        TextureRegion currentFrame = animationHandler.getCurrentFrame();
+        float originalWidth = currentFrame.getRegionWidth();
+        float originalHeight = currentFrame.getRegionHeight();
+    
+        // Préserver le ratio d'aspect
+        float aspectRatio = originalWidth / originalHeight;
         float scaledHeight = hauteur_skin * scalePlayer;
+        float scaledWidth = scaledHeight * aspectRatio;
+        
         if (Gdx.input.isKeyPressed(game.toucheGauche) || Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
             game.batch.draw(Hercule_gauche, personnage1.getPositionX(), personnage1.getPositionY(), scaledWidth, scaledHeight);
         } else if (Gdx.input.isKeyPressed(game.toucheDroite) || Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
@@ -238,8 +282,13 @@ public class GameScreen implements Screen {
 
         // TEST SBIRE
         //game.batch.draw(Hercule_haut, sbireTest.getPositionX() , sbireTest.getPositionY(), scaledWidth, scaledHeight);
+        
         sbireTest.draw(game,scaledWidth, scaledHeight);
         //
+        
+
+        game.batch.draw(currentFrame, playerX, playerY, scaledWidth, scaledHeight);
+        
 
         // afficher le dash selon la direction
         if (Gdx.input.isKeyPressed(game.toucheDash)) {
@@ -276,7 +325,6 @@ public class GameScreen implements Screen {
                 dash_afficher = false;
             }
         }
-
         // cooldown
 
         float progress = tempsDash / dashCooldown;
@@ -285,8 +333,8 @@ public class GameScreen implements Screen {
         float x = personnage1.getPositionX() - 3;
         float y = personnage1.getPositionY() - 8;
 
-        game.batch.draw(barre_vide, x, y, barWidth, barHeight);
-        game.batch.draw(barre_pleine, x, y, barWidth * progress, barHeight);
+        //game.batch.draw(barre_vide, x, y, barWidth, barHeight);
+        //game.batch.draw(barre_pleine, x, y, barWidth * progress, barHeight);
 
         for (int i = 0; i < this.personnage1.getVie(); i++) {
             game.batch.draw(coeur_plein, camera.position.x - cameraHalfWidth + i * hauteur_skin + 10,
@@ -310,24 +358,36 @@ public class GameScreen implements Screen {
 
     @Override
     public void dispose() {
-        mapTexture.dispose();
-        skin.dispose();
-        dash_texture.dispose();
-        dash_gris.dispose();
-        coeur_plein.dispose();
-        bouclierIntact.dispose();
-        Hercule_bas.dispose();
-        Hercule_haut.dispose();
-        Hercule_gauche.dispose();
-        Hercule_droite.dispose();
-        barre_vide.dispose();
-        barre_pleine.dispose();
-        if (timer != null) {
-            timer.cancel();
-        }
-        if (timer2 != null) {
-            timer2.cancel();
-        }
+        
+    mapTexture.dispose();
+    skin.dispose();
+    dash_texture.dispose();
+    dash_gris.dispose();
+    coeur_plein.dispose();
+    bouclierIntact.dispose();
+    Hercule_bas.dispose();
+    Hercule_haut.dispose();
+    Hercule_gauche.dispose();
+    Hercule_droite.dispose();
+    
+    if (barre_vide != null) barre_vide.dispose();
+    if (barre_pleine != null) barre_pleine.dispose();
+    
+    if (timer != null) {
+        timer.cancel();
+        timer.purge();
+        timer = null;
+    }
+    if (timer2 != null) {
+        timer2.cancel();
+        timer2.purge();
+        timer2 = null;
+    }
+    
+    // Libérer l'animation
+    if (animationHandler != null) {
+        animationHandler.dispose();
+    }
     }
 
     @Override
@@ -346,6 +406,14 @@ public class GameScreen implements Screen {
 
     @Override
     public void hide() {
+        if (timer != null) {
+            timer.cancel();
+            timer = null;
+        }
+        if (timer2 != null) {
+            timer2.cancel();
+            timer2 = null;
+        }
     }
 
     // public void update() {
