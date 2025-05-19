@@ -142,14 +142,6 @@ public class Personnage extends ApplicationAdapter implements Entite {
         return this.positionY;
     }
 
-    public void changePositionX(float x){
-        this.positionX += x;
-    }
-
-    public void changePositionY(float y){
-        this.positionY += y;
-    }
-
     public Personnage(int mana, int vie, int bouclier, String nom, Texture skin) {//}, Vector2 position) {
         this.nom = nom;
         this.vie = vie;

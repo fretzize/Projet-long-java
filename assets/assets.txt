@@ -44,7 +44,10 @@ doorH.png
 doorv.png
 floor.png
 font-export.fnt
+<<<<<<< HEAD
+=======
 hs_err_pid32676.log
+>>>>>>> origin/ArmeRaph
 image_heracles_normal.png
 map.png
 menubackground.png
