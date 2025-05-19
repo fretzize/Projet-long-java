@@ -40,6 +40,9 @@ coeur_plein.png
 dash.png
 dash2.png
 dash_gris.png
+doorH.png
+doorv.png
+floor.png
 font-export.fnt
 hs_err_pid32676.log
 image_heracles_normal.png
@@ -47,3 +50,4 @@ map.png
 menubackground.png
 menumusic.mp3
 police.otf
+wall.png
