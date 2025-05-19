@@ -1,0 +1,37 @@
+# Ignorer tous les fichiers
+*
+
+# Sauf les fichiers .java
+!*.java
+
+# Sauf les fichiers .gitignore
+!.gitignore
+
+# Sauf les fichiers README.md (optionnel)
+!README.md
+
+# Ne pas ignorer les dossiers afin de permettre la navigation
+!*/
+
+# Exceptions pour les ressources importantes
+!assets/*.png
+!assets/*.jpg
+!assets/*.mp3
+!config.properties
+
+# Ignorer les fichiers et dossiers spécifiques à l'IDE et au build
+.gradle/
+build/
+bin/
+.idea/
+.settings/
+.classpath
+.project
+*.class
+*.jar
+
+# Ignorer les fichiers macOS
+.DS_Store
+
+# Ignorer les fichiers temporaires Windows
+Thumbs.db
