@@ -287,7 +287,7 @@ public class GameScreen implements Screen {
         //
         
 
-        game.batch.draw(currentFrame, playerX, playerY, scaledWidth, scaledHeight);
+        game.batch.draw(currentFrame, personnage1.getPositionX(), personnage1.getPositionY(), scaledWidth, scaledHeight);
         
 
         // afficher le dash selon la direction
