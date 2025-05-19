@@ -5,6 +5,9 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 
+import projet.java.Main;
+import projet.java.Menu.GameScreen;
+
 /**
  * Classe représentant un projectile tiré par une arme à distance.
  * Gère le déplacement, la collision et le rendu du projectile.
@@ -83,7 +86,7 @@ public class Projectile {
      * @return true si le projectile n'est plus actif (collision ou hors portée)
      */
     public boolean doitEtreDetruit() {
-        return !actif;
+        return !actif || isHorsPortee();
     }
     
     /**
@@ -129,6 +132,15 @@ public class Projectile {
     public Vector2 getVitesse() {
         return vitesse;
     }
+
+    public boolean isActif() {
+        return actif;
+    }
+
+
+    public boolean isHorsPortee() {
+        return position.dst(originPosition) > porteeMax;
+    }
     
     /**
      * Change les dégâts du projectile.
@@ -138,5 +150,11 @@ public class Projectile {
      */
     public void setDegats(int nouveauxDegats) {
         this.degats = nouveauxDegats;
+    }
+
+
+    //affichage de l'entité
+    public void draw(Main game,float scaledWidth,float scaledHeight){
+        game.batch.draw(texture,this.position.x,this.position.y,scaledWidth,scaledHeight);
     }
 }

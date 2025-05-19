@@ -143,17 +143,21 @@ public class Sbire implements Entite{
 
 
     public void update(float delta, List<Projectile> projectiles) {
-        tempsDepuisDernierTir += delta;
+        try {
+            tempsDepuisDernierTir += delta;
 
-        if (cible != null && peutAttaquer()) {
-            if(estAPorteeCaC()){
-                attaquerMelee();
-                tempsDepuisDernierTir = 0;
+            if (cible != null && peutAttaquer()) {
+                if(estAPorteeCaC()){
+                    attaquerMelee();
+                    tempsDepuisDernierTir = 0;
+                }
+                else if(estAPortee()){
+                    tirerSurCible(projectiles);
+                    tempsDepuisDernierTir = 0;
+                }
             }
-            else if(estAPortee()){
-                tirerSurCible(projectiles);
-                tempsDepuisDernierTir = 0;
-            }
+        } catch (Exception e) {
+            System.err.println("Erreur dans update du sbire : " + e.getMessage());
         }
     }
 

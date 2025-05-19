@@ -34,6 +34,9 @@ public class Personnage extends ApplicationAdapter implements Entite {
     private int mana_max;
     private int vie_max;
     private int bouclier_max;
+
+    //Hitbox du personnage
+    private Rectangle hitbox; // Hitbox du personnage
     
 
     // etat bouclier et dash personnage
@@ -142,15 +145,22 @@ public class Personnage extends ApplicationAdapter implements Entite {
         return this.positionY;
     }
 
+    public Rectangle getHitbox() {
+        return hitbox;
+    }
+
     public void changePositionX(float x){
         this.positionX += x;
+        this.hitbox.setPosition(this.positionX, this.positionY);
     }
 
     public void changePositionY(float y){
         this.positionY += y;
+        this.hitbox.setPosition(this.positionX, this.positionY);
+
     }
 
-    public Personnage(int mana, int vie, int bouclier, String nom, Texture skin) {//}, Vector2 position) {
+    public Personnage(int mana, int vie, int bouclier, String nom, Texture skin, Rectangle hitbox) {//}, Vector2 position) {
         this.nom = nom;
         this.vie = vie;
         this.mana = mana;
@@ -161,6 +171,7 @@ public class Personnage extends ApplicationAdapter implements Entite {
         this.bouclier_max = bouclier;
         this.positionY = 0;
         this.positionX = 0;
+        this.hitbox = hitbox;
     }
     
 

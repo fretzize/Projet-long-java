@@ -105,7 +105,7 @@ public class GameScreen implements Screen {
 
     //TEST SBIRE
     private Sbire sbireTest;
-
+    private ArrayList<Projectile> projectiles;
 
     @Override
     public void show() {
@@ -114,12 +114,13 @@ public class GameScreen implements Screen {
         largeur_skin = skin.getWidth();
         hauteur_skin = skin.getHeight();
 
-        personnage1 = new Personnage(4, 4, 4, "mathis", skin);
+        personnage1 = new Personnage(4, 4, 4, "mathis", skin, new Rectangle(0, 0, 2, 4));
         personnage1.create_entite();
 
         // TEST SBIRE
         sbireTest = new Sbire(3,3,3,10, 10,100,2,new Rectangle(0,0, 2,4), 10,2, 1,1, personnage1, new ComportementMelee(),new Texture(Gdx.files.internal("coeur_plein.png")),new Texture("Hercule_haut.png"));
-        
+        //Gestion projectiles du sbire
+        projectiles = new ArrayList<>();
         //
 
         // sprint ou dash //mettre un boutton dash pour montrer quand il a de nouveau
@@ -186,6 +187,9 @@ public class GameScreen implements Screen {
         if (tempsDash > dashCooldown) {
             dashOk = true;
         }
+
+
+        //
     }
 
     private void input(float avance) {
@@ -233,8 +237,7 @@ public class GameScreen implements Screen {
         personnage1.changePositionX(MathUtils.clamp(personnage1.getPositionX(), 0, mapSize - skin.getWidth())-personnage1.getPositionX());
         personnage1.changePositionY(MathUtils.clamp(personnage1.getPositionY(), 0, mapSize - skin.getWidth())-personnage1.getPositionY());
 
-        // TEST SBIRE
-        sbireTest.agir(avance, new ArrayList<Projectile>());
+
     }
 
     private void logic() {
@@ -249,7 +252,34 @@ public class GameScreen implements Screen {
         camera.position.x = MathUtils.clamp(camera.position.x, cameraHalfWidth, mapSize - cameraHalfWidth);
         camera.position.y = MathUtils.clamp(camera.position.y, cameraHalfHeight, mapSize - cameraHalfHeight);
 
+
+        //Gestion du sbire
+        sbireTest.agir(Gdx.graphics.getDeltaTime(), projectiles);
+
+        // Mise à jour et gestion des projectiles (parcours la liste à l'envers pour éviter les problèmes de suppression)
+        for (int i = projectiles.size() - 1; i >= 0; i--) {
+            Projectile projectile = projectiles.get(i);
+            projectile.update(Gdx.graphics.getDeltaTime());
+            
+            // Vérifier collision avec le joueur : si c'est le cas on lui enlève des points de vie et on supprime le projectile de la liste
+            if (projectile.getHitbox().overlaps(personnage1.getHitbox())) {
+                personnage1.prendreDegat(projectile.getDegats());
+                projectiles.remove(i);
+                continue;
+            }
+            
+            // Vérifier si le projectile est hors portée : si c'est le cas on le supprime de la liste
+            if (projectile.doitEtreDetruit()) {
+                projectiles.remove(i);
+                continue;
+            }
+        }
+        //Gestion de la caméra
         camera.update();
+
+        
+
+
     }
 
     private void draw() {
@@ -273,6 +303,13 @@ public class GameScreen implements Screen {
 
         sbireTest.draw(game,scaledWidth/2, scaledHeight/2); 
 
+
+        //Dessiner les projectiles
+
+        for (Projectile projectile : projectiles) {
+            projectile.draw(game, scaledWidth / 2, scaledHeight / 2);
+        }
+        //Dessiner le personnage
         game.batch.draw(currentFrame, personnage1.getPositionX(), personnage1.getPositionY(), scaledWidth, scaledHeight);
         
 
