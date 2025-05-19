@@ -1,3 +1,9 @@
+<<<<<<< HEAD
 Manifest-Version: 1.0
 Main-Class: projet.java.lwjgl3.Lwjgl3Launcher
 
+=======
+Manifest-Version: 1.0
+Main-Class: projet.java.lwjgl3.Lwjgl3Launcher
+
+>>>>>>> origin/ArmeRaph
