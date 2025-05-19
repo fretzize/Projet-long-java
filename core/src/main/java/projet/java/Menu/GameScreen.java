@@ -72,7 +72,8 @@ public class GameScreen implements Screen {
     float cameraHalfWidth;
     float cameraHalfHeight;
 
-    private float scalePlayer = 10.0f; // Facteur d'échelle pour le personnage
+    private float scalePlayer = 8.0f; // Facteur d'échelle pour le personnage
+    private float scaleSbire = 8.0f;
 
     // etat bouclier et dash personnage
     private boolean etatbouclier = false;
@@ -109,7 +110,7 @@ public class GameScreen implements Screen {
     @Override
     public void show() {
         mapTexture = new Texture(Gdx.files.internal("map.png")); // Créez une image "map.png"
-        skin = new Texture(Gdx.files.internal("image_heracles_normal.png")); // Créez une image "player.png"
+        skin = new Texture("HERCULEpng/HERCULEpng/Sword_Idle_front.png"); // Créez une image "player.png"
         largeur_skin = skin.getWidth();
         hauteur_skin = skin.getHeight();
 
@@ -117,7 +118,7 @@ public class GameScreen implements Screen {
         personnage1.create_entite();
 
         // TEST SBIRE
-        sbireTest = new Sbire(3,3,3,10, 10,100,2,new Rectangle(0,0, 2,4), 10,2, 1,1, personnage1, new ComportementMelee(),new Texture(Gdx.files.internal("coeur_heracles.png")),new Texture("Hercule_haut.png"));
+        sbireTest = new Sbire(3,3,3,10, 10,100,2,new Rectangle(0,0, 2,4), 10,2, 1,1, personnage1, new ComportementMelee(),new Texture(Gdx.files.internal("coeur_plein.png")),new Texture("Hercule_haut.png"));
         
         //
 
@@ -269,23 +270,8 @@ public class GameScreen implements Screen {
         float aspectRatio = originalWidth / originalHeight;
         float scaledHeight = hauteur_skin * scalePlayer;
         float scaledWidth = scaledHeight * aspectRatio;
-        
-        if (Gdx.input.isKeyPressed(game.toucheGauche) || Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
-            game.batch.draw(Hercule_gauche, personnage1.getPositionX(), personnage1.getPositionY(), scaledWidth, scaledHeight);
-        } else if (Gdx.input.isKeyPressed(game.toucheDroite) || Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
-            game.batch.draw(Hercule_droite, personnage1.getPositionX(), personnage1.getPositionY(), scaledWidth, scaledHeight);
-        } else if (Gdx.input.isKeyPressed(game.toucheHaut) || Gdx.input.isKeyPressed(Input.Keys.UP)) {
-            game.batch.draw(Hercule_haut, personnage1.getPositionX(), personnage1.getPositionY(), scaledWidth, scaledHeight);
-        } else {
-            game.batch.draw(Hercule_bas, personnage1.getPositionX(), personnage1.getPositionY(), scaledWidth, scaledHeight);
-        }
 
-        // TEST SBIRE
-        //game.batch.draw(Hercule_haut, sbireTest.getPositionX() , sbireTest.getPositionY(), scaledWidth, scaledHeight);
-        
-        sbireTest.draw(game,scaledWidth, scaledHeight);
-        //
-        
+        sbireTest.draw(game,scaledWidth/2, scaledHeight/2); 
 
         game.batch.draw(currentFrame, personnage1.getPositionX(), personnage1.getPositionY(), scaledWidth, scaledHeight);
         
