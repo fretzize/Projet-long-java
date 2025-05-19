@@ -33,6 +33,7 @@ public class Sbire implements Entite{
 
     //Texture du projectile lancé par le sbire
     private Texture projectileTexture;
+    private Texture sbireTexture;
     private float porteeProjectile;  //Portée du projectile
     private int degats;
     private float cooldown; // temps entre deux tirs (en secondes)
@@ -40,7 +41,11 @@ public class Sbire implements Entite{
     private Rectangle hitbox; // Hitbox du sbire
 
 
-    public Sbire(float x, float y,float vitesseDeplacement,float cooldown,Rectangle hitbox, float porteeProjectile,float porteeCaC, int degats, int degatsCaC, Personnage cible, ComportementSbire comportement,Texture projectileTexture) {
+    public Sbire(int vie, int shield,int mana, float x, float y,float vitesseDeplacement,float cooldown,Rectangle hitbox, float porteeProjectile,float porteeCaC, int degats, int degatsCaC, Personnage cible, ComportementSbire comportement,Texture projectileTexture,Texture sbireTexture) {
+        this.vie = vie;
+        this.bouclier = shield;
+        this.mana = mana;
+        
         this.positionX = x;
         this.positionY = y;
         this.projectileTexture = projectileTexture;
@@ -219,6 +224,7 @@ public class Sbire implements Entite{
             direction.nor();
             
             // Déplacement
+            System.out.println("direction: "+direction.x+" : "+direction.y);
             positionX += direction.x * vitesseDeplacement * deltaTime;
             positionY += direction.y * vitesseDeplacement * deltaTime;
             
@@ -236,6 +242,7 @@ public class Sbire implements Entite{
             Vector2 positionCible = new Vector2(cible.getPositionX(), cible.getPositionY());
             // Calcul de la direction vers la cible
             Vector2 direction = new Vector2(positionCible).sub(position);
+
             deplacer(deltaTime, direction);
         }
     }

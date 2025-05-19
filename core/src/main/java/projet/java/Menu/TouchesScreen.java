@@ -13,6 +13,11 @@ import projet.java.Main;
 public class TouchesScreen implements Screen {
 
     final Main game;
+    private OptionScreen optionScreen;
+    private PauseScreen pauseScreen;
+    private GameScreen gameScreen;
+    private boolean fromPause;
+
     private Texture backgroundTexture;
     private int selectedIndex = 0;
     private final String[] keyOptions = {"Haut", "Bas", "Gauche", "Droite", "Dash", "Retour"};
@@ -20,8 +25,12 @@ public class TouchesScreen implements Screen {
     private int[] keyBindings;
     private boolean waitingForInput = false;
 
-    public TouchesScreen(final Main game) {
+
+    public TouchesScreen(final Main game, OptionScreen optionScreen) {
         this.game = game;
+        this.optionScreen = optionScreen;
+        this.fromPause = false;
+
         optionBounds = new Rectangle[keyOptions.length];
         for (int i = 0; i < keyOptions.length; i++) {
             optionBounds[i] = new Rectangle();
@@ -36,6 +45,26 @@ public class TouchesScreen implements Screen {
         };
     }
 
+    public TouchesScreen(final Main game, OptionScreen optionScreen, PauseScreen pauseScreen, GameScreen gameScreen) {
+        this.game = game;
+        this.optionScreen = optionScreen;
+        this.pauseScreen = pauseScreen;
+        this.gameScreen = gameScreen;
+        this.fromPause = true;
+
+        optionBounds = new Rectangle[keyOptions.length];
+        for (int i = 0; i < keyOptions.length; i++) {
+            optionBounds[i] = new Rectangle();
+        }
+        // Initialisation avec les touches actuelles de Main
+        keyBindings = new int[]{
+            game.toucheHaut,
+            game.toucheBas,
+            game.toucheGauche,
+            game.toucheDroite,
+            game.toucheDash
+        };
+    }
     private String getKeyName(int keycode) {
         if (keycode < 0) {
             return "Non défini";
@@ -120,7 +149,14 @@ public class TouchesScreen implements Screen {
         }
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE) && !waitingForInput) {
-            game.setScreen(new OptionScreen(game));
+            for (int i = 0; i < keyBindings.length; i++) {
+                game.setTouche(i, keyBindings[i]);
+            }
+            if (fromPause) {
+                game.setScreen(new OptionScreen(game, pauseScreen, gameScreen));
+            } else {
+                game.setScreen(new OptionScreen(game));
+            }
             dispose();
         }
     }
@@ -133,7 +169,11 @@ public class TouchesScreen implements Screen {
             for (int i = 0; i < keyBindings.length; i++) {
                 game.setTouche(i, keyBindings[i]);
             }
+            if (fromPause) {
+            game.setScreen(new OptionScreen(game, pauseScreen, gameScreen));
+        } else {
             game.setScreen(new OptionScreen(game));
+        }
             dispose();
         }
     }
