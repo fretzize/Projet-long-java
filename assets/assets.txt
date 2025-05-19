@@ -14,6 +14,7 @@ dash.png
 dash2.png
 dash_gris.png
 font-export.fnt
+hs_err_pid32676.log
 image_heracles.png
 image_heracles_normal.png
 libgdx.png
