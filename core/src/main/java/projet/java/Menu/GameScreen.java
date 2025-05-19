@@ -271,8 +271,8 @@ public class GameScreen implements Screen {
                 isDashing = true;
                 currentDashTime = 0f;
                 dashOk = false;
-                tempsDash = 0;
                 dash_afficher = true;
+                tempsDash = 0;
             }
         }
 
@@ -453,7 +453,51 @@ public class GameScreen implements Screen {
                             iconSize, iconSize);
         }
 
+        // À la fin de la méthode draw(), avant game.batch.end():
+        // Dessiner une minimap simplifiée
+        float minimapSize = 40;
+        float minimapX = camera.position.x + cameraHalfWidth - minimapSize - 10;
+        float minimapY = camera.position.y - cameraHalfHeight + 10;
 
+        // Dessiner le fond de la minimap
+        game.batch.setColor(0, 0, 0, 0.7f);
+        game.batch.draw(solTexture, minimapX - 2, minimapY - 2, minimapSize + 4, minimapSize + 4);
+        game.batch.setColor(Color.WHITE);
+
+        // Calculer l'échelle
+        float mapWidthPixels = map[0].length * TILE_SIZE;
+        float mapHeightPixels = map.length * TILE_SIZE;
+        float scaleX = minimapSize / mapWidthPixels;
+        float scaleY = minimapSize / mapHeightPixels;
+        float scale = Math.min(scaleX, scaleY);
+
+        // Dessiner une version simplifiée de la carte
+        for (int mapY = 0; mapY < map.length; mapY++) {
+            for (int mapX = 0; mapX < map[0].length; mapX++) {
+                if (map[mapY][mapX] == 0) { // Mur
+                    game.batch.setColor(0.3f, 0.3f, 0.3f, 1); // Gris foncé
+                } else if (map[mapY][mapX] == 2 || map[mapY][mapX] == 3) { // Portes
+                    game.batch.setColor(0.9f, 0.6f, 0.2f, 1); // Orange
+                } else if (map[mapY][mapX] == 4) { // Vide
+                    continue;
+                } else { // Sol
+                    game.batch.setColor(0.7f, 0.7f, 0.7f, 1); // Gris clair
+                }
+                
+                float tileX = minimapX + mapX * TILE_SIZE * scale;
+                float tileY = minimapY + (map.length - 1 - mapY) * TILE_SIZE * scale;
+                game.batch.draw(solTexture, tileX, tileY, TILE_SIZE * scale, TILE_SIZE * scale);
+            }
+        }
+
+        // Dessiner la position du joueur
+        game.batch.setColor(1, 0, 0, 1); // Rouge
+        float playerMinimapX = minimapX + playerX * scale;
+        float playerMinimapY = minimapY + playerY * scale;
+        game.batch.draw(solTexture, playerMinimapX, playerMinimapY, 3, 3);
+
+        // Réinitialiser la couleur
+        game.batch.setColor(1, 1, 1, 1);
         game.batch.end();
         //affichage de hitbox
         shapeRenderer.setProjectionMatrix(camera.combined);
