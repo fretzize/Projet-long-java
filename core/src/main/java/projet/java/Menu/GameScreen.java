@@ -8,6 +8,8 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import projet.java.entite.Entite;
 import projet.java.entite.Personnage;
 import projet.java.Main;
+import projet.java.Map.Chambre;
+import projet.java.Map.Map;
 
 import java.util.TimerTask;
 import java.util.Timer;
@@ -17,16 +19,44 @@ import com.badlogic.gdx.math.MathUtils;
 
 public class GameScreen implements Screen {
     final Main game;
+    //tout ce qui est utile à la map :
+    Texture solTexture;
+    Texture solTexture2;
+    Texture solTexture3;
+    Texture solTexture4;
+    Texture solTexture5;
+    Texture solTexture6;
+    Texture solTexture7;
+    Texture solTexture8;
+    Texture solTexture9;
+    Texture solTexture10;
+    Texture solTexture11;
+    Texture solTexture12;
+    Texture murTexture;
+    Texture murTexture2;
+    Texture porteH;
+    Texture porteV;
+    Texture videTexture;
+    int nombreDeChambres = 25;
+    int[] tailleChambre = {70, 70};
+    Map carte = new Map(nombreDeChambres, tailleChambre);
+    int[][] map;
+    int[][] mapCollision;
+    //
+
+
+    final int TILE_SIZE = 16;
+    final float CAMERA_SPEED = 600f;
     private Texture mapTexture;
     private Texture skin;
-    private float playerX = 50;
-    private float playerY = 50;
-    private float playerSpeed = 500; // Vitesse normale en pixels par seconde
+    private float playerX = 100;
+    private float playerY = 100;
+    private float playerSpeed = 150; // Vitesse normale en pixels par seconde
     private float speed = 2500; // Vitesse du dash réduite (était 10000)
     private float dashDuration = 0.08f; // Durée du dash en secondes pour maintenir la même distance
     private float currentDashTime = 0f; // Pour suivre la durée du dash en cours
     private boolean isDashing = false; // Pour savoir si on est en train de dasher
-    private float mapSize = 2000; // Taille de la map carrée
+    //private float mapSize = 2000; // Taille de la map carrée
     private OrthographicCamera camera;
     private Entite personnage1; // = new Personnage(4, 2, 3, "mathis", skin);
     private Texture dash_texture;
@@ -61,7 +91,7 @@ public class GameScreen implements Screen {
     float cameraHalfWidth;
     float cameraHalfHeight;
 
-    private float scalePlayer = 2.0f; // Facteur d'échelle pour le personnage
+    private float scalePlayer = 0.5f; // Facteur d'échelle pour le personnage
 
     // etat bouclier et dash personnage
     private boolean etatbouclier = false;
@@ -89,6 +119,39 @@ public class GameScreen implements Screen {
         this.game = game;
         camera = new OrthographicCamera();
         camera.setToOrtho(false, 1920, 1080);
+
+        //map
+        carte.placerChambresGrille();
+        carte.corridor_creator();
+        carte.creuser_couloir();
+        Map carteReduite = carte.reducteur();
+        carteReduite.rotation90Trigo();
+        carteReduite.afficherMap();
+        carteReduite.coupureCoord();
+        carteReduite.creation_vide();
+        carteReduite.afficherMap();
+        mapCollision = carteReduite.getCoord();
+        carteReduite.randomiseur_sol();
+        //carteReduite.naturalisation_mur();
+        map = carteReduite.getCoord();
+        videTexture = new Texture("Tile_30.png");
+        solTexture = new Texture("Tile_20.png");
+        murTexture = new Texture("Tile_11.png");
+        murTexture2 = new Texture("Tile_92.png");
+        porteH = new Texture("1.png");
+        porteV = new Texture("2.png");
+        solTexture2 = new Texture("Tile_21.png");
+        solTexture3 = new Texture("Tile_22.png");
+        solTexture4 = new Texture("Tile_36.png");
+        solTexture5 = new Texture("Tile_45.png");
+        solTexture6 = new Texture("Tile_72.png");
+        solTexture7 = new Texture("Tile_74.png");
+        solTexture8 = new Texture("Tile_76.png");
+        solTexture9 = new Texture("Tile_82.png");
+        solTexture10 = new Texture("Tile_83.png");
+        solTexture11 = new Texture("Tile_84.png");
+        solTexture12 = new Texture("Tile_95.png");
+
     }
 
     @Override
@@ -143,11 +206,6 @@ public class GameScreen implements Screen {
     }
 
     private void input(float avance) {
-        // Gestion de la pause
-        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE) || Gdx.input.isKeyJustPressed(Input.Keys.P)) {
-            game.setScreen(new PauseScreen(game, this));
-            return; // Sortir de la méthode pour éviter de traiter d'autres entrées
-        }
         // Gestion du dash
         if (Gdx.input.isKeyPressed(game.toucheDash)) {
             if (dashOk && !isDashing) {
@@ -184,9 +242,21 @@ public class GameScreen implements Screen {
         }
 
         // Limiter le joueur à la map
-        playerX = MathUtils.clamp(playerX, 0, mapSize - skin.getWidth());
-        playerY = MathUtils.clamp(playerY, 0, mapSize - skin.getHeight());
+        //playerX = MathUtils.clamp(playerX, 0, mapSize - skin.getWidth());
+        //playerY = MathUtils.clamp(playerY, 0, mapSize - skin.getHeight());
 
+        // Retour au menu
+        if (Gdx.input.isKeyPressed(Input.Keys.ESCAPE)) {
+            game.startMenuMusic();
+            game.setScreen(new MenuScreen(game));
+            game.startMenuMusic();
+            game.setScreen(new MenuScreen(game));
+            game.startMenuMusic();
+            game.setScreen(new MenuScreen(game));
+            game.startMenuMusic();
+            game.setScreen(new MenuScreen(game));
+            dispose();
+        }
     }
 
     private void logic() {
@@ -197,10 +267,15 @@ public class GameScreen implements Screen {
         // Limiter la caméra aux bords de la map
         cameraHalfWidth = camera.viewportWidth / 2;
         cameraHalfHeight = camera.viewportHeight / 2;
-
-        camera.position.x = MathUtils.clamp(camera.position.x, cameraHalfWidth, mapSize - cameraHalfWidth);
-        camera.position.y = MathUtils.clamp(camera.position.y, cameraHalfHeight, mapSize - cameraHalfHeight);
-
+//
+//        camera.position.x = MathUtils.clamp(camera.position.x, cameraHalfWidth, map.length*TILE_SIZE - cameraHalfWidth);
+//        camera.position.y = MathUtils.clamp(camera.position.y, cameraHalfHeight, map[0].length*TILE_SIZE - cameraHalfHeight);
+        if (Gdx.input.isKeyJustPressed(Input.Keys.PLUS) || Gdx.input.isKeyJustPressed(Input.Keys.EQUALS)) {
+            camera.zoom -= 0.1f;
+        }
+        if (Gdx.input.isKeyJustPressed(Input.Keys.MINUS)) {
+            camera.zoom += 0.1f;
+        }
         camera.update();
     }
 
@@ -210,7 +285,19 @@ public class GameScreen implements Screen {
 
         game.batch.begin();
         // Dessiner la map
-        game.batch.draw(mapTexture, 0, 0, mapSize, mapSize);
+        //game.batch.draw(mapTexture, 0, 0, mapSize, mapSize);
+        for (int y = 0; y < map.length; y++) {
+            for (int x = 0; x < map[0].length; x++) {
+                Texture texture = getTextureForTile(map[y][x]);
+                if (texture != null && texture != porteH && texture != porteV) {
+                    game.batch.draw(texture, x * TILE_SIZE, (map.length - 1 - y) * TILE_SIZE);
+                } else if (texture == porteH || texture == porteV) {
+                    game.batch.draw(solTexture, x * TILE_SIZE, (map.length - 1 - y) * TILE_SIZE);
+                    game.batch.draw(texture, x * TILE_SIZE, (map.length - 1 - y) * TILE_SIZE);
+
+                }
+            }
+        }
 
         // Dessiner le joueur selon la direction avec la nouvelle échelle
         float scaledWidth = largeur_skin * scalePlayer;
@@ -312,6 +399,8 @@ public class GameScreen implements Screen {
         if (timer2 != null) {
             timer2.cancel();
         }
+        solTexture.dispose();
+        murTexture.dispose();
     }
 
     @Override
@@ -356,5 +445,45 @@ public class GameScreen implements Screen {
                 });
             }
         }, 0, 1000); // 1000 ms = 1s
+    }
+
+    private Texture getTextureForTile(int value) {
+        if (value == 0 ) {
+            return murTexture;
+        } else if (value == 3) {
+            return porteH;
+        } else if (value == 2) {
+            return porteV;
+        } else if (value == 4){
+            // return videTexture;
+            return null;
+        } else if (value == 100){
+            return solTexture2;
+        } else if (value == 101){
+            return solTexture3 ;
+        } else if (value == 102) {
+            return solTexture4;
+        } else if (value == 103) {
+            return solTexture5;
+        } else if (value == 104) {
+            return solTexture6;
+        }else if (value == 105) {
+            return solTexture7;
+        }else if (value == 106) {
+            return solTexture8;
+        }else if (value == 107) {
+            return solTexture9;
+        }else if (value == 108) {
+            return solTexture10;
+        }else if (value == 109) {
+            return solTexture11;
+        }else if (value == 110) {
+            return solTexture12;
+        } else if (value == 200) {
+            return murTexture2;
+        } else {
+            return solTexture; // 1 ou autre = sol
+        }
+
     }
 }
