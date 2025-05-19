@@ -3,9 +3,13 @@ package projet.java.Menu;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.utils.Array;
 import projet.java.entite.Entite;
 import projet.java.entite.Personnage;
 import projet.java.Main;
@@ -24,6 +28,8 @@ public class GameScreen implements Screen {
     final Main game;
 
     //tout ce qui est utile à la map :
+    private ShapeRenderer shapeRenderer;
+    Array<Rectangle> mursHitboxes ;
     Texture solTexture;
     Texture solTexture2;
     Texture solTexture3;
@@ -51,10 +57,11 @@ public class GameScreen implements Screen {
 
     private Texture mapTexture;
     private Texture skin;
-    private float playerX = 50;
-    private float playerY = 50;
+    private Rectangle playerHitbox ;
+    private float playerX = 250;
+    private float playerY = 250;
     private float playerSpeed = 100; // Vitesse normale en pixels par seconde
-    private float speed = 2500; // Vitesse du dash réduite (était 10000)
+    private float speed = 500; // Vitesse du dash réduite (était 10000)
     private float dashDuration = 0.08f; // Durée du dash en secondes pour maintenir la même distance
     private float currentDashTime = 0f; // Pour suivre la durée du dash en cours
     private boolean isDashing = false; // Pour savoir si on est en train de dasher
@@ -68,6 +75,7 @@ public class GameScreen implements Screen {
     private float hauteur_dash;
     private Texture coeur_plein;
     private Texture bouclierIntact;
+
 
     private AnimationHandler animationHandler;
 
@@ -101,7 +109,7 @@ public class GameScreen implements Screen {
     float cameraHalfWidth;
     float cameraHalfHeight;
 
-    private float scalePlayer = 2.0f; // Facteur d'échelle pour le personnage
+    private float scalePlayer = 1.0f; // Facteur d'échelle pour le personnage
 
     // etat bouclier et dash personnage
     private boolean etatbouclier = false;
@@ -134,15 +142,17 @@ public class GameScreen implements Screen {
     @Override
     public void show() {
         //map
+        mursHitboxes = new Array<>();
         carte.placerChambresGrille();
         carte.corridor_creator();
         carte.creuser_couloir();
+        shapeRenderer = new ShapeRenderer();
         Map carteReduite = carte.reducteur();
         carteReduite.rotation90Trigo();
-        carteReduite.afficherMap();
+        //carteReduite.afficherMap();
         carteReduite.coupureCoord();
         carteReduite.creation_vide();
-        carteReduite.afficherMap();
+        //carteReduite.afficherMap();
         mapCollision = carteReduite.getCoord();
         carteReduite.randomiseur_sol();
         //carteReduite.naturalisation_mur();
@@ -169,6 +179,8 @@ public class GameScreen implements Screen {
         skin = new Texture(Gdx.files.internal("image_heracles_normal.png")); // Créez une image "player.png"
         largeur_skin = skin.getWidth();
         hauteur_skin = skin.getHeight();
+        playerHitbox = new Rectangle(playerX+22, playerY+22, 10, 10);
+
 
         personnage1 = new Personnage(4, 4, 4, "mathis", skin);
         personnage1.create_entite();
@@ -210,6 +222,15 @@ public class GameScreen implements Screen {
             timer2.cancel();
         }
         timer2 = new Timer();
+
+
+        for (int y = 0; y < mapCollision.length; y++) {
+            for (int x = 0; x < mapCollision[0].length; x++) {
+                if (mapCollision[y][x] == 0) {
+                    mursHitboxes.add(new Rectangle(x * TILE_SIZE, (map.length - 1 - y) * TILE_SIZE, TILE_SIZE, TILE_SIZE));
+                }
+            }
+        }
 
     }
 
@@ -258,6 +279,9 @@ public class GameScreen implements Screen {
 
         float currentSpeed = isDashing ? speed : playerSpeed;
 
+        float oldX = playerX;
+        float oldY = playerY;
+
         // Déplacement du joueur
         if (Gdx.input.isKeyPressed(game.toucheHaut) || Gdx.input.isKeyPressed(Input.Keys.UP)) {
             playerY += currentSpeed * avance;
@@ -270,6 +294,19 @@ public class GameScreen implements Screen {
         }
         if (Gdx.input.isKeyPressed(game.toucheBas) || Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
             playerY -= currentSpeed * avance;
+        }
+
+        playerHitbox.setPosition(playerX+22, playerY+22);
+
+
+        for (int i = 0; i < mursHitboxes.size; i++) {
+            if (playerHitbox.overlaps(mursHitboxes.get(i))) {
+                // collision détectée, on annule le déplacement
+                playerX = oldX;
+                playerY = oldY;
+                playerHitbox.setPosition(playerX+22, playerY+22);
+                break;
+            }
         }
 
         // Mise à jour du dash
@@ -398,6 +435,20 @@ public class GameScreen implements Screen {
         }
 
         game.batch.end();
+        //affichage de hitbox
+//        shapeRenderer.setProjectionMatrix(camera.combined);
+//        shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
+//        shapeRenderer.setColor(Color.RED);
+//        for (Rectangle mur : mursHitboxes) {
+//            shapeRenderer.rect(mur.x, mur.y, mur.width, mur.height);
+//        }
+//
+//        shapeRenderer.setColor(Color.GREEN);
+//        float scaledWidth1 = largeur_skin * scalePlayer;
+//        float scaledHeight1 = hauteur_skin * scalePlayer;
+//        shapeRenderer.rect(playerX+22, playerY+22, 10,10);
+//
+//        shapeRenderer.end();
     }
 
     @Override
