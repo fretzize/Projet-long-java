@@ -136,7 +136,7 @@ public class GameScreen implements Screen {
     public GameScreen(final Main game) {
         this.game = game;
         camera = new OrthographicCamera();
-        camera.setToOrtho(false, 1920, 1080);
+        camera.setToOrtho(false, 320, 180);
     }
 
     @Override
@@ -191,7 +191,6 @@ public class GameScreen implements Screen {
 
         dash_texture = new Texture("dash.png");
         dash = new TextureRegion(dash_texture);
-        dash_gris = new Texture("dash_gris.png");
         largeur_dash = dash_texture.getWidth();
         hauteur_dash = dash_texture.getHeight();
 
@@ -324,16 +323,27 @@ public class GameScreen implements Screen {
     }
 
     private void logic() {
-        // Mise à jour de la caméra pour suivre le joueur
-        camera.position.x = playerX;// + skin.getWidth()/2;
-        camera.position.y = playerY;// + skin.getHeight()/2;
+        // Calculer le centre du personnage pour un meilleur suivi
+        float playerCenterX = playerX + ((largeur_skin * scalePlayer) / 2);
+        float playerCenterY = playerY + ((hauteur_skin * scalePlayer) / 2);
+        
+        // Utiliser une interpolation linéaire pour des mouvements plus fluides
+        float lerpFactor = 0.1f; // Ajustez entre 0.01 (très lent) et 0.2 (très rapide)
+        
+        camera.position.x += (playerCenterX - camera.position.x) * lerpFactor;
+        camera.position.y += (playerCenterY - camera.position.y) * lerpFactor;
 
-        // Limiter la caméra aux bords de la map
+        // Calculer les dimensions effectives de la vue caméra
         cameraHalfWidth = camera.viewportWidth / 2;
         cameraHalfHeight = camera.viewportHeight / 2;
+        
+        // Calculer les limites réelles de la map en pixels
+        float mapWidthPixels = map[0].length * TILE_SIZE;
+        float mapHeightPixels = map.length * TILE_SIZE;
 
-        camera.position.x = MathUtils.clamp(camera.position.x, cameraHalfWidth, mapSize - cameraHalfWidth);
-        camera.position.y = MathUtils.clamp(camera.position.y, cameraHalfHeight, mapSize - cameraHalfHeight);
+        // Limiter la caméra pour qu'elle ne sorte pas de la map
+        camera.position.x = MathUtils.clamp(camera.position.x, cameraHalfWidth, mapWidthPixels - cameraHalfWidth);
+        camera.position.y = MathUtils.clamp(camera.position.y, cameraHalfHeight, mapHeightPixels - cameraHalfHeight);
 
         camera.update();
     }
@@ -344,15 +354,25 @@ public class GameScreen implements Screen {
 
         game.batch.begin();
         // Dessiner la map
-        for (int y = 0; y < map.length; y++) {
-            for (int x = 0; x < map[0].length; x++) {
-                Texture texture = getTextureForTile(map[y][x]);
-                if (texture != null && texture != porteH && texture != porteV) {
-                    game.batch.draw(texture, x * TILE_SIZE, (map.length - 1 - y) * TILE_SIZE);
-                } else if (texture == porteH || texture == porteV) {
-                    game.batch.draw(solTexture, x * TILE_SIZE, (map.length - 1 - y) * TILE_SIZE);
-                    game.batch.draw(texture, x * TILE_SIZE, (map.length - 1 - y) * TILE_SIZE);
+        int startX = Math.max(0, (int)((camera.position.x - cameraHalfWidth) / TILE_SIZE));
+        int startY = Math.max(0, (int)((camera.position.y - cameraHalfHeight) / TILE_SIZE));
+        int endX = Math.min(map[0].length - 1, (int)((camera.position.x + cameraHalfWidth) / TILE_SIZE + 1));
+        int endY = Math.min(map.length - 1, (int)((camera.position.y + cameraHalfHeight) / TILE_SIZE + 1));
 
+        // Ne dessiner que les tuiles visibles
+        for (int y = startY; y <= endY; y++) {
+            int mapY = map.length - 1 - y;
+            if (mapY < 0 || mapY >= map.length) continue;
+            
+            for (int x = startX; x <= endX; x++) {
+                if (x < 0 || x >= map[0].length) continue;
+                
+                Texture texture = getTextureForTile(map[mapY][x]);
+                if (texture != null && texture != porteH && texture != porteV) {
+                    game.batch.draw(texture, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                } else if (texture == porteH || texture == porteV) {
+                    game.batch.draw(solTexture, x * TILE_SIZE, y * TILE_SIZE);
+                    game.batch.draw(texture, x * TILE_SIZE, y * TILE_SIZE);
                 }
             }
         }
@@ -418,37 +438,37 @@ public class GameScreen implements Screen {
         //game.batch.draw(barre_pleine, x, y, barWidth * progress, barHeight);
 
         for (int i = 0; i < personnage1.getVie(); i++) {
-            game.batch.draw(coeur_plein, camera.position.x - cameraHalfWidth + i * hauteur_skin + 10,
-                    camera.position.y + cameraHalfHeight - hauteur_skin, hauteur_skin, hauteur_skin);
+            // Réduire la taille des icônes de vie pour qu'elles soient proportionnées
+            float iconSize = Math.min(hauteur_skin, 16); // Maximum 16 pixels
+            game.batch.draw(coeur_plein, 
+                            camera.position.x - cameraHalfWidth + 5 + (i * (iconSize + 2)), 
+                            camera.position.y + cameraHalfHeight - iconSize - 5, 
+                            iconSize, iconSize);
         }
         for (int i = 0; i < personnage1.getBouclier(); i++) {
-            game.batch.draw(bouclierIntact, camera.position.x - cameraHalfWidth + i * hauteur_skin + 10,
-                    camera.position.y + cameraHalfHeight - hauteur_skin - 1 - hauteur_skin, hauteur_skin, hauteur_skin);
+            float iconSize = Math.min(hauteur_skin, 16); // Maximum 16 pixels
+            game.batch.draw(bouclierIntact, 
+                            camera.position.x - cameraHalfWidth + 5 + (i * (iconSize + 2)), 
+                            camera.position.y + cameraHalfHeight - iconSize*2 - 7, 
+                            iconSize, iconSize);
         }
 
-        if (dashOk) {
-            game.batch.draw(dash, camera.position.x - cameraHalfWidth + largeur_dash,
-                    camera.position.y - cameraHalfHeight + hauteur_dash);
-        } else {
-            game.batch.draw(dash_gris, camera.position.x - cameraHalfWidth + largeur_dash,
-                    camera.position.y - cameraHalfHeight + hauteur_dash);
-        }
 
         game.batch.end();
         //affichage de hitbox
-//        shapeRenderer.setProjectionMatrix(camera.combined);
-//        shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
-//        shapeRenderer.setColor(Color.RED);
-//        for (Rectangle mur : mursHitboxes) {
-//            shapeRenderer.rect(mur.x, mur.y, mur.width, mur.height);
-//        }
-//
-//        shapeRenderer.setColor(Color.GREEN);
-//        float scaledWidth1 = largeur_skin * scalePlayer;
-//        float scaledHeight1 = hauteur_skin * scalePlayer;
-//        shapeRenderer.rect(playerX+22, playerY+22, 10,10);
-//
-//        shapeRenderer.end();
+        shapeRenderer.setProjectionMatrix(camera.combined);
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
+        shapeRenderer.setColor(Color.RED);
+        for (Rectangle mur : mursHitboxes) {
+            shapeRenderer.rect(mur.x, mur.y, mur.width, mur.height);
+        }
+
+        shapeRenderer.setColor(Color.GREEN);
+        float scaledWidth1 = largeur_skin * scalePlayer;
+        float scaledHeight1 = hauteur_skin * scalePlayer;
+        shapeRenderer.rect(playerX+22, playerY+22, 10,10);
+
+        shapeRenderer.end();
     }
 
     @Override
@@ -457,7 +477,6 @@ public class GameScreen implements Screen {
     mapTexture.dispose();
     skin.dispose();
     dash_texture.dispose();
-    dash_gris.dispose();
     coeur_plein.dispose();
     bouclierIntact.dispose();
     Hercule_bas.dispose();
@@ -487,6 +506,19 @@ public class GameScreen implements Screen {
 
     @Override
     public void resize(int width, int height) {
+        // Maintenir le ratio d'aspect tout en gardant le même niveau de zoom
+        float aspectRatio = (float)width / (float)height;
+        float targetRatio = 16f/9f; // Ratio cible
+        
+        if (aspectRatio > targetRatio) {
+            // Plus large que 16:9
+            camera.viewportWidth = camera.viewportHeight * aspectRatio;
+        } else {
+            // Plus haut que 16:9
+            camera.viewportHeight = camera.viewportWidth / aspectRatio;
+        }
+        
+        camera.update();
         game.viewport.update(width, height, true);
 
     }
