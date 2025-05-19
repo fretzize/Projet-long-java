@@ -147,23 +147,23 @@ public class GameScreen implements Screen {
         carteReduite.randomiseur_sol();
         //carteReduite.naturalisation_mur();
         map = carteReduite.getCoord();
-videTexture = new Texture(Gdx.files.internal("map/Tile_30.png"));
-solTexture = new Texture(Gdx.files.internal("map/Tile_20.png"));
-murTexture = new Texture(Gdx.files.internal("map/Tile_11.png"));
-murTexture2 = new Texture(Gdx.files.internal("map/Tile_92.png"));
-porteH = new Texture(Gdx.files.internal("map/1.png"));
-porteV = new Texture(Gdx.files.internal("map/2.png"));
-solTexture2 = new Texture(Gdx.files.internal("map/Tile_21.png"));
-solTexture3 = new Texture(Gdx.files.internal("map/Tile_22.png"));
-solTexture4 = new Texture(Gdx.files.internal("map/Tile_36.png"));
-solTexture5 = new Texture(Gdx.files.internal("map/Tile_45.png"));
-solTexture6 = new Texture(Gdx.files.internal("map/Tile_72.png"));
-solTexture7 = new Texture(Gdx.files.internal("map/Tile_74.png"));
-solTexture8 = new Texture(Gdx.files.internal("map/Tile_76.png"));
-solTexture9 = new Texture(Gdx.files.internal("map/Tile_82.png"));
-solTexture10 = new Texture(Gdx.files.internal("map/Tile_83.png"));
-solTexture11 = new Texture(Gdx.files.internal("map/Tile_84.png"));
-solTexture12 = new Texture(Gdx.files.internal("map/Tile_95.png"));
+        videTexture = new Texture(Gdx.files.internal("map/Tile_30.png"));
+        solTexture = new Texture(Gdx.files.internal("map/Tile_20.png"));
+        murTexture = new Texture(Gdx.files.internal("map/Tile_11.png"));
+        murTexture2 = new Texture(Gdx.files.internal("map/Tile_92.png"));
+        porteH = new Texture(Gdx.files.internal("map/1.png"));
+        porteV = new Texture(Gdx.files.internal("map/2.png"));
+        solTexture2 = new Texture(Gdx.files.internal("map/Tile_21.png"));
+        solTexture3 = new Texture(Gdx.files.internal("map/Tile_22.png"));
+        solTexture4 = new Texture(Gdx.files.internal("map/Tile_36.png"));
+        solTexture5 = new Texture(Gdx.files.internal("map/Tile_45.png"));
+        solTexture6 = new Texture(Gdx.files.internal("map/Tile_72.png"));
+        solTexture7 = new Texture(Gdx.files.internal("map/Tile_74.png"));
+        solTexture8 = new Texture(Gdx.files.internal("map/Tile_76.png"));
+        solTexture9 = new Texture(Gdx.files.internal("map/Tile_82.png"));
+        solTexture10 = new Texture(Gdx.files.internal("map/Tile_83.png"));
+        solTexture11 = new Texture(Gdx.files.internal("map/Tile_84.png"));
+        solTexture12 = new Texture(Gdx.files.internal("map/Tile_95.png"));
 
         mapTexture = new Texture(Gdx.files.internal("map.png")); // Créez une image "map.png"
         skin = new Texture(Gdx.files.internal("image_heracles_normal.png")); // Créez une image "player.png"
