@@ -47,7 +47,7 @@ public class GameScreen implements Screen {
     Texture porteH;
     Texture porteV;
     Texture videTexture;
-    int nombreDeChambres = 6;
+    int nombreDeChambres = 9;
     int[] tailleChambre = {70, 70};
     Map carte = new Map(nombreDeChambres, tailleChambre);
     int[][] map;
