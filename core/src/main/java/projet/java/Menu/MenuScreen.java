@@ -19,11 +19,10 @@ public class MenuScreen implements Screen {
     private Texture backgroundTexture;
     private int selectedIndex = 0; // Index de l'option sélectionnée
     private final String[] menuOptions = { "Commencer", "Options", "Quitter" };
-    private Rectangle[] optionBounds; // Pour stocker les zones cliquables
+    private Rectangle[] optionBounds; 
 
     public MenuScreen(final Main game) {
         this.game = game;
-        // Initialiser les rectangles pour chaque option
         optionBounds = new Rectangle[menuOptions.length];
         for (int i = 0; i < menuOptions.length; i++) {
             optionBounds[i] = new Rectangle();
@@ -37,27 +36,24 @@ public class MenuScreen implements Screen {
         game.viewport.apply();
         game.batch.setProjectionMatrix(game.viewport.getCamera().combined);
 
-        game.batch.begin(); // Assurez-vous que le batch commence avant tout dessin
+        game.batch.begin(); 
 
-        // Calculer les dimensions de l'écran
         float screenWidth = game.viewport.getWorldWidth();
         float screenHeight = game.viewport.getWorldHeight();
 
         game.batch.draw(backgroundTexture, 0, 0, game.viewport.getWorldWidth(), game.viewport.getWorldHeight());
 
-        game.font.getData().setScale(3.0f); // Plus grand que les options du menu
-        game.font.setColor(Color.GOLD); // Couleur dorée pour le titre
+        game.font.getData().setScale(3.0f); 
+        game.font.setColor(Color.GOLD); 
         String title = "Héraclès";
         float titleWidth = game.font.draw(game.batch, title, 0, 0).width;
         float titleX = (screenWidth - titleWidth) / 2;
-        float titleY = screenHeight - 100; // Position en haut de l'écran
+        float titleY = screenHeight - 100; 
         game.font.draw(game.batch, title, titleX, titleY);
 
-        // Réinitialiser l'échelle pour les options du menu
         game.font.getData().setScale(1.5f);
 
-        // Ajuster la taille de la police pour agrandir les options du menu
-        game.font.getData().setScale(1.5f); // Augmentez l'échelle selon vos besoins
+        game.font.getData().setScale(1.5f); 
 
         // Afficher les options du menu
         for (int i = 0; i < menuOptions.length; i++) {
