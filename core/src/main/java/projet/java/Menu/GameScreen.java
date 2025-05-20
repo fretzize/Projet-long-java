@@ -60,6 +60,8 @@ public class GameScreen implements Screen {
     private Rectangle playerHitbox ;
     private float playerX = 250;
     private float playerY = 250;
+    private float hitboxX = 22;
+    private float hitboxY = 18;
     private float playerSpeed = 100; // Vitesse normale en pixels par seconde
     private float speed = 500; // Vitesse du dash réduite (était 10000)
     private float dashDuration = 0.08f; // Durée du dash en secondes pour maintenir la même distance
@@ -179,7 +181,7 @@ public class GameScreen implements Screen {
         skin = new Texture(Gdx.files.internal("image_heracles_normal.png")); // Créez une image "player.png"
         largeur_skin = skin.getWidth();
         hauteur_skin = skin.getHeight();
-        playerHitbox = new Rectangle(playerX+22, playerY+22, 10, 10);
+        playerHitbox = new Rectangle(playerX+hitboxX, playerY+hitboxY, 10, 10);
 
 
         personnage1 = new Personnage(4, 4, 4, "mathis", skin);
@@ -295,7 +297,7 @@ public class GameScreen implements Screen {
             playerY -= currentSpeed * avance;
         }
 
-        playerHitbox.setPosition(playerX+22, playerY+22);
+        playerHitbox.setPosition(playerX+hitboxX, playerY+hitboxY);
 
 
         for (int i = 0; i < mursHitboxes.size; i++) {
@@ -303,7 +305,7 @@ public class GameScreen implements Screen {
                 // collision détectée, on annule le déplacement
                 playerX = oldX;
                 playerY = oldY;
-                playerHitbox.setPosition(playerX+22, playerY+22);
+                playerHitbox.setPosition(playerX+hitboxX, playerY+hitboxY);
                 break;
             }
         }
@@ -359,6 +361,7 @@ public class GameScreen implements Screen {
         int endX = Math.min(map[0].length - 1, (int)((camera.position.x + cameraHalfWidth) / TILE_SIZE + 1));
         int endY = Math.min(map.length - 1, (int)((camera.position.y + cameraHalfHeight) / TILE_SIZE + 1));
 
+        mursHitboxes.clear();
         // Ne dessiner que les tuiles visibles
         for (int y = startY; y <= endY; y++) {
             int mapY = map.length - 1 - y;
@@ -370,12 +373,24 @@ public class GameScreen implements Screen {
                 Texture texture = getTextureForTile(map[mapY][x]);
                 if (texture != null && texture != porteH && texture != porteV) {
                     game.batch.draw(texture, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                    if (texture == murTexture) {
+                        mursHitboxes.add(new Rectangle(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE));
+                    }
                 } else if (texture == porteH || texture == porteV) {
                     game.batch.draw(solTexture, x * TILE_SIZE, y * TILE_SIZE);
                     game.batch.draw(texture, x * TILE_SIZE, y * TILE_SIZE);
+                    if (texture == porteH){
+                        mursHitboxes.add(new Rectangle(x * TILE_SIZE  , y * TILE_SIZE+ 4, TILE_SIZE , TILE_SIZE-8));
+                    }
+                    else if (texture == porteV){
+                        mursHitboxes.add(new Rectangle(x * TILE_SIZE+4, y * TILE_SIZE, TILE_SIZE-8, TILE_SIZE));
+
+                    }
                 }
             }
         }
+
+
 
         // Dessiner le joueur avec l'animation actuelle
 
@@ -510,7 +525,8 @@ public class GameScreen implements Screen {
         shapeRenderer.setColor(Color.GREEN);
         float scaledWidth1 = largeur_skin * scalePlayer;
         float scaledHeight1 = hauteur_skin * scalePlayer;
-        shapeRenderer.rect(playerX+22, playerY+22, 10,10);
+
+        shapeRenderer.rect(playerX+hitboxX, playerY+hitboxY, 10,10);
 
         shapeRenderer.end();
     }
