@@ -60,6 +60,7 @@ public class GameOverScreen implements Screen {
         float textY = layout2.height * 2;
 
         optionBounds = new Rectangle(textX, textY - layout2.height, layout2.width, layout2.height);
+        game.playGameOverSound();
     }
 
     @Override
@@ -82,6 +83,8 @@ public class GameOverScreen implements Screen {
             parameter2.color = new Color(1f, 1f, 0f, 1f);
             font2 = generator.generateFont(parameter2);
             if (Gdx.input.justTouched()) {
+                game.disposeGameOverSound();
+                game.startMenuMusic();
                 game.setScreen(new MenuScreen(game));
             }
         } else {

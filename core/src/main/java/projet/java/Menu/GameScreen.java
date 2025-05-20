@@ -329,7 +329,7 @@ public class GameScreen implements Screen {
             return; // Sortir de la méthode pour éviter de traiter d'autres entrées
         }
         // Gestion de l'inventaire
-        if (Gdx.input.isKeyJustPressed(Input.Keys.E)) {
+        if (Gdx.input.isKeyJustPressed(game.toucheInventaire)) {
             game.setScreen(new InventaireScreen(game, this, personnage1));
             return; // Sortir de la méthode pour éviter de traiter d'autres entrées
         }

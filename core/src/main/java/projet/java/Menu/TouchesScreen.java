@@ -20,7 +20,7 @@ public class TouchesScreen implements Screen {
 
     private Texture backgroundTexture;
     private int selectedIndex = 0;
-    private final String[] keyOptions = {"Haut", "Bas", "Gauche", "Droite", "Dash", "Retour"};
+    private final String[] keyOptions = {"Haut", "Bas", "Gauche", "Droite", "Dash", "Inventaire", "Retour"};
     private Rectangle[] optionBounds;
     private int[] keyBindings;
     private boolean waitingForInput = false;
@@ -41,7 +41,8 @@ public class TouchesScreen implements Screen {
             game.toucheBas,
             game.toucheGauche,
             game.toucheDroite,
-            game.toucheDash
+            game.toucheDash,
+            game.toucheInventaire
         };
     }
 
@@ -62,7 +63,8 @@ public class TouchesScreen implements Screen {
             game.toucheBas,
             game.toucheGauche,
             game.toucheDroite,
-            game.toucheDash
+            game.toucheDash,
+            game.toucheInventaire
         };
     }
     private String getKeyName(int keycode) {
