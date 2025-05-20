@@ -160,6 +160,12 @@ public class GameScreen implements Screen {
     // Ajouter cette variable avec les autres attributs de la classe
     private float attackSpeedModifier = 0.3f; // Réduit à 30% de la vitesse normale pendant l'attaque
 
+    // Ajouter ces variables avec les autres attributs
+    private boolean damageEffect = false;
+    private float damageEffectTime = 0;
+    private final float DAMAGE_EFFECT_DURATION = 0.5f; // Durée en secondes
+    private final Color DAMAGE_COLOR = new Color(1, 0, 0, 0.5f); // Rouge semi-transparent
+
     public GameScreen(final Main game) {
         this.game = game;
         camera = new OrthographicCamera();
@@ -210,8 +216,17 @@ public class GameScreen implements Screen {
 
         niveau = new Niveau();
         personnage1 = new Personnage(4, 4, 4, "mathis", skin);
-
-
+        
+        // Définir le listener pour les dégâts
+        personnage1.setDamageListener(new Personnage.DamageListener() {
+            @Override
+            public void onDamageTaken(int damage) {
+                // Activer l'effet de dégât
+                damageEffect = true;
+                damageEffectTime = 0;
+            }
+        });
+        
         sbiretest = new Sbire(
             300, 0, 3,            // vie, bouclier, mana
             300, 300,           // positionX, positionY
@@ -300,6 +315,14 @@ public class GameScreen implements Screen {
         wasMovingDown = isMovingDown;
         wasMovingLeft = isMovingLeft;
         wasMovingRight = isMovingRight;
+        
+        // Mettre à jour le timer de l'effet de dégât
+        if (damageEffect) {
+            damageEffectTime += delta;
+            if (damageEffectTime >= DAMAGE_EFFECT_DURATION) {
+                damageEffect = false;
+            }
+        }
         
         logic();
         draw();
@@ -471,7 +494,6 @@ public class GameScreen implements Screen {
 
 
         // Dessiner le joueur avec l'animation actuelle
-
         TextureRegion currentFrame = animationHandler.getCurrentFrame();
         float originalWidth = currentFrame.getRegionWidth();
         float originalHeight = currentFrame.getRegionHeight();
@@ -492,7 +514,28 @@ public class GameScreen implements Screen {
                             sbireScaledHeight);
         }
         
+        // Sauvegarder la couleur originale du batch
+        Color originalColor = new Color(game.batch.getColor());
+        
+        // Appliquer l'effet de dégât si actif
+        if (damageEffect) {
+            // Calculer l'intensité de l'effet (fade out)
+            float intensity = 1 - (damageEffectTime / DAMAGE_EFFECT_DURATION);
+            
+            // Définir une couleur rouge avec alpha basé sur l'intensité
+            game.batch.setColor(
+                1,                                  // rouge à 100%
+                originalColor.g * (1 - intensity),  // réduire le vert
+                originalColor.b * (1 - intensity),  // réduire le bleu
+                originalColor.a                     // conserver l'alpha original
+            );
+        }
+    
+        // Dessiner le joueur
         game.batch.draw(currentFrame, playerX, playerY, scaledWidth, scaledHeight);
+        
+        // Restaurer la couleur originale
+        game.batch.setColor(originalColor);
         
 
         // afficher le dash selon la direction

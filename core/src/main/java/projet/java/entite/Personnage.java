@@ -250,6 +250,13 @@ public class Personnage extends ApplicationAdapter implements Entite {
     
 
     public void prendreDegat(int degats) {
+        // Notifier le listener dans tous les cas où des dégâts sont pris
+        // (peu importe si c'est le bouclier ou la vie qui est affecté)
+        if (damageListener != null && degats > 0) {
+            damageListener.onDamageTaken(degats);
+        }
+
+        // Continuer avec la logique existante pour appliquer les dégâts
         if (this.getBouclier() == 0) {
             // Pas de bouclier, dégâts directs à la vie
             perteVie(degats);
@@ -268,11 +275,11 @@ public class Personnage extends ApplicationAdapter implements Entite {
     public void perteVie(int degats) {
         if (this.enVie()) {
             this.vie -= degats;
+            
+            // Ne plus appeler le listener ici car c'est déjà fait dans prendreDegat
+            // La notification est maintenant centralisée
         } else {
             gameOver = true;
-            // batch.begin();
-            // font.draw(batch2, "Game Over", 100, 150);
-            // batch.end();
         }
     }
 
@@ -366,5 +373,16 @@ public class Personnage extends ApplicationAdapter implements Entite {
         this.positionY = y;
     }
 
+    // Ajouter cette interface pour écouter les événements de dégâts
+    public interface DamageListener {
+        void onDamageTaken(int damage);
+    }
 
+    // Ajouter ce membre à la classe Personnage
+    private DamageListener damageListener;
+
+    // Ajouter cette méthode pour définir le listener
+    public void setDamageListener(DamageListener listener) {
+        this.damageListener = listener;
+    }
 }
