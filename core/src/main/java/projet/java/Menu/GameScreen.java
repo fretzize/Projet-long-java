@@ -15,12 +15,17 @@ import projet.java.entite.Personnage;
 import projet.java.Main;
 import projet.java.Map.Chambre;
 import projet.java.Map.Map;
-
+import projet.java.Inventaire.Inventaire;
+import projet.java.Menu.InventaireScreen;
+import projet.java.Inventaire.Item;
+import projet.java.Inventaire.Inventaire;
+import projet.java.Inventaire.Item.ItemType;
 import java.util.TimerTask;
 import java.util.Timer;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.math.MathUtils;
+import projet.java.Menu.GameOverScreen;
 
 import projet.java.animation.AnimationHandler;
 
@@ -69,7 +74,7 @@ public class GameScreen implements Screen {
     private boolean isDashing = false; // Pour savoir si on est en train de dasher
     private float mapSize = 2000; // Taille de la map carrée
     private OrthographicCamera camera;
-    private Entite personnage1; // = new Personnage(4, 2, 3, "mathis", skin);
+    private Personnage personnage1; // = new Personnage(4, 2, 3, "mathis", skin);
     private Texture dash_texture;
     private TextureRegion dash;
     private Texture dash_gris;
@@ -78,7 +83,8 @@ public class GameScreen implements Screen {
     private Texture coeur_plein;
     private Texture bouclierIntact;
 
-
+    private boolean firstFrame = true;
+    private Map carteR;
     private AnimationHandler animationHandler;
 
     // Variables pour le suivi de la dernière direction
@@ -98,6 +104,12 @@ public class GameScreen implements Screen {
 
     private Texture barre_vide;
     private Texture barre_pleine;
+
+    // texture pour essayer inventaire
+
+    private Texture arme1;
+    private Texture arme2;
+    private Texture arme3;
 
     // largeur et longueur
 
@@ -159,6 +171,7 @@ public class GameScreen implements Screen {
         carteReduite.randomiseur_sol();
         //carteReduite.naturalisation_mur();
         map = carteReduite.getCoord();
+        carteR = carteReduite;
         videTexture = new Texture(Gdx.files.internal("map/Tile_30.png"));
         solTexture = new Texture(Gdx.files.internal("map/Tile_20.png"));
         murTexture = new Texture(Gdx.files.internal("map/Tile_11.png"));
@@ -233,6 +246,20 @@ public class GameScreen implements Screen {
             }
         }
 
+        // texture pour tester la grille d'inventaire
+        arme1 = new Texture("epee1.png");
+        arme2 = new Texture("epee2.png");
+        arme3 = new Texture("epee3.png");
+
+        Item Arme1 = new Item("arme1", arme1, Item.ItemType.ARME);
+        Item Arme2 = new Item("arme2", arme2, Item.ItemType.ARME);
+        Item Arme3 = new Item("arme3", arme3, Item.ItemType.ARME);
+
+        personnage1.getInventaire().addItem(Arme1);
+        personnage1.getInventaire().addItem(Arme2);
+        personnage1.getInventaire().addItem(Arme3);
+
+
     }
 
     @Override
@@ -263,10 +290,27 @@ public class GameScreen implements Screen {
 
     private void input(float avance) {
         // Gestion de la pause
+        if (firstFrame) {
+            firstFrame = false;
+            playerX = carteR.getCoordspawnX()*16;
+            playerY = carteR.getCoordspawnY()*16;
+        }
+        // Gestion de la pause
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE) || Gdx.input.isKeyJustPressed(Input.Keys.P)) {
             game.setScreen(new PauseScreen(game, this));
             return; // Sortir de la méthode pour éviter de traiter d'autres entrées
         }
+        // Gestion du game Over
+        if (!personnage1.enVie()) {
+            game.setScreen(new GameOverScreen(game));
+            return; // Sortir de la méthode pour éviter de traiter d'autres entrées
+        }
+        // Gestion de l'inventaire
+        if (Gdx.input.isKeyJustPressed(Input.Keys.E)) {
+            game.setScreen(new InventaireScreen(game, this, personnage1));
+            return; // Sortir de la méthode pour éviter de traiter d'autres entrées
+        }
+
         // Gestion du dash
         if (Gdx.input.isKeyPressed(game.toucheDash)) {
             if (dashOk && !isDashing) {
@@ -494,7 +538,7 @@ public class GameScreen implements Screen {
         float scaleY = minimapSize / mapHeightPixels;
         float scale = Math.min(scaleX, scaleY);
 
-        // Dessiner une version simplifiée de la carte
+        
         for (int mapY = 0; mapY < map.length; mapY++) {
             for (int mapX = 0; mapX < map[0].length; mapX++) {
                 if (map[mapY][mapX] == 0) { // Mur
@@ -513,7 +557,7 @@ public class GameScreen implements Screen {
             }
         }
 
-        // Dessiner la position du joueur
+        // position du joueur sur minimap
         game.batch.setColor(1, 0, 0, 1); // Rouge
         float playerMinimapX = minimapX + playerX * scale;
         float playerMinimapY = minimapY + playerY * scale;
@@ -527,7 +571,7 @@ public class GameScreen implements Screen {
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
         shapeRenderer.setColor(Color.RED);
         for (Rectangle mur : mursHitboxes) {
-            shapeRenderer.rect(mur.x, mur.y, mur.width, mur.height);
+            shapeRenderer.rect(mur.x, mur.y, mur.width, mur.height);    
         }
 
         shapeRenderer.setColor(Color.GREEN);
@@ -597,6 +641,7 @@ public class GameScreen implements Screen {
 
     @Override
     public void resume() {
+        
     }
 
     @Override

@@ -129,6 +129,7 @@ public class PauseScreen implements Screen {
         return bounds.contains(worldCoords.x, worldCoords.y);
     }
 
+    
     @Override
     public void show() {
         backgroundTexture = new Texture(Gdx.files.internal("menubackground.png"));

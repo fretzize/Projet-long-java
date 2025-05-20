@@ -8,6 +8,7 @@ import com.badlogic.gdx.Gdx;
 import projet.java.Main;
 
 import java.util.Timer;
+import projet.java.Inventaire.Inventaire;
 import java.util.TimerTask;
 
 
@@ -25,7 +26,8 @@ public class Personnage extends ApplicationAdapter implements Entite {
     private int mana_max;
     private int vie_max;
     private int bouclier_max;
-    
+    private Arme arme;
+    private Inventaire inventaire = new Inventaire();
 
     // etat bouclier et dash personnage
     private boolean etatbouclier = false;
@@ -132,7 +134,9 @@ public class Personnage extends ApplicationAdapter implements Entite {
     public float getPositionY(){
         return this.positionY;
     }
-
+    public Inventaire getInventaire(){
+            return this.inventaire;
+    }
     public Personnage(int mana, int vie, int bouclier, String nom, Texture skin) {//}, Vector2 position) {
         this.nom = nom;
         this.vie = vie;

@@ -119,6 +119,7 @@ public class AnimationHandler {
         return animations[currentAnimation].getKeyFrame(stateTime, true);
     }
     
+    
     public void dispose() {
         for (Animation<TextureRegion> animation : animations) {
             if (animation != null) {

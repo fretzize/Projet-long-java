@@ -7,6 +7,7 @@ public class Chambre {
     private int numero;
     private int[] initial;
     private int[] taille;
+    private int[] spawn;
 
     public Chambre(int numero,int[] initial,int[] taille) {
         this.numero = numero;
@@ -24,6 +25,15 @@ public class Chambre {
         this.initial = initial;
         this.taille = taille;
         this.grille = grille;
+    }
+
+    public int[] getSpawn() {
+        System.out.println("spawn4" + spawn[0] + " " + spawn[1]);
+        return spawn;
+    }
+    public void setSpawn(int x, int y) {
+        this.spawn = new int[]{x, y};
+        System.out.println("spawn3");
     }
 
     public int[] getDimension(){
@@ -261,7 +271,7 @@ public class Chambre {
         return taille;
     }
 
-    public void specialRonde(){
+    public void specialRonde(int spawn){
         int[] centre = new int[2];
         centre[0] = (int) Math.ceil(this.taille[0]*0.5);
         centre[1] = (int) Math.ceil(this.taille[1]*0.5);
@@ -271,7 +281,12 @@ public class Chambre {
         int rayonsous = Math.max(1, (int) Math.ceil(0.65* rayonMax)); // ou ajuste 0.3 à ton goût
         int rayon = rand.nextInt(rayonMax - rayonsous+ 1) +rayonMin;
 
+        if (spawn == 1) {
+            System.out.println("spawn2 " + centre[0] + " " + centre[1] );
 
+            this.setSpawn(centre[0], centre[1]);
+
+        }
         for (int i = 0; i < this.taille[0]; i++) {
             for (int j = 0; j < this.taille[1]; j++) {
                 int dist = (int) Math.sqrt(Math.pow(i-centre[0],2)+Math.pow(j-centre[1],2));
@@ -295,7 +310,14 @@ public class Chambre {
         Random rand = new Random();
         double alea = rand.nextDouble();
         if (alea < 0.15 || spawn) {
-            this.specialRonde();
+            if (spawn) {
+                System.out.println("spawn1");
+                this.specialRonde(1);
+
+            }
+            else {
+                this.specialRonde(0);
+            }
         }
         else {
             this.multimarcheurAleatoire(5);
@@ -331,7 +353,6 @@ public class Chambre {
                     minY = j;
                 }
             }
-
         }
         for (int i =minX; i < maxX+1; i++) {
             this.grille[i][centreY] = 1;
