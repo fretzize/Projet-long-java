@@ -40,6 +40,9 @@ public class Grille {
         }
     }
 
+    public void removeItem(int ligne_item, int colonne_item) {
+        Itemgrille.get(ligne_item).set(colonne_item, null);
+    }
     public void render(Main game) {
         for (int i = 0; i < ligne; i++) {
             for (int j = 0; j < colonne; j++) {
