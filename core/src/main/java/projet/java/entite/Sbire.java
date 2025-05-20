@@ -36,7 +36,7 @@ public class Sbire implements Entite{
     private Texture projectileTexture;
     private Texture sbireTexture;
     private float porteeProjectile;  //Portée du projectile
-    private int degats;
+    private int degats; // Dégâts infligés par les projectiles
     private float cooldown; // temps entre deux tirs (en secondes)
     private float tempsDepuisDernierTir = 0f;
     private Rectangle hitbox; // Hitbox du sbire
@@ -70,6 +70,18 @@ public class Sbire implements Entite{
 
     public float getPorteeProjectile() {
         return this.porteeProjectile;
+    }
+
+    public float getVitesseProjectile() {
+        return this.vitesseProjectile;
+    }
+
+    public Texture getProjectileTexture(){
+        return this.projectileTexture;
+    }
+
+    public int getDegats(){
+        return this.degats;
     }
 
     public int getMana(){
@@ -192,7 +204,10 @@ public class Sbire implements Entite{
     
         Vector2 vitesseVecteur = direction.scl(vitesseProjectile);
 
-        Rectangle hitboxProjectile = new Rectangle(positionX, positionY, 100, 100);
+        float hitboxWidth = 100;
+        float hitboxHeight = 100;
+
+        Rectangle hitboxProjectile = new Rectangle(positionX - hitboxWidth/2, positionY - hitboxHeight/2, hitboxWidth, hitboxHeight);
         Projectile projectile = new Projectile(
             positionX,
             positionY,
@@ -259,6 +274,12 @@ public class Sbire implements Entite{
         }
     }
 
+    public void setPosition(float x, float y) {
+        this.positionX = x;
+        this.positionY = y;
+        hitbox.setPosition(x, y);
+    }
+
     public void agir(float deltaTime, List<Projectile> projectiles) {
         if (comportement != null) {
             comportement.executerAction(this, deltaTime, projectiles);
@@ -267,7 +288,7 @@ public class Sbire implements Entite{
 
     //affichage de l'entité
     public void draw(Main game,float scaledWidth,float scaledHeight){
-        game.batch.draw(sbireTexture,this.positionX,this.positionY,scaledWidth,scaledHeight);
+        game.batch.draw(sbireTexture,this.positionX - scaledWidth/2,this.positionY - scaledHeight/2,scaledWidth,scaledHeight);
     }
 
     //USELESS

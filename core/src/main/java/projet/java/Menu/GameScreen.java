@@ -114,11 +114,11 @@ public class GameScreen implements Screen {
         largeur_skin = skin.getWidth();
         hauteur_skin = skin.getHeight();
 
-        personnage1 = new Personnage(4, 4, 4, "mathis", skin, new Rectangle(0, 0, 2, 4));
+        personnage1 = new Personnage(4, 4, 4, "mathis", skin, new Rectangle(0-2/2, 0-4/2, 2, 4));
         personnage1.create_entite();
 
         // TEST SBIRE
-        sbireTest = new Sbire(3,3,3,10, 10,100,300,3,new Rectangle(0,0, 2,4), 1500,1, 1,0, personnage1, new ComportementMelee(),new Texture(Gdx.files.internal("fleche.png")),new Texture("Hercule_haut.png"));
+        sbireTest = new Sbire(3,3,3,10, 10,100,300,3,new Rectangle(0,0, 2,4), 1500,1, 1,0, personnage1, new ComportementBoss(),new Texture(Gdx.files.internal("fleche.png")),new Texture("Hercule_haut.png"));
         //Gestion projectiles du sbire
         projectiles = new ArrayList<>();
         //
@@ -310,7 +310,7 @@ public class GameScreen implements Screen {
             projectile.draw(game, scaledWidth / 2, scaledHeight / 2);
         }
         //Dessiner le personnage
-        game.batch.draw(currentFrame, personnage1.getPositionX(), personnage1.getPositionY(), scaledWidth, scaledHeight);
+        game.batch.draw(currentFrame, personnage1.getPositionX() - scaledWidth/2, personnage1.getPositionY() - scaledHeight/2, scaledWidth, scaledHeight);
         
 
         // afficher le dash selon la direction
