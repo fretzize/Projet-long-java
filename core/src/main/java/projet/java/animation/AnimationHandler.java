@@ -121,8 +121,7 @@ public class AnimationHandler {
         return new Animation<>(0.1f, frames);
     }
     
-    public void update(float delta, boolean isMovingUp, boolean isMovingDown, 
-                       boolean isMovingLeft, boolean isMovingRight, boolean attacking) {
+    public void update(float delta, boolean isMovingUp, boolean isMovingDown, boolean isMovingLeft, boolean isMovingRight, boolean attacking) {
         stateTime += delta;
         isMoving = isMovingUp || isMovingDown || isMovingLeft || isMovingRight;
         
@@ -137,28 +136,13 @@ public class AnimationHandler {
                 else if (currentAnimation == ATTACK_DOWN) currentAnimation = IDLE_DOWN;
                 else if (currentAnimation == ATTACK_LEFT) currentAnimation = IDLE_LEFT;
                 else if (currentAnimation == ATTACK_RIGHT) currentAnimation = IDLE_RIGHT;
-                
-                // IMPORTANT: Permettre une nouvelle attaque immédiatement si le bouton est toujours pressé
-                if (attacking) {
-                    isAttacking = true;
-                    attackTimer = 0;
-                    
-                    // Détermine la nouvelle animation d'attaque
-                    if (currentAnimation == IDLE_UP) currentAnimation = ATTACK_UP;
-                    else if (currentAnimation == IDLE_DOWN) currentAnimation = ATTACK_DOWN;
-                    else if (currentAnimation == IDLE_LEFT) currentAnimation = ATTACK_LEFT;
-                    else if (currentAnimation == IDLE_RIGHT) currentAnimation = ATTACK_RIGHT;
-                    
-                    stateTime = 0;
-                    return;
-                }
             } else {
                 // Ne pas changer d'animation jusqu'à la fin de l'attaque
                 return;
             }
         }
         
-        // Commencer une nouvelle attaque si demandée
+        // Commencer une nouvelle attaque si demandée, mais uniquement si on n'est pas déjà en attaque
         if (attacking && !isAttacking) {
             isAttacking = true;
             attackTimer = 0;

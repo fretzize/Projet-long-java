@@ -6,18 +6,21 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+
 import projet.java.entite.*;
 import projet.java.Main;
 
 import java.util.TimerTask;
 import java.util.ArrayList;
 import java.util.Timer;
+
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 
 import projet.java.animation.AnimationHandler;
+import projet.java.combat.AttackManager;
 
 public class GameScreen implements Screen {
     final Main game;
@@ -97,6 +100,9 @@ public class GameScreen implements Screen {
     private float tempsDash = 3;
     private float dashCooldown = 2f;
 
+    // Dans la section des déclarations d'attributs de GameScreen
+    private AttackManager attackManager;  // Gestionnaire des attaques
+
     public GameScreen(final Main game) {
         this.game = game;
         camera = new OrthographicCamera();
@@ -106,6 +112,8 @@ public class GameScreen implements Screen {
     //TEST SBIRE
     private Sbire sbireTest;
 
+    // ATTAQUE
+    private boolean isAttacking = false;
 
     @Override
     public void show() {
@@ -148,8 +156,12 @@ public class GameScreen implements Screen {
         barre_pleine = new Texture("barres_pleine.png");
         barre_vide = new Texture("barres_vide.png");
 
+        // Initialiser le gestionnaire d'animations
         animationHandler = new AnimationHandler();
-
+        
+        // Initialiser le gestionnaire d'attaques avec un cooldown de 3 secondes
+        attackManager = new AttackManager(game, personnage1, animationHandler, 0.5f);
+    
         if (timer != null) {
             timer.cancel();
         }
@@ -170,7 +182,11 @@ public class GameScreen implements Screen {
         boolean isMovingLeft = Gdx.input.isKeyPressed(game.toucheGauche) || Gdx.input.isKeyPressed(Input.Keys.LEFT);
         boolean isMovingRight = Gdx.input.isKeyPressed(game.toucheDroite) || Gdx.input.isKeyPressed(Input.Keys.RIGHT);
         
-        animationHandler.update(delta, isMovingUp, isMovingDown, isMovingLeft, isMovingRight);
+        // Mettre à jour le système d'attaque et récupérer l'état d'attaque
+        boolean isAttacking = attackManager.update(delta);
+        
+        // Mettre à jour l'animation en fonction de l'état du personnage
+        animationHandler.update(delta, isMovingUp, isMovingDown, isMovingLeft, isMovingRight, isAttacking);
         
         // Mémoriser l'état de mouvement pour le dash
         wasMovingUp = isMovingUp;

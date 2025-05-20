@@ -51,54 +51,57 @@ public class AttackManager {
      * @return true si une attaque a été déclenchée, false sinon
      */
     public boolean update(float delta) {
-        // Mettre à jour le cooldown de l'arme
-        armeMelee.update(delta);
+        boolean attackTriggered = false;
         
         // Gestion du cooldown de l'attaque
         if (!peutAttaquer) {
             tempsDepuisAttaque += delta;
-            if (tempsDepuisAttaque >= cooldownAttaque && !animationHandler.isAttacking()) {
-                peutAttaquer = true;
+            // Debug pour voir le cooldown en action
+            // System.out.println("Cooldown: " + tempsDepuisAttaque + "/" + cooldownAttaque);
+            
+            if (tempsDepuisAttaque >= cooldownAttaque) {
+                // On attend que l'animation soit terminée avant de permettre une nouvelle attaque
+                if (!animationHandler.isAttacking()) {
+                    peutAttaquer = true;
+                    tempsDepuisAttaque = 0f;
+                }
             }
         }
         
-        // Vérifier si le joueur attaque
-        boolean isAttacking = false;
-        if (peutAttaquer) {
-            // Vérifier selon la touche configurée
-            if (game.toucheAttaque == Main.MOUSE_LEFT_CLICK) {
-                isAttacking = Gdx.input.isButtonJustPressed(Input.Buttons.LEFT);
-            } else {
-                isAttacking = Gdx.input.isKeyJustPressed(game.toucheAttaque);
+        // Vérifier si le joueur attaque et peut attaquer
+        boolean inputAttack = false;
+        if (game.toucheAttaque == Main.MOUSE_LEFT_CLICK) {
+            inputAttack = Gdx.input.isButtonJustPressed(Input.Buttons.LEFT);
+        } else {
+            inputAttack = Gdx.input.isKeyJustPressed(game.toucheAttaque);
+        }
+        
+        if (inputAttack && peutAttaquer) {
+            // N'autoriser l'attaque que si l'animation précédente est terminée
+            if (!animationHandler.isAttacking()) {
+                executeAttack();
+                attackTriggered = true;
+                
+                // IMPORTANT: Désactiver immédiatement la possibilité d'attaquer à nouveau
+                peutAttaquer = false;
+                tempsDepuisAttaque = 0f;
             }
         }
         
-        // Si le joueur attaque et peut attaquer
-        if (isAttacking && peutAttaquer && !animationHandler.isAttacking()) {
-            executeAttack();
-            return true;
-        }
-        
-        return false;
+        return attackTriggered;
     }
     
     /**
      * Exécute l'attaque proprement dite
      */
     private void executeAttack() {
-        // Obtenir la direction d'attaque basée sur la direction du personnage
         Vector2 direction = getAttackDirection();
         
-        // Effectuer l'attaque
         try {
-            armeMelee.attaquer_arme(
-                new Vector2(personnage.getPositionX(), personnage.getPositionY()),
-                direction
-            );
-            
-            // Réinitialiser le cooldown
-            peutAttaquer = false;
-            tempsDepuisAttaque = 0f;
+            // Important: Ne pas utiliser la gestion de cooldown interne de l'arme
+            // Uniquement déclencher l'effet de l'attaque
+            Vector2 playerPos = new Vector2(personnage.getPositionX(), personnage.getPositionY());
+            armeMelee.attaquer_arme(playerPos, direction);
         } catch (Exception e) {
             System.err.println("Erreur lors de l'attaque: " + e.getMessage());
         }
