@@ -139,6 +139,7 @@ public class GameScreen implements Screen {
         this.game = game;
         camera = new OrthographicCamera();
         camera.setToOrtho(false, 320, 180);
+
     }
 
     @Override
@@ -232,6 +233,13 @@ public class GameScreen implements Screen {
                 }
             }
         }
+
+
+
+        playerX = carteReduite.getCoordspawnX()*16;
+        playerY = carteReduite.getCoordspawnY()*16;
+//        playerX = (int) Math.floor(coord[0]/2)*16;
+//        playerY = (int) Math.floor(coord[1]/2)*16;
 
     }
 
