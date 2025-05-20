@@ -32,6 +32,29 @@ public class Projectile {
      * @param texture Texture utilisée pour le rendu
      * @param degats Dégâts infligés en cas de collision
      * @param porteeMax Distance maximale que le projectile peut parcourir
+     * @param hitbox Hitbox du projectile pour la détection de collision
+     */
+    public Projectile(float x, float y, float vx, float vy, Texture texture, int degats, float porteeMax, Rectangle hitbox) {
+        this.position = new Vector2(x, y);
+        this.originPosition = new Vector2(x, y);
+        this.vitesse = new Vector2(vx, vy);
+        this.texture = texture;
+        this.degats = degats;
+        this.porteeMax = porteeMax;
+        //this.hitbox = new Rectangle(x, y, texture.getWidth(), texture.getHeight());
+        this.hitbox = hitbox; // Utilisation de la hitbox fournie
+    }
+
+     /**
+     * Constructeur du projectile.
+     * 
+     * @param x Position X initiale
+     * @param y Position Y initiale
+     * @param vx Composante X du vecteur vitesse
+     * @param vy Composante Y du vecteur vitesse
+     * @param texture Texture utilisée pour le rendu
+     * @param degats Dégâts infligés en cas de collision
+     * @param porteeMax Distance maximale que le projectile peut parcourir
      */
     public Projectile(float x, float y, float vx, float vy, Texture texture, int degats, float porteeMax) {
         this.position = new Vector2(x, y);
@@ -47,9 +70,9 @@ public class Projectile {
      * Constructeur simplifié sans gestion des dégâts et de la portée.
      * Pour compatibilité avec l'ancien code.
      */
-    public Projectile(float x, float y, float vx, float vy, Texture texture) {
-        this(x, y, vx, vy, texture, 1, 1000f); // Valeurs par défaut
-    }
+    //public Projectile(float x, float y, float vx, float vy, Texture texture) {
+      //  this(x, y, vx, vy, texture, 1, 1000f); // Valeurs par défaut
+    //}
 
     /**
      * Met à jour la position et l'état du projectile.

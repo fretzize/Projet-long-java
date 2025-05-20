@@ -118,7 +118,7 @@ public class GameScreen implements Screen {
         personnage1.create_entite();
 
         // TEST SBIRE
-        sbireTest = new Sbire(3,3,3,10, 10,100,2,new Rectangle(0,0, 2,4), 10,2, 1,1, personnage1, new ComportementMelee(),new Texture(Gdx.files.internal("coeur_plein.png")),new Texture("Hercule_haut.png"));
+        sbireTest = new Sbire(3,3,3,10, 10,100,300,3,new Rectangle(0,0, 2,4), 1500,1, 1,0, personnage1, new ComportementMelee(),new Texture(Gdx.files.internal("fleche.png")),new Texture("Hercule_haut.png"));
         //Gestion projectiles du sbire
         projectiles = new ArrayList<>();
         //

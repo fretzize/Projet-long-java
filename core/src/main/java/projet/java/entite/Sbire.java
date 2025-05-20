@@ -42,7 +42,7 @@ public class Sbire implements Entite{
     private Rectangle hitbox; // Hitbox du sbire
 
 
-    public Sbire(int vie, int shield,int mana, float x, float y,float vitesseDeplacement,float cooldown,Rectangle hitbox, float porteeProjectile,float porteeCaC, int degats, int degatsCaC, Personnage cible, ComportementSbire comportement,Texture projectileTexture,Texture sbireTexture) {
+    public Sbire(int vie, int shield,int mana, float x, float y,float vitesseDeplacement,float vitesseProjectile,float cooldown,Rectangle hitbox, float porteeProjectile,float porteeCaC, int degats, int degatsCaC, Personnage cible, ComportementSbire comportement,Texture projectileTexture,Texture sbireTexture) {
         this.vie = vie;
         this.bouclier = shield;
         this.mana = mana;
@@ -52,6 +52,7 @@ public class Sbire implements Entite{
         this.projectileTexture = projectileTexture;
         this.cooldown = cooldown;
         this.vitesseDeplacement = vitesseDeplacement;
+        this.vitesseProjectile = vitesseProjectile;
         this.hitbox = hitbox;
         this.porteeProjectile = porteeProjectile;
         this.porteeCaC = porteeCaC;
@@ -171,7 +172,8 @@ public class Sbire implements Entite{
         if (cible == null){
             return false;
         }
-        return getDistanceCible() <= porteeProjectile;
+        float distance = getDistanceCible();
+        return distance <= porteeProjectile;
     }
 
     private boolean estAPorteeCaC(){
@@ -190,6 +192,7 @@ public class Sbire implements Entite{
     
         Vector2 vitesseVecteur = direction.scl(vitesseProjectile);
 
+        Rectangle hitboxProjectile = new Rectangle(positionX, positionY, 100, 100);
         Projectile projectile = new Projectile(
             positionX,
             positionY,
@@ -197,8 +200,11 @@ public class Sbire implements Entite{
             vitesseVecteur.y,
             projectileTexture,
             degats,
-            porteeProjectile
-        );
+            porteeProjectile,
+            hitboxProjectile);
+
+        //DEBUG
+        System.out.println(projectile.getHitbox().getWidth() + " " + projectile.getHitbox().getHeight());
     
         projectiles.add(projectile);
     }
