@@ -2,13 +2,12 @@ package projet.java.combat;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.math.Vector2;
 
 import projet.java.Main;
 import projet.java.animation.AnimationHandler;
 import projet.java.entite.ArmeMelee;
-import projet.java.entite.Personnage;
+import projet.java.entite.Entite;
 
 /**
  * Cette classe gère toute la logique d'attaque, isolant ainsi cette fonctionnalité
@@ -21,7 +20,7 @@ public class AttackManager {
     private float tempsDepuisAttaque = 0f;
     
     // Références
-    private final Personnage personnage;
+    private final Entite personnage;
     private final AnimationHandler animationHandler;
     private final ArmeMelee armeMelee;
     private final Main game;
@@ -35,7 +34,7 @@ public class AttackManager {
      * @param animationHandler Le gestionnaire d'animations
      * @param cooldownAttaque Le temps entre deux attaques en secondes
      */
-    public AttackManager(Main game, Personnage personnage, AnimationHandler animationHandler, float cooldownAttaque) {
+    public AttackManager(Main game, Entite personnage, AnimationHandler animationHandler, float cooldownAttaque) {
         this.game = game;
         this.personnage = personnage;
         this.animationHandler = animationHandler;

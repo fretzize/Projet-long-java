@@ -7,16 +7,11 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-<<<<<<< HEAD
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
 import projet.java.entite.Entite;
 import projet.java.entite.Personnage;
-=======
-
-import projet.java.entite.*;
->>>>>>> f3172bc8abb3486079cb2c98296ffc88876fe24b
 import projet.java.Main;
 import projet.java.Map.Chambre;
 import projet.java.Map.Map;
@@ -151,15 +146,6 @@ public class GameScreen implements Screen {
         camera.setToOrtho(false, 320, 180);
     }
 
-<<<<<<< HEAD
-=======
-    //TEST SBIRE
-    private Sbire sbireTest;
-
-    // ATTAQUE
-    private boolean isAttacking = false;
-
->>>>>>> f3172bc8abb3486079cb2c98296ffc88876fe24b
     @Override
     public void show() {
         //map
@@ -235,7 +221,7 @@ public class GameScreen implements Screen {
         animationHandler = new AnimationHandler();
         
         // Initialiser le gestionnaire d'attaques avec un cooldown de 3 secondes
-        attackManager = new AttackManager(game, personnage1, animationHandler, 0.5f);
+        attackManager = new AttackManager(game, (Personnage) personnage1, animationHandler, 0.5f);
     
         if (timer != null) {
             timer.cancel();
