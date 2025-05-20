@@ -33,19 +33,30 @@ public class Sbire implements Entite{
 
     //Texture du projectile lancé par le sbire
     private Texture projectileTexture;
+    public Texture sbireTexture;
     private float porteeProjectile;  //Portée du projectile
     private int degats;
     private float cooldown; // temps entre deux tirs (en secondes)
     private float tempsDepuisDernierTir = 0f;
     private Rectangle hitbox; // Hitbox du sbire
 
+    // Ajouter ces variables d'instance à la classe Sbire
+    private Vector2 knockbackVelocity = new Vector2(0, 0);
+    private boolean isKnockedBack = false;
+    private float knockbackFriction = 0.9f; // Valeur entre 0 et 1, plus elle est proche de 1, plus le knockback dure longtemps
 
-    public Sbire(float x, float y,float vitesseDeplacement,float cooldown,Rectangle hitbox, float porteeProjectile,float porteeCaC, int degats, int degatsCaC, Personnage cible, ComportementSbire comportement,Texture projectileTexture) {
+
+    public Sbire(int vie, int shield,int mana, float x, float y,float vitesseDeplacement,float vitesseProjectile,float cooldown,Rectangle hitbox, float porteeProjectile,float porteeCaC, int degats, int degatsCaC, Personnage cible, ComportementSbire comportement,Texture projectileTexture,Texture sbireTexture) {
+        this.vie = vie;
+        this.bouclier = shield;
+        this.mana = mana;
+        
         this.positionX = x;
         this.positionY = y;
         this.projectileTexture = projectileTexture;
         this.cooldown = cooldown;
         this.vitesseDeplacement = vitesseDeplacement;
+        this.vitesseProjectile = vitesseProjectile;
         this.hitbox = hitbox;
         this.porteeProjectile = porteeProjectile;
         this.porteeCaC = porteeCaC;
@@ -53,6 +64,8 @@ public class Sbire implements Entite{
         this.degats = degats;
         this.cible = cible;
         this.comportement = comportement;
+        this.projectileTexture = projectileTexture;
+        this.sbireTexture = sbireTexture;
     }
 
     public void setCible(Personnage cible) {
@@ -135,17 +148,21 @@ public class Sbire implements Entite{
 
 
     public void update(float delta, List<Projectile> projectiles) {
-        tempsDepuisDernierTir += delta;
+        try {
+            tempsDepuisDernierTir += delta;
 
-        if (cible != null && peutAttaquer()) {
-            if(estAPorteeCaC()){
-                attaquerMelee();
-                tempsDepuisDernierTir = 0;
+            if (cible != null && peutAttaquer()) {
+                if(estAPorteeCaC()){
+                    attaquerMelee();
+                    tempsDepuisDernierTir = 0;
+                }
+                else if(estAPortee()){
+                    tirerSurCible(projectiles);
+                    tempsDepuisDernierTir = 0;
+                }
             }
-            else if(estAPortee()){
-                tirerSurCible(projectiles);
-                tempsDepuisDernierTir = 0;
-            }
+        } catch (Exception e) {
+            System.err.println("Erreur dans update du sbire : " + e.getMessage());
         }
     }
 
@@ -159,14 +176,29 @@ public class Sbire implements Entite{
         if (cible == null){
             return false;
         }
-        return getDistanceCible() <= porteeProjectile;
+        float distance = getDistanceCible();
+        return distance <= porteeProjectile;
     }
 
-    private boolean estAPorteeCaC(){
-        if(cible == null){
+    // Vérifier si cette méthode calcule correctement la distance
+    private boolean estAPorteeCaC() {
+        if (cible == null) {
             return false;
         }
-        return getDistanceCible() <= porteeCaC;
+        
+        // Calculer la distance entre les centres
+        float sbireX = this.positionX + this.hitbox.width / 2;
+        float sbireY = this.positionY + this.hitbox.height / 2;
+        
+        float cibleX = cible.getPositionX() + 32; // Estimer le centre du joueur
+        float cibleY = cible.getPositionY() + 32;
+        
+        float dx = sbireX - cibleX;
+        float dy = sbireY - cibleY;
+        float distance = (float) Math.sqrt(dx * dx + dy * dy);
+        
+        System.out.println("Distance: " + distance + ", Portée: " + porteeCaC);
+        return distance <= porteeCaC;
     }
 
     public void tirerSurCible(List<Projectile> projectiles) {
@@ -178,6 +210,7 @@ public class Sbire implements Entite{
     
         Vector2 vitesseVecteur = direction.scl(vitesseProjectile);
 
+        Rectangle hitboxProjectile = new Rectangle(positionX, positionY, 100, 100);
         Projectile projectile = new Projectile(
             positionX,
             positionY,
@@ -185,15 +218,23 @@ public class Sbire implements Entite{
             vitesseVecteur.y,
             projectileTexture,
             degats,
-            porteeProjectile
-        );
+            porteeProjectile,
+            hitboxProjectile);
+
+        //DEBUG
+        System.out.println(projectile.getHitbox().getWidth() + " " + projectile.getHitbox().getHeight());
     
         projectiles.add(projectile);
     }
 
-    public void attaquerMelee(){
+    public void attaquerMelee() {
         if (cible != null && estAPorteeCaC()) {
+            // Appliquer les dégâts
             cible.prendreDegat(degatsCaC);
+            
+            // Ajouter des logs pour débugger
+            System.out.println("Sbire attaque! Dégâts infligés: " + degatsCaC);
+            System.out.println("Vie restante du personnage: " + cible.getVie() + ", Bouclier: " + cible.getBouclier());
         }
     }
 
@@ -204,8 +245,43 @@ public class Sbire implements Entite{
         }
     }
 
-    public void appliquerKnockback(Vector2 directionKnockback, float forceKnockback){
-        // TO COMPLETE
+    // Méthode modifiée pour appliquer le knockback
+    public void appliquerKnockback(Vector2 directionKnockback, float forceKnockback) {
+        // Au lieu d'appliquer directement le déplacement, on initialise une vélocité
+        knockbackVelocity.set(directionKnockback).scl(forceKnockback);
+        isKnockedBack = true;
+    }
+
+    // Ajouter cette méthode qui sera appelée à chaque frame
+    private void updateKnockback(float deltaTime) {
+        if (isKnockedBack && knockbackVelocity.len() > 0.5f) {
+            // Déplacer le sbire selon la vélocité actuelle
+            this.positionX += knockbackVelocity.x * deltaTime;
+            this.positionY += knockbackVelocity.y * deltaTime;
+            
+            // Mettre à jour la hitbox pour suivre le sbire
+            this.hitbox.setPosition(this.positionX, this.positionY);
+            
+            // Réduire graduellement la vélocité (effet de friction)
+            knockbackVelocity.scl(knockbackFriction);
+            
+            // Si la vélocité devient trop faible, arrêter le knockback
+            if (knockbackVelocity.len() < 0.5f) {
+                isKnockedBack = false;
+                knockbackVelocity.set(0, 0);
+            }
+        }
+    }
+
+    // Modifier la méthode agir pour intégrer la mise à jour du knockback
+    public void agir(float deltaTime, List<Projectile> projectiles) {
+        // Mise à jour du knockback
+        updateKnockback(deltaTime);
+        
+        // Si le sbire est en knockback, ne pas exécuter le comportement normal
+        if (!isKnockedBack && comportement != null) {
+            comportement.executerAction(this, deltaTime, projectiles);
+        }
     }
 
     public Rectangle getHitbox() {
@@ -236,14 +312,14 @@ public class Sbire implements Entite{
             Vector2 positionCible = new Vector2(cible.getPositionX(), cible.getPositionY());
             // Calcul de la direction vers la cible
             Vector2 direction = new Vector2(positionCible).sub(position);
+
             deplacer(deltaTime, direction);
         }
     }
 
-    public void agir(float deltaTime, List<Projectile> projectiles) {
-        if (comportement != null) {
-            comportement.executerAction(this, deltaTime, projectiles);
-        }
+    //affichage de l'entité
+    public void draw(Main game,float scaledWidth,float scaledHeight){
+        game.batch.draw(sbireTexture,this.positionX,this.positionY,scaledWidth,scaledHeight);
     }
 
     //USELESS

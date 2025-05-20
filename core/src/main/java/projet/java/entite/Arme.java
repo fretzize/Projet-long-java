@@ -17,6 +17,15 @@ public interface Arme {
      * @throws ManaInsuffisant si le joueur n'a pas assez de mana pour utiliser l'arme
      */
     void attaquer_arme(Vector2 position, Vector2 direction);
+
+    /**
+     * Méthode principale pour déclencher l'attaque de l'arme.
+     * 
+     * @param position Position du joueur/porteur de l'arme
+     * @param direction Direction dans laquelle l'attaque est effectuée
+     * @param hitboxSize Taille de la hitbox du personnage (x=largeur, y=hauteur)
+     */
+    void attaquer_arme(Vector2 position, Vector2 direction, Vector2 hitboxSize);
     
     /**
      * Renvoie le nom de l'arme.

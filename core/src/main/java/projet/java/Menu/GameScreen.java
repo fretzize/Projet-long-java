@@ -1,5 +1,7 @@
 package projet.java.Menu;
 
+import java.util.ArrayList;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
@@ -10,6 +12,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
+
 import projet.java.entite.Entite;
 import projet.java.entite.Personnage;
 import projet.java.Main;
@@ -25,6 +28,11 @@ import com.badlogic.gdx.math.MathUtils;
 
 import projet.java.animation.AnimationHandler;
 import projet.java.combat.AttackManager;
+import projet.java.debug.GameDebugger;
+import projet.java.entite.ComportementMelee;
+import projet.java.entite.Niveau;
+import projet.java.entite.Sbire;
+import projet.java.entite.Projectile;
 
 public class GameScreen implements Screen {
     final Main game;
@@ -71,7 +79,7 @@ public class GameScreen implements Screen {
     private boolean isDashing = false; // Pour savoir si on est en train de dasher
     private float mapSize = 2000; // Taille de la map carrée
     private OrthographicCamera camera;
-    private Entite personnage1; // = new Personnage(4, 2, 3, "mathis", skin);
+    private Personnage personnage1; // = new Personnage(4, 2, 3, "mathis", skin);
     private Texture dash_texture;
     private TextureRegion dash;
     private Texture dash_gris;
@@ -140,6 +148,18 @@ public class GameScreen implements Screen {
     // Dans la section des déclarations d'attributs de GameScreen
     private AttackManager attackManager;  // Gestionnaire des attaques
 
+    // sbire melee test
+    Niveau niveau;
+
+    private Sbire sbiretest;
+    private ArrayList<Projectile> projectiles;
+    
+    // Ajouter comme attribut de classe
+    public GameDebugger debugger;
+
+    // Ajouter cette variable avec les autres attributs de la classe
+    private float attackSpeedModifier = 0.3f; // Réduit à 30% de la vitesse normale pendant l'attaque
+
     public GameScreen(final Main game) {
         this.game = game;
         camera = new OrthographicCamera();
@@ -188,10 +208,25 @@ public class GameScreen implements Screen {
         hauteur_skin = skin.getHeight();
         playerHitbox = new Rectangle(playerX+hitboxX, playerY+hitboxY, 10, 10);
 
-
+        niveau = new Niveau();
         personnage1 = new Personnage(4, 4, 4, "mathis", skin);
-        personnage1.create_entite();
 
+
+        sbiretest = new Sbire(
+            300, 0, 3,            // vie, bouclier, mana
+            300, 300,           // positionX, positionY
+            25,                 // vitesseDeplacement (peut être augmenté si le sbire est trop lent)
+            300, 3,             // vitesseProjectile, cooldown
+            new Rectangle(300, 300, 32, 32),  // hitbox plus grande et correctement positionnée
+            1500, 30,           // porteeProjectile, porteeCaC (augmentée pour faciliter l'attaque)
+            1, 1,              // degats (projectile), degatsCaC (augmenté de 0 à 15)
+            personnage1,         
+            new ComportementMelee(),
+            new Texture(Gdx.files.internal("coeur_plein.png")),
+            new Texture("Hercule_haut.png")
+        );
+        niveau.ajouterSbire(sbiretest);
+        projectiles = new ArrayList<>();
         // sprint ou dash //mettre un boutton dash pour montrer quand il a de nouveau
         // acces au dash, par exemple dans un coin le symbole de dash gris si il n'y a
         // pas acces et en couleur sinon
@@ -221,8 +256,8 @@ public class GameScreen implements Screen {
         animationHandler = new AnimationHandler();
         
         // Initialiser le gestionnaire d'attaques avec un cooldown de 3 secondes
-        attackManager = new AttackManager(game, (Personnage) personnage1, animationHandler, 0.5f);
-    
+        attackManager = new AttackManager(game, personnage1, animationHandler, 0.5f);
+        attackManager.getArmeMelee().setNiveau(niveau);
         if (timer != null) {
             timer.cancel();
         }
@@ -242,6 +277,8 @@ public class GameScreen implements Screen {
             }
         }
 
+        // Initialiser le débogueur après la création du personnage, niveau et attackManager
+        debugger = new GameDebugger(personnage1, niveau, attackManager);
     }
 
     @Override
@@ -291,7 +328,17 @@ public class GameScreen implements Screen {
             }
         }
 
-        float currentSpeed = isDashing ? speed : playerSpeed;
+        // Vérifier si le joueur est en train d'attaquer pour réduire sa vitesse
+        float currentSpeed;
+        if (isDashing) {
+            currentSpeed = speed; // La vitesse de dash reste inchangée
+        } else if (attackManager.isAttacking()) {
+            // Réduire la vitesse pendant l'attaque
+            currentSpeed = playerSpeed * attackSpeedModifier;
+        } else {
+            // Vitesse normale
+            currentSpeed = playerSpeed;
+        }
 
         float oldX = playerX;
         float oldY = playerY;
@@ -356,6 +403,15 @@ public class GameScreen implements Screen {
         camera.position.x += (playerCenterX - camera.position.x) * lerpFactor;
         camera.position.y += (playerCenterY - camera.position.y) * lerpFactor;
 
+        // Synchroniser la position de personnage1 avec les coordonnées réelles du joueur
+        personnage1.setPositionX(playerX);
+        personnage1.setPositionY(playerY);
+        
+        // Mettre à jour le sbire avec la position correcte du joueur SEULEMENT s'il est en vie
+        if (sbiretest != null && sbiretest.enVie()) {
+            sbiretest.agir(Gdx.graphics.getDeltaTime(), projectiles);
+        }
+        
         // Calculer les dimensions effectives de la vue caméra
         cameraHalfWidth = camera.viewportWidth / 2;
         cameraHalfHeight = camera.viewportHeight / 2;
@@ -376,6 +432,7 @@ public class GameScreen implements Screen {
         game.batch.setProjectionMatrix(camera.combined);
 
         game.batch.begin();
+        
         // Dessiner la map
         int startX = Math.max(0, (int)((camera.position.x - cameraHalfWidth) / TILE_SIZE));
         int startY = Math.max(0, (int)((camera.position.y - cameraHalfHeight) / TILE_SIZE));
@@ -424,6 +481,17 @@ public class GameScreen implements Screen {
         float scaledHeight = hauteur_skin * scalePlayer;
         float scaledWidth = scaledHeight * aspectRatio;
 
+        // Dessiner le sbire UNIQUEMENT s'il est en vie
+        if (sbiretest != null && sbiretest.enVie()) {
+            float sbireScaledWidth = largeur_skin * scalePlayer;
+            float sbireScaledHeight = hauteur_skin * scalePlayer;
+            game.batch.draw(sbiretest.sbireTexture, 
+                            sbiretest.getPositionX(), 
+                            sbiretest.getPositionY(), 
+                            sbireScaledWidth, 
+                            sbireScaledHeight);
+        }
+        
         game.batch.draw(currentFrame, playerX, playerY, scaledWidth, scaledHeight);
         
 
@@ -535,21 +603,31 @@ public class GameScreen implements Screen {
         // Réinitialiser la couleur
         game.batch.setColor(1, 1, 1, 1);
         game.batch.end();
-        //affichage de hitbox
+        
+        // === DESSIN DES HITBOXES ===
         shapeRenderer.setProjectionMatrix(camera.combined);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
-        shapeRenderer.setColor(Color.RED);
-        for (Rectangle mur : mursHitboxes) {
-            shapeRenderer.rect(mur.x, mur.y, mur.width, mur.height);
+        
+        // Hitbox du joueur
+        shapeRenderer.setColor(0, 1, 0, 1);  // Vert
+        shapeRenderer.rect(playerX + hitboxX, playerY + hitboxY, playerHitbox.width, playerHitbox.height);
+        
+        // Hitbox du sbire UNIQUEMENT s'il est en vie
+        if (sbiretest != null && sbiretest.enVie()) {
+            shapeRenderer.setColor(1, 0, 0, 1);  // Rouge
+            Rectangle sbireHitbox = sbiretest.getHitbox();
+            shapeRenderer.rect(sbireHitbox.x, sbireHitbox.y, sbireHitbox.width, sbireHitbox.height);
         }
-
-        shapeRenderer.setColor(Color.GREEN);
-        float scaledWidth1 = largeur_skin * scalePlayer;
-        float scaledHeight1 = hauteur_skin * scalePlayer;
-
-        shapeRenderer.rect(playerX+hitboxX, playerY+hitboxY, 10,10);
-
+        
+        // Hitbox de l'attaque si active
+        if (attackManager.isAttacking()) {
+            shapeRenderer.setColor(0, 0, 1, 0.7f);  // Bleu
+            Rectangle attackZone = attackManager.getArmeMelee().getZoneAttaque();
+            shapeRenderer.rect(attackZone.x, attackZone.y, attackZone.width, attackZone.height);
+        }
+        
         shapeRenderer.end();
+    
     }
 
     @Override

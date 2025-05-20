@@ -48,35 +48,60 @@ public class ArmeMelee extends ArmeBase {
     
     /**
      * Effectue une attaque avec l'arme de mêlée.
-     * Crée une zone d'attaque devant le joueur et vérifie les collisions.
-     * 
-     * @param position Position du joueur
-     * @param direction Direction de l'attaque
+     * Version originale maintenue pour compatibilité
      */
     @Override
     public void attaquer_arme(Vector2 position, Vector2 direction) {
-        // IMPORTANT: Ne pas vérifier peutAttaquer ici, car c'est déjà géré dans AttackManager
-        // if (!peutAttaquer) return;
-        
+        // Appeler la version améliorée avec une hitbox par défaut
+        attaquer_arme(position, direction, new Vector2(10, 10));
+    }
+
+    /**
+     * Version améliorée qui prend en compte la taille de la hitbox du personnage
+     */
+    @Override
+    public void attaquer_arme(Vector2 position, Vector2 direction, Vector2 hitboxSize) {
         // Commence l'animation d'attaque
         enAnimation = true;
         tempsAnimation = 0;
         
-        // NE PAS modifier peutAttaquer ici
-        // peutAttaquer = false;
-        
-        // Calcule les dimensions de la zone d'attaque (reste inchangé)
+        // Calcule les dimensions de la zone d'attaque
         float zoneWidth = portee;
         float zoneHeight = portee / 2;
         
-        // Calcule la position de la zone d'attaque devant le joueur (reste inchangé)
-        Vector2 normalizedDirection = new Vector2(direction).nor();
-        Vector2 centerZone = new Vector2(position).add(
-            normalizedDirection.x * portee / 2,
-            normalizedDirection.y * portee / 2
+        // Ajuster les dimensions selon la direction pour une meilleure jouabilité
+        if (Math.abs(direction.y) > Math.abs(direction.x)) {
+            // Attaque verticale (haut/bas)
+            float temp = zoneWidth;
+            zoneWidth = zoneHeight;
+            zoneHeight = temp;
+        }
+        
+        // Position du centre de la hitbox du personnage
+        Vector2 hitboxCenter = new Vector2(
+            position.x + hitboxSize.x / 2,
+            position.y + hitboxSize.y / 2
         );
         
-        // Définit la zone d'attaque comme un rectangle (reste inchangé)
+        // Normaliser la direction pour avoir un vecteur unitaire
+        Vector2 normalizedDir = new Vector2(direction).nor();
+        
+        // Calculer où placer la hitbox d'attaque pour qu'elle soit adjacente à la hitbox du joueur
+        float offsetX = (hitboxSize.x / 2) * Math.abs(normalizedDir.x);
+        float offsetY = (hitboxSize.y / 2) * Math.abs(normalizedDir.y);
+        
+        // Position du point d'attaque (bord de la hitbox du joueur dans la direction de l'attaque)
+        Vector2 attackPoint = new Vector2(hitboxCenter);
+        attackPoint.x += normalizedDir.x * offsetX;
+        attackPoint.y += normalizedDir.y * offsetY;
+        
+        // Positionner la zone d'attaque à partir de ce point
+        Vector2 centerZone = new Vector2(attackPoint).add(
+            normalizedDir.x * zoneWidth / 2,
+            normalizedDir.y * zoneHeight / 2
+        );
+        
+        // Définir la zone d'attaque comme un rectangle
         zoneAttaque.set(
             centerZone.x - zoneWidth / 2,
             centerZone.y - zoneHeight / 2,
@@ -84,8 +109,8 @@ public class ArmeMelee extends ArmeBase {
             zoneHeight
         );
         
-        // Détecte les collisions avec les sbires (reste inchangé)
-        detecterCollisions(position, normalizedDirection);
+        // Détecter les collisions avec les sbires
+        detecterCollisions(position, normalizedDir);
     }
     
     /**
@@ -148,6 +173,15 @@ public class ArmeMelee extends ArmeBase {
      */
     public float getForceKnockback() {
         return forceKnockback;
+    }
+    
+    /**
+     * Renvoie la zone d'attaque actuelle pour l'affichage ou la détection de collision.
+     * 
+     * @return Rectangle représentant la zone d'attaque
+     */
+    public Rectangle getZoneAttaque() {
+        return this.zoneAttaque;
     }
     
     /**

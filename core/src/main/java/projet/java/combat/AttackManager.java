@@ -40,8 +40,8 @@ public class AttackManager {
         this.animationHandler = animationHandler;
         this.cooldownAttaque = cooldownAttaque;
         
-        // Initialiser l'arme avec le même cooldown
-        this.armeMelee = new ArmeMelee("Épée", 20, 0, 100f, cooldownAttaque, "menubackground.png", 90f, 20f);
+        // Initialiser l'arme avec une portée raisonnable
+        this.armeMelee = new ArmeMelee("Épée", 20, 0, 50f, cooldownAttaque, "menubackground.png", 90f, 150f);
         
         // Charger le son d'attaque
         try {
@@ -106,14 +106,25 @@ public class AttackManager {
         Vector2 direction = getAttackDirection();
         
         try {
-            // Important: Ne pas utiliser la gestion de cooldown interne de l'arme
-            // Uniquement déclencher l'effet de l'attaque
-            Vector2 playerPos = new Vector2(personnage.getPositionX(), personnage.getPositionY());
-            armeMelee.attaquer_arme(playerPos, direction);
+            // Récupérer la position du personnage avec un décalage pour la hitbox
+            // Ajouter la différence entre la position du personnage et sa hitbox
+            Vector2 playerPos = new Vector2(
+                personnage.getPositionX() + 22, // Ajout du hitboxX (valeur de GameScreen)
+                personnage.getPositionY() + 18  // Ajout du hitboxY (valeur de GameScreen)
+            );
+            
+            // Obtenir la taille de la hitbox (estimée)
+            float hitboxWidth = 10;  // Largeur estimée de la hitbox du joueur
+            float hitboxHeight = 10; // Hauteur estimée de la hitbox du joueur
+            
+            // Créer un Vector2 avec les infos de la hitbox pour placer l'attaque correctement
+            Vector2 hitboxInfo = new Vector2(hitboxWidth, hitboxHeight);
+            
+            // Passer la position et la taille de la hitbox à la méthode d'attaque
+            armeMelee.attaquer_arme(playerPos, direction, hitboxInfo);
             
             // Jouer le son d'attaque
             if (attackSound != null) {
-                // Le volume peut être ajusté en fonction des paramètres du jeu
                 attackSound.play(game.getSoundVolume());
             }
         } catch (Exception e) {
@@ -165,6 +176,15 @@ public class AttackManager {
      */
     public void setCooldownAttaque(float cooldown) {
         this.cooldownAttaque = cooldown;
+    }
+    
+    /**
+     * Indique si une attaque est actuellement en cours d'exécution.
+     * 
+     * @return true si une attaque est en cours, false sinon
+     */
+    public boolean isAttacking() {
+        return !peutAttaquer && tempsDepuisAttaque < 0.3f; // Les premières 300ms du cooldown sont considérées comme "attaque active"
     }
     
     // Ajouter une méthode dispose pour libérer les ressources

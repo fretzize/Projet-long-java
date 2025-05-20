@@ -250,16 +250,17 @@ public class Personnage extends ApplicationAdapter implements Entite {
     
 
     public void prendreDegat(int degats) {
-        int vieperdu = this.getBouclier() - degats;
         if (this.getBouclier() == 0) {
+            // Pas de bouclier, dégâts directs à la vie
             perteVie(degats);
-        } else if (vieperdu > 0) {
+        } else if (this.getBouclier() >= degats) {
+            // Le bouclier absorbe tous les dégâts
             this.bouclier -= degats;
         } else {
+            // Le bouclier est insuffisant
+            int degatsRestants = degats - this.getBouclier();
             this.bouclier = 0;
-            // mettre une animation pour montrer que le bouclier casse
-            // casserBouclier();
-            perteVie(vieperdu);
+            perteVie(degatsRestants); // Appliquer le reste des dégâts à la vie
         }
     }
 
@@ -355,6 +356,14 @@ public class Personnage extends ApplicationAdapter implements Entite {
         // dash_gris.dispose();
         bouclierIntact.dispose();
         game.batch.end();
+    }
+
+    public void setPositionX(float x) {
+        this.positionX = x;
+    }
+
+    public void setPositionY(float y) {
+        this.positionY = y;
     }
 
 

@@ -1,7 +1,7 @@
 package projet.java.entite;
 
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.audio.Sound;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
@@ -82,31 +82,58 @@ public class ArmeDistance extends ArmeBase {
      */
     @Override
     public void attaquer_arme(Vector2 position, Vector2 direction) {
-        if (!peutAttaquer) return;  // Vérifie si l'arme peut attaquer (pas en cooldown)
+        // Utiliser la version améliorée avec une hitbox par défaut
+        attaquer_arme(position, direction, new Vector2(10, 10));
+    }
+
+    /**
+     * Version améliorée qui prend en compte la hitbox du personnage
+     */
+    public void attaquer_arme(Vector2 position, Vector2 direction, Vector2 hitboxSize) {
+        if (!peutAttaquer) return;
         
-        // Normalise la direction pour avoir un vecteur unitaire
+        // Calculer le centre de la hitbox du personnage
+        Vector2 hitboxCenter = new Vector2(
+            position.x + hitboxSize.x / 2,
+            position.y + hitboxSize.y / 2
+        );
+        
+        // Normaliser la direction
         Vector2 dir = new Vector2(direction).nor();
         
-        // Crée et lance les projectiles
+        // Calculer le point de départ du projectile (bord de la hitbox)
+        float offsetX = (hitboxSize.x / 2) * Math.abs(dir.x);
+        float offsetY = (hitboxSize.y / 2) * Math.abs(dir.y);
+        
+        Vector2 projectileStart = new Vector2(hitboxCenter);
+        projectileStart.x += dir.x * offsetX;
+        projectileStart.y += dir.y * offsetY;
+        
+        // Créer et lancer les projectiles à partir du point calculé
         if (nbProjectilesParTir == 1) {
             // Un seul projectile dans la direction donnée
-            creerProjectile(position, dir);
+            creerProjectile(projectileStart, dir);
         } else {
             // Plusieurs projectiles avec dispersion (comme pour un shotgun)
             float angleTotal = angleDispersion;
-            float angleStep = angleTotal / (nbProjectilesParTir - 1);  // Angle entre chaque projectile
-            float startAngle = -angleTotal / 2;  // Angle de départ (centré)
+            float angleStep = angleTotal / (nbProjectilesParTir - 1);
+            float startAngle = -angleTotal / 2;
             
             for (int i = 0; i < nbProjectilesParTir; i++) {
-                float currentAngle = startAngle + (angleStep * i);  // Angle courant
-                Vector2 rotatedDir = new Vector2(dir).rotateDeg(currentAngle);  // Direction rotée
-                creerProjectile(position, rotatedDir);  // Crée un projectile dans cette direction
+                float currentAngle = startAngle + (angleStep * i);
+                Vector2 rotatedDir = new Vector2(dir).rotateDeg(currentAngle);
+                creerProjectile(projectileStart, rotatedDir);
             }
         }
         
         // Met l'arme en cooldown
         peutAttaquer = false;
         tempsDepuisDerniereAttaque = 0;
+        
+        // Jouer le son de tir si disponible
+        if (sonTir != null) {
+            sonTir.play(0.5f);
+        }
     }
     
     /**
