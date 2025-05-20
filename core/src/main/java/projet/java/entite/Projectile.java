@@ -5,6 +5,9 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 
+import projet.java.Main;
+import projet.java.Menu.GameScreen;
+
 /**
  * Classe représentant un projectile tiré par une arme à distance.
  * Gère le déplacement, la collision et le rendu du projectile.
@@ -29,6 +32,29 @@ public class Projectile {
      * @param texture Texture utilisée pour le rendu
      * @param degats Dégâts infligés en cas de collision
      * @param porteeMax Distance maximale que le projectile peut parcourir
+     * @param hitbox Hitbox du projectile pour la détection de collision
+     */
+    public Projectile(float x, float y, float vx, float vy, Texture texture, int degats, float porteeMax, Rectangle hitbox) {
+        this.position = new Vector2(x, y);
+        this.originPosition = new Vector2(x, y);
+        this.vitesse = new Vector2(vx, vy);
+        this.texture = texture;
+        this.degats = degats;
+        this.porteeMax = porteeMax;
+        //this.hitbox = new Rectangle(x, y, texture.getWidth(), texture.getHeight());
+        this.hitbox = hitbox; // Utilisation de la hitbox fournie
+    }
+
+     /**
+     * Constructeur du projectile.
+     * 
+     * @param x Position X initiale
+     * @param y Position Y initiale
+     * @param vx Composante X du vecteur vitesse
+     * @param vy Composante Y du vecteur vitesse
+     * @param texture Texture utilisée pour le rendu
+     * @param degats Dégâts infligés en cas de collision
+     * @param porteeMax Distance maximale que le projectile peut parcourir
      */
     public Projectile(float x, float y, float vx, float vy, Texture texture, int degats, float porteeMax) {
         this.position = new Vector2(x, y);
@@ -44,9 +70,9 @@ public class Projectile {
      * Constructeur simplifié sans gestion des dégâts et de la portée.
      * Pour compatibilité avec l'ancien code.
      */
-    public Projectile(float x, float y, float vx, float vy, Texture texture) {
-        this(x, y, vx, vy, texture, 1, 1000f); // Valeurs par défaut
-    }
+    //public Projectile(float x, float y, float vx, float vy, Texture texture) {
+      //  this(x, y, vx, vy, texture, 1, 1000f); // Valeurs par défaut
+    //}
 
     /**
      * Met à jour la position et l'état du projectile.
@@ -83,7 +109,7 @@ public class Projectile {
      * @return true si le projectile n'est plus actif (collision ou hors portée)
      */
     public boolean doitEtreDetruit() {
-        return !actif;
+        return !actif || isHorsPortee();
     }
     
     /**
@@ -129,6 +155,15 @@ public class Projectile {
     public Vector2 getVitesse() {
         return vitesse;
     }
+
+    public boolean isActif() {
+        return actif;
+    }
+
+
+    public boolean isHorsPortee() {
+        return position.dst(originPosition) > porteeMax;
+    }
     
     /**
      * Change les dégâts du projectile.
@@ -138,5 +173,11 @@ public class Projectile {
      */
     public void setDegats(int nouveauxDegats) {
         this.degats = nouveauxDegats;
+    }
+
+
+    //affichage de l'entité
+    public void draw(Main game,float scaledWidth,float scaledHeight){
+        game.batch.draw(texture,this.position.x,this.position.y,scaledWidth,scaledHeight);
     }
 }
