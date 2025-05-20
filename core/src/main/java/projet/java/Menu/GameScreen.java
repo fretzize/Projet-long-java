@@ -383,7 +383,7 @@ public class GameScreen implements Screen {
                         mursHitboxes.add(new Rectangle(x * TILE_SIZE  , y * TILE_SIZE+ 4, TILE_SIZE , TILE_SIZE-8));
                     }
                     else if (texture == porteV){
-                        mursHitboxes.add(new Rectangle(x * TILE_SIZE+4, y * TILE_SIZE, TILE_SIZE-8, TILE_SIZE));
+                        mursHitboxes.add(new Rectangle(x * TILE_SIZE+2, y * TILE_SIZE, TILE_SIZE-12, TILE_SIZE));
 
                     }
                 }
