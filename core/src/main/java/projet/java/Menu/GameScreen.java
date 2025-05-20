@@ -297,18 +297,26 @@ public class GameScreen implements Screen {
             playerY -= currentSpeed * avance;
         }
 
-        playerHitbox.setPosition(playerX+hitboxX, playerY+hitboxY);
-
-
+        playerHitbox.setPosition(playerX+hitboxX, oldY+hitboxY);
         for (int i = 0; i < mursHitboxes.size; i++) {
             if (playerHitbox.overlaps(mursHitboxes.get(i))) {
                 // collision détectée, on annule le déplacement
                 playerX = oldX;
+                playerHitbox.setPosition(oldY+hitboxX, oldY+hitboxY);
+                break;
+            }
+        }
+        playerHitbox.setPosition(playerX+hitboxX, playerY+hitboxY);
+        for (int i = 0; i < mursHitboxes.size; i++) {
+            if (playerHitbox.overlaps(mursHitboxes.get(i))) {
+                // collision détectée, on annule le déplacement
                 playerY = oldY;
                 playerHitbox.setPosition(playerX+hitboxX, playerY+hitboxY);
                 break;
             }
         }
+
+
 
         // Mise à jour du dash
         if (isDashing) {
