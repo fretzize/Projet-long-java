@@ -79,3 +79,4 @@ map.png
 menubackground.png
 menumusic.mp3
 police.otf
+sword_swing.mp3.mp3

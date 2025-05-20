@@ -390,6 +390,11 @@ public class GameScreen implements Screen {
     if (animationHandler != null) {
         animationHandler.dispose();
     }
+    
+    // Libérer les ressources du gestionnaire d'attaque
+    if (attackManager != null) {
+        attackManager.dispose();
+    }
     }
 
     @Override

@@ -2,6 +2,7 @@ package projet.java.combat;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.math.Vector2;
 
 import projet.java.Main;
@@ -24,6 +25,7 @@ public class AttackManager {
     private final AnimationHandler animationHandler;
     private final ArmeMelee armeMelee;
     private final Main game;
+    private com.badlogic.gdx.audio.Sound attackSound;
     
     /**
      * Constructeur du gestionnaire d'attaque
@@ -41,6 +43,13 @@ public class AttackManager {
         
         // Initialiser l'arme avec le même cooldown
         this.armeMelee = new ArmeMelee("Épée", 20, 0, 100f, cooldownAttaque, "menubackground.png", 90f, 20f);
+        
+        // Charger le son d'attaque
+        try {
+            this.attackSound = Gdx.audio.newSound(Gdx.files.internal("sword_swing.mp3"));
+        } catch (Exception e) {
+            System.err.println("Impossible de charger le son d'attaque: " + e.getMessage());
+        }
     }
     
     /**
@@ -102,6 +111,12 @@ public class AttackManager {
             // Uniquement déclencher l'effet de l'attaque
             Vector2 playerPos = new Vector2(personnage.getPositionX(), personnage.getPositionY());
             armeMelee.attaquer_arme(playerPos, direction);
+            
+            // Jouer le son d'attaque
+            if (attackSound != null) {
+                // Le volume peut être ajusté en fonction des paramètres du jeu
+                attackSound.play(game.getSoundVolume());
+            }
         } catch (Exception e) {
             System.err.println("Erreur lors de l'attaque: " + e.getMessage());
         }
@@ -151,5 +166,12 @@ public class AttackManager {
      */
     public void setCooldownAttaque(float cooldown) {
         this.cooldownAttaque = cooldown;
+    }
+    
+    // Ajouter une méthode dispose pour libérer les ressources
+    public void dispose() {
+        if (attackSound != null) {
+            attackSound.dispose();
+        }
     }
 }
