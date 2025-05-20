@@ -158,18 +158,20 @@ public class Personnage extends ApplicationAdapter implements Entite {
         this.hitbox.setPosition(this.positionX, this.positionY);
     }
 
-    public Personnage(int mana, int vie, int bouclier, String nom, Texture skin,Rectangle hitbox) {//}, Vector2 position) {
-        this.nom = nom;
-        this.vie = vie;
+    public Personnage(Texture skin,Rectangle hitbox) {//}, Vector2 position) {
+        this.nom = "mathis";
+        this.vie = 5;
         this.mana = mana;
         // this.skin = skin;
         this.mana_max = mana;
-        this.vie_max = vie;
-        this.bouclier = bouclier;
-        this.bouclier_max = bouclier;
+        this.vie_max = 5;
+        this.bouclier = 5;
+        this.bouclier_max = 5;
         this.positionY = 250;
         this.positionX = 250;
         this.hitbox = hitbox;
+        this.vie_max = 5;
+        this.bouclier_max = 5;
     }
     
 
@@ -313,6 +315,15 @@ public class Personnage extends ApplicationAdapter implements Entite {
 
     public Rectangle getHitbox() {
         return hitbox;
+    }
+
+
+    public void addVie(int vie) {
+        if (this.vie + vie > this.vie_max) {
+            this.vie = this.vie_max;
+        } else {
+            this.vie += vie;
+        }
     }
     //Methode pour récupérer le bouclier
 

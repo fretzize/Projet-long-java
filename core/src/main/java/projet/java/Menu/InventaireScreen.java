@@ -1,3 +1,4 @@
+
 package projet.java.Menu;
 
 import java.util.List;
@@ -47,6 +48,7 @@ public class InventaireScreen implements Screen {
     int place_item_ligne = ligne_grille-1;
     int place_item_colonne = 0;
     int taille_cote_case = 10;
+    int nombre_element_grille = 0;
 
     @Override
     public void render(float delta) {
@@ -103,21 +105,26 @@ public class InventaireScreen implements Screen {
         place_item_ligne = ligne_grille-1;
         place_item_colonne = 0;
         
-        for (Item item : inventaire.getItems()) {
+        if (inventaire.getItems().size() != nombre_element_grille) {
+            nombre_element_grille = 0;
+            for (Item item : inventaire.getItems()) {
             //game.batch.draw(item.getIcone(), taillecase, taillecase, taillecase, taillecase);
             //System.out.println(place_item_ligne + place_item_colonne);
-            grille.setItem(place_item_ligne, place_item_colonne, item);
+                grille.setItem(place_item_ligne, place_item_colonne, item);
             
             //List<List<Item>> liste = grille.getItemgrille();
             //List<Item> liste_item = liste.get(place_item_ligne);
             //System.out.println("Taille de la liste : " + liste.size());
-            if (place_item_colonne > colonne_grille) {
-                place_item_colonne = 0;
-                place_item_ligne --;
-            } else {
-                place_item_colonne ++;
+                if (place_item_colonne > colonne_grille) {
+                    place_item_colonne = 0;
+                    place_item_ligne --;
+                } else {
+                    place_item_colonne ++;
+                }
+                nombre_element_grille ++;
             }
         }
+        
         
 
         
@@ -131,6 +138,13 @@ public class InventaireScreen implements Screen {
                     game.batch.draw(texture, taille_cote_case + screenWidth/2 - taillecase*ligne_grille + taillecase/2+  j* taillecase, taille_cote_case + taillecase +i * taillecase, taillecase - 2*taille_cote_case, taillecase-2*taille_cote_case);
                     if (isMouseOverTexture(screenWidth/2 - taillecase*ligne_grille + taillecase/2+  j* taillecase, taillecase +i * taillecase, taillecase, taillecase)) {
                         if (Gdx.input.justTouched()) {
+                            if (item.getType() == Item.ItemType.POTION) {
+                                personnage.addVie(item.getNombre());
+                                // System.out.println(personnage.getVie());
+                                personnage.getInventaire().removeItem(item);
+                                grille.removeItem(i, j);
+                                nombre_element_grille --;
+                            }
                             // personnage.setArme(null);
                         } else {
                             Color previousColor = game.batch.getColor().cpy();

@@ -32,6 +32,7 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.math.MathUtils;
 import projet.java.Menu.GameOverScreen;
+import projet.java.Inventaire.Potion;
 
 import projet.java.animation.AnimationHandler;
 
@@ -58,7 +59,7 @@ public class GameScreen implements Screen {
     Texture porteH;
     Texture porteV;
     Texture videTexture;
-    int nombreDeChambres = 9;
+    int nombreDeChambres = 6;
     int[] tailleChambre = {70, 70};
     Map carte = new Map(nombreDeChambres, tailleChambre);
     int[][] map;
@@ -157,13 +158,15 @@ public class GameScreen implements Screen {
         this.game = game;
         camera = new OrthographicCamera();
         camera.setToOrtho(false, 320, 180);
+        playerHitbox = new Rectangle(250+hitboxX, 250+hitboxY, 10, 10);
+        this.personnage1 = new Personnage(skin,playerHitbox);
     }
 
     //TEST SBIRE
 
     private Sbire sbireTest;
     private ArrayList<Projectile> projectiles;
-
+    int une_fois = 1;
     @Override
     public void show() {
         //map
@@ -206,8 +209,6 @@ public class GameScreen implements Screen {
         largeur_skin = skin.getWidth();
         hauteur_skin = skin.getHeight();
 
-        playerHitbox = new Rectangle(250+hitboxX, 250+hitboxY, 10, 10);
-        personnage1 = new Personnage(4, 4, 4, "mathis", skin,playerHitbox);
         personnage1.create_entite();
 
         // TEST SBIRE
@@ -262,19 +263,24 @@ public class GameScreen implements Screen {
             }
         }
 
-        // texture pour tester la grille d'inventaire
         arme1 = new Texture("epee1.png");
         arme2 = new Texture("epee2.png");
         arme3 = new Texture("epee3.png");
+        Potion potionvie = new Potion(3);
+        Texture potion = potionvie.getImage();
 
-        Item Arme1 = new Item("arme1", arme1, Item.ItemType.ARME);
-        Item Arme2 = new Item("arme2", arme2, Item.ItemType.ARME);
-        Item Arme3 = new Item("arme3", arme3, Item.ItemType.ARME);
+        Item Arme1 = new Item("arme1", arme1, Item.ItemType.ARME, 3);
+        Item Arme2 = new Item("arme2", arme2, Item.ItemType.ARME, 2);
+        Item Arme3 = new Item("arme3", arme3, Item.ItemType.ARME, 3);
+        Item Potion = new Item("potion", potion, Item.ItemType.POTION, potionvie.getVie());
 
-        personnage1.getInventaire().addItem(Arme1);
-        personnage1.getInventaire().addItem(Arme2);
-        personnage1.getInventaire().addItem(Arme3);
-
+        if (une_fois == 1) {
+            personnage1.getInventaire().addItem(Arme1);
+            personnage1.getInventaire().addItem(Arme2);
+            personnage1.getInventaire().addItem(Arme3);
+            personnage1.getInventaire().addItem(Potion);
+            une_fois ++;
+        }
 
     }
 
