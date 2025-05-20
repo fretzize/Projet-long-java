@@ -77,6 +77,8 @@ public class GameScreen implements Screen {
     private float hauteur_dash;
     private Texture coeur_plein;
     private Texture bouclierIntact;
+    private boolean firstFrame = true;
+    private Map carteR;
 
 
     private AnimationHandler animationHandler;
@@ -160,6 +162,7 @@ public class GameScreen implements Screen {
         carteReduite.randomiseur_sol();
         //carteReduite.naturalisation_mur();
         map = carteReduite.getCoord();
+        carteR = carteReduite;
         videTexture = new Texture(Gdx.files.internal("map/Tile_30.png"));
         solTexture = new Texture(Gdx.files.internal("map/Tile_20.png"));
         murTexture = new Texture(Gdx.files.internal("map/Tile_11.png"));
@@ -236,10 +239,8 @@ public class GameScreen implements Screen {
 
 
 
-        playerX = carteReduite.getCoordspawnX()*16;
-        playerY = carteReduite.getCoordspawnY()*16;
-//        playerX = (int) Math.floor(coord[0]/2)*16;
-//        playerY = (int) Math.floor(coord[1]/2)*16;
+
+
 
     }
 
@@ -271,6 +272,11 @@ public class GameScreen implements Screen {
 
     private void input(float avance) {
         // Gestion de la pause
+        if (firstFrame) {
+            firstFrame = false;
+            playerX = carteR.getCoordspawnX()*16;
+            playerY = carteR.getCoordspawnY()*16;
+        }
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE) || Gdx.input.isKeyJustPressed(Input.Keys.P)) {
             game.setScreen(new PauseScreen(game, this));
             return; // Sortir de la méthode pour éviter de traiter d'autres entrées
