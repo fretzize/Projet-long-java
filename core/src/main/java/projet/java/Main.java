@@ -23,6 +23,8 @@ public class Main extends Game {
     private float menuMusicVolume = 0.2f;
     private float gameSoundVolume = 0.5f;
     
+    // Constante spéciale pour le clic gauche
+    public static final int MOUSE_LEFT_CLICK = -1;
 
     // Ajout des touches configurables
     public int toucheHaut = Input.Keys.W;
@@ -30,6 +32,7 @@ public class Main extends Game {
     public int toucheGauche = Input.Keys.A;
     public int toucheDroite = Input.Keys.D;
     public int toucheDash = Input.Keys.SPACE;
+    public int toucheAttaque = MOUSE_LEFT_CLICK; // Clic gauche par défaut
 
     public void setTouche(int index, int keycode) {
         switch(index) {
@@ -38,6 +41,7 @@ public class Main extends Game {
             case 2: toucheGauche = keycode; break;
             case 3: toucheDroite = keycode; break;
             case 4: toucheDash = keycode; break;
+            case 5: toucheAttaque = keycode; break;
         }
     }
 
@@ -46,6 +50,7 @@ public class Main extends Game {
             menuMusic.stop(); // Arrêter la musique de fond
         }
     }
+    
     public void startMenuMusic() {
         if (menuMusic != null && !menuMusic.isPlaying()) {
             menuMusic.play(); // Démarrer la musique de fond
@@ -86,9 +91,6 @@ public class Main extends Game {
         parameter.size = 48; // Taille de la police
         font = generator.generateFont(parameter);
         generator.dispose(); // Libérer les ressources du générateur
-
-
-
 
         font.setUseIntegerPositions(false);
         font.getData().setScale(viewport.getWorldHeight() / Gdx.graphics.getHeight());

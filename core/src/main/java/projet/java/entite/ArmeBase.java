@@ -48,14 +48,8 @@ public abstract class ArmeBase implements Arme {
      */
     @Override
     public void update(float delta) {
-        // Gestion du cooldown des attaques
-        if (!peutAttaquer) {  // Si l'arme est en cooldown
-            tempsDepuisDerniereAttaque += delta;  // Incrémente le compteur
-            if (tempsDepuisDerniereAttaque >= vitesseAttaque) {  // Si le cooldown est terminé
-                peutAttaquer = true;  // L'arme peut être utilisée à nouveau
-                tempsDepuisDerniereAttaque = 0;  // Réinitialise le compteur
-            }
-        }
+        // La gestion du cooldown est maintenant entièrement déléguée à AttackManager
+        // Ne pas gérer le cooldown ici
     }
     
     // Implémentation des getters de l'interface

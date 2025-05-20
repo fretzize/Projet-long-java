@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.ScreenUtils;
+
 import projet.java.Main;
 
 public class TouchesScreen implements Screen {
@@ -20,7 +21,7 @@ public class TouchesScreen implements Screen {
 
     private Texture backgroundTexture;
     private int selectedIndex = 0;
-    private final String[] keyOptions = {"Haut", "Bas", "Gauche", "Droite", "Dash", "Retour"};
+    private final String[] keyOptions = {"Haut", "Bas", "Gauche", "Droite", "Dash", "Attaque", "Retour"};
     private Rectangle[] optionBounds;
     private int[] keyBindings;
     private boolean waitingForInput = false;
@@ -41,7 +42,8 @@ public class TouchesScreen implements Screen {
             game.toucheBas,
             game.toucheGauche,
             game.toucheDroite,
-            game.toucheDash
+            game.toucheDash,
+            game.toucheAttaque
         };
     }
 
@@ -62,11 +64,14 @@ public class TouchesScreen implements Screen {
             game.toucheBas,
             game.toucheGauche,
             game.toucheDroite,
-            game.toucheDash
+            game.toucheDash,
+            game.toucheAttaque
         };
     }
     private String getKeyName(int keycode) {
-        if (keycode < 0) {
+        if (keycode == Main.MOUSE_LEFT_CLICK) {
+            return "Clic Gauche";
+        } else if (keycode < 0) {
             return "Non défini";
         }
         return Input.Keys.toString(keycode);
@@ -145,6 +150,12 @@ public class TouchesScreen implements Screen {
                     waitingForInput = false;
                     break;
                 }
+            }
+            
+            // Vérifier également si un clic gauche est fait pour la touche d'attaque
+            if (selectedIndex == 5 && Gdx.input.justTouched() && Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
+                keyBindings[selectedIndex] = Main.MOUSE_LEFT_CLICK;
+                waitingForInput = false;
             }
         }
 

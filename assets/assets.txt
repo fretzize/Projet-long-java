@@ -1,3 +1,35 @@
+HERCULEpng/HERCULEpng/Sword_Attack_back_1.png
+HERCULEpng/HERCULEpng/Sword_Attack_back_2.png
+HERCULEpng/HERCULEpng/Sword_Attack_back_3.png
+HERCULEpng/HERCULEpng/Sword_Attack_back_4.png
+HERCULEpng/HERCULEpng/Sword_Attack_back_5.png
+HERCULEpng/HERCULEpng/Sword_Attack_back_6.png
+HERCULEpng/HERCULEpng/Sword_Attack_back_7.png
+HERCULEpng/HERCULEpng/Sword_Attack_back_8.png
+HERCULEpng/HERCULEpng/Sword_Attack_front_1.png
+HERCULEpng/HERCULEpng/Sword_Attack_front_2.png
+HERCULEpng/HERCULEpng/Sword_Attack_front_3.png
+HERCULEpng/HERCULEpng/Sword_Attack_front_4.png
+HERCULEpng/HERCULEpng/Sword_Attack_front_5.png
+HERCULEpng/HERCULEpng/Sword_Attack_front_6.png
+HERCULEpng/HERCULEpng/Sword_Attack_front_7.png
+HERCULEpng/HERCULEpng/Sword_Attack_front_8.png
+HERCULEpng/HERCULEpng/Sword_Attack_side_left_1.png
+HERCULEpng/HERCULEpng/Sword_Attack_side_left_2.png
+HERCULEpng/HERCULEpng/Sword_Attack_side_left_3.png
+HERCULEpng/HERCULEpng/Sword_Attack_side_left_4.png
+HERCULEpng/HERCULEpng/Sword_Attack_side_left_5.png
+HERCULEpng/HERCULEpng/Sword_Attack_side_left_6.png
+HERCULEpng/HERCULEpng/Sword_Attack_side_left_7.png
+HERCULEpng/HERCULEpng/Sword_Attack_side_left_8.png
+HERCULEpng/HERCULEpng/Sword_Attack_side_right_1.png
+HERCULEpng/HERCULEpng/Sword_Attack_side_right_2.png
+HERCULEpng/HERCULEpng/Sword_Attack_side_right_3.png
+HERCULEpng/HERCULEpng/Sword_Attack_side_right_4.png
+HERCULEpng/HERCULEpng/Sword_Attack_side_right_5.png
+HERCULEpng/HERCULEpng/Sword_Attack_side_right_6.png
+HERCULEpng/HERCULEpng/Sword_Attack_side_right_7.png
+HERCULEpng/HERCULEpng/Sword_Attack_side_right_8.png
 HERCULEpng/HERCULEpng/Sword_Idle_back.png
 HERCULEpng/HERCULEpng/Sword_Idle_front.png
 HERCULEpng/HERCULEpng/Sword_Idle_side_left.png
@@ -53,4 +85,8 @@ map.png
 menubackground.png
 menumusic.mp3
 police.otf
+<<<<<<< HEAD
 wall.png
+=======
+sword_swing.mp3.mp3
+>>>>>>> f3172bc8abb3486079cb2c98296ffc88876fe24b

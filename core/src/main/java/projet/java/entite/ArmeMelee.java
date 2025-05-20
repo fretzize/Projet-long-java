@@ -55,33 +55,36 @@ public class ArmeMelee extends ArmeBase {
      */
     @Override
     public void attaquer_arme(Vector2 position, Vector2 direction) {
-        if (!peutAttaquer) return;  // Vérifie si l'arme peut attaquer (pas en cooldown)
+        // IMPORTANT: Ne pas vérifier peutAttaquer ici, car c'est déjà géré dans AttackManager
+        // if (!peutAttaquer) return;
         
         // Commence l'animation d'attaque
         enAnimation = true;
         tempsAnimation = 0;
-        peutAttaquer = false;  // L'arme entre en cooldown
         
-        // Calcule les dimensions de la zone d'attaque
+        // NE PAS modifier peutAttaquer ici
+        // peutAttaquer = false;
+        
+        // Calcule les dimensions de la zone d'attaque (reste inchangé)
         float zoneWidth = portee;
         float zoneHeight = portee / 2;
         
-        // Calcule la position de la zone d'attaque devant le joueur
-        Vector2 normalizedDirection = new Vector2(direction).nor();  // Normalise la direction
+        // Calcule la position de la zone d'attaque devant le joueur (reste inchangé)
+        Vector2 normalizedDirection = new Vector2(direction).nor();
         Vector2 centerZone = new Vector2(position).add(
             normalizedDirection.x * portee / 2,
             normalizedDirection.y * portee / 2
         );
         
-        // Définit la zone d'attaque comme un rectangle
+        // Définit la zone d'attaque comme un rectangle (reste inchangé)
         zoneAttaque.set(
-            centerZone.x - zoneWidth / 2,  // Position X
-            centerZone.y - zoneHeight / 2,  // Position Y
-            zoneWidth,  // Largeur
-            zoneHeight  // Hauteur
+            centerZone.x - zoneWidth / 2,
+            centerZone.y - zoneHeight / 2,
+            zoneWidth,
+            zoneHeight
         );
         
-        // Détecte les collisions avec les sbires
+        // Détecte les collisions avec les sbires (reste inchangé)
         detecterCollisions(position, normalizedDirection);
     }
     
