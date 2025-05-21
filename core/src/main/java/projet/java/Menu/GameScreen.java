@@ -34,6 +34,7 @@ import com.badlogic.gdx.math.MathUtils;
 import projet.java.Menu.GameOverScreen;
 import projet.java.Inventaire.Potion;
 
+
 import projet.java.animation.AnimationHandler;
 
 public class GameScreen implements Screen {
@@ -42,6 +43,7 @@ public class GameScreen implements Screen {
     //tout ce qui est utile à la map :
     private ShapeRenderer shapeRenderer;
     Array<Rectangle> mursHitboxes ;
+    Array<Rectangle> porteHitboxes ;
     Texture solTexture;
     Texture solTexture2;
     Texture solTexture3;
@@ -58,6 +60,8 @@ public class GameScreen implements Screen {
     Texture murTexture2;
     Texture porteH;
     Texture porteV;
+    Texture porteHOpen;
+    Texture porteVOpen;
     Texture videTexture;
     int nombreDeChambres = 6;
     int[] tailleChambre = {70, 70};
@@ -171,6 +175,7 @@ public class GameScreen implements Screen {
     public void show() {
         //map
         mursHitboxes = new Array<>();
+        porteHitboxes = new Array<>();
         carte.placerChambresGrille();
         carte.corridor_creator();
         carte.creuser_couloir();
@@ -186,6 +191,7 @@ public class GameScreen implements Screen {
         //carteReduite.naturalisation_mur();
         map = carteReduite.getCoord();
         carteR = carteReduite;
+        
         videTexture = new Texture(Gdx.files.internal("map/Tile_30.png"));
         solTexture = new Texture(Gdx.files.internal("map/Tile_20.png"));
         murTexture = new Texture(Gdx.files.internal("map/Tile_11.png"));
@@ -203,6 +209,8 @@ public class GameScreen implements Screen {
         solTexture10 = new Texture(Gdx.files.internal("map/Tile_83.png"));
         solTexture11 = new Texture(Gdx.files.internal("map/Tile_84.png"));
         solTexture12 = new Texture(Gdx.files.internal("map/Tile_95.png"));
+        porteHOpen = new Texture(Gdx.files.internal("map/Door_OPEN_H.png"));
+        porteVOpen = new Texture(Gdx.files.internal("map/Door_OPEN_V.png"));
 
         mapTexture = new Texture(Gdx.files.internal("map.png")); // Créez une image "map.png"
         skin = new Texture(Gdx.files.internal("image_heracles_normal.png")); // Créez une image "player.png"
@@ -349,6 +357,8 @@ public class GameScreen implements Screen {
 
         float oldX = personnage1.getPositionX();
         float oldY = personnage1.getPositionY();
+        int xp=0;
+        int yp=0;
 
         // Déplacement du joueur
         if (Gdx.input.isKeyPressed(game.toucheHaut) || Gdx.input.isKeyPressed(Input.Keys.UP)) {
@@ -367,7 +377,8 @@ public class GameScreen implements Screen {
             //playerY -= currentSpeed * avance;
             personnage1.changePositionY(-currentSpeed * avance);
         }
-
+        
+        //test mur en X
         playerHitbox.setPosition(personnage1.getPositionX()+hitboxX, oldY+hitboxY);
         for (int i = 0; i < mursHitboxes.size; i++) {
             if (playerHitbox.overlaps(mursHitboxes.get(i))) {
@@ -377,6 +388,21 @@ public class GameScreen implements Screen {
                 break;
             }
         }
+
+        //test porte en x
+        playerHitbox.setPosition(personnage1.getPositionX()+hitboxX, personnage1.getPositionY()+hitboxY);
+        for (int i = 0; i < porteHitboxes.size; i++) {
+            if (playerHitbox.overlaps(porteHitboxes.get(i))) {
+                // collision détectée, on annule le déplacement
+                personnage1.setPositionX(oldX);
+                playerHitbox.setPosition(oldY+hitboxX, oldY+hitboxY);
+                xp = (int) Math.floor(porteHitboxes.get(i).x/TILE_SIZE);
+                yp = (int) Math.floor(porteHitboxes.get(i).y/TILE_SIZE);
+                map[map.length - 1 - yp][xp] = 30;
+                break;
+            }
+        }
+        //test mur en Y
         playerHitbox.setPosition(personnage1.getPositionX()+hitboxX, personnage1.getPositionY()+hitboxY);
         for (int i = 0; i < mursHitboxes.size; i++) {
             if (playerHitbox.overlaps(mursHitboxes.get(i))) {
@@ -388,7 +414,18 @@ public class GameScreen implements Screen {
             }
         }
 
-
+        //test porte en Y
+        for (int i = 0; i < porteHitboxes.size; i++) {
+            if (playerHitbox.overlaps(porteHitboxes.get(i))) {
+                // collision détectée, on annule le déplacement
+                personnage1.setPositionY(oldY);
+                playerHitbox.setPosition(personnage1.getPositionX()+hitboxX, personnage1.getPositionY()+hitboxY);
+                xp = (int) Math.floor(porteHitboxes.get(i).x/TILE_SIZE);
+                yp = (int) Math.floor(porteHitboxes.get(i).y/TILE_SIZE);
+                map[map.length - 1 - yp][xp] = 20;
+                break;
+            }
+        }
 
         // Mise à jour du dash
         if (isDashing) {
@@ -458,7 +495,9 @@ public class GameScreen implements Screen {
         int endY = Math.min(map.length - 1, (int)((camera.position.y + cameraHalfHeight) / TILE_SIZE + 1));
 
         mursHitboxes.clear();
-        // Ne dessiner que les tuiles visibles
+        porteHitboxes.clear();
+
+         // Ne dessiner que les tuiles visibles
         for (int y = startY; y <= endY; y++) {
             int mapY = map.length - 1 - y;
             if (mapY < 0 || mapY >= map.length) continue;
@@ -467,21 +506,34 @@ public class GameScreen implements Screen {
                 if (x < 0 || x >= map[0].length) continue;
                 
                 Texture texture = getTextureForTile(map[mapY][x]);
-                if (texture != null && texture != porteH && texture != porteV) {
+                if (texture == porteH || texture == porteV || texture == porteHOpen || texture == porteVOpen) {
+                    game.batch.draw(solTexture, x * TILE_SIZE, y * TILE_SIZE);
+                    if (texture == porteH){
+                        porteHitboxes.add(new Rectangle(x * TILE_SIZE  , y * TILE_SIZE+ 4, TILE_SIZE , TILE_SIZE-8));
+                    }
+                    else if (texture == porteV){
+                        porteHitboxes.add(new Rectangle(x * TILE_SIZE+2, y * TILE_SIZE, TILE_SIZE-12, TILE_SIZE));
+
+                    }
+                }else if (texture != null ) {
                     game.batch.draw(texture, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
                     if (texture == murTexture) {
                         mursHitboxes.add(new Rectangle(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE));
                     }
-                } else if (texture == porteH || texture == porteV) {
-                    game.batch.draw(solTexture, x * TILE_SIZE, y * TILE_SIZE);
-                    game.batch.draw(texture, x * TILE_SIZE, y * TILE_SIZE);
-                    if (texture == porteH){
-                        mursHitboxes.add(new Rectangle(x * TILE_SIZE  , y * TILE_SIZE+ 4, TILE_SIZE , TILE_SIZE-8));
-                    }
-                    else if (texture == porteV){
-                        mursHitboxes.add(new Rectangle(x * TILE_SIZE+2, y * TILE_SIZE, TILE_SIZE-12, TILE_SIZE));
+                }
+            }
+        }
+        //porte
+        for (int y = startY; y <= endY; y++) {
+            int mapY = map.length - 1 - y;
+            if (mapY < 0 || mapY >= map.length) continue;
 
-                    }
+            for (int x = startX; x <= endX; x++) {
+                if (x < 0 || x >= map[0].length) continue;
+                Texture texture = getTextureForTile(map[mapY][x]);
+                if (texture == porteH || texture == porteV || texture == porteHOpen || texture == porteVOpen) {
+                    game.batch.draw(texture, x * TILE_SIZE, y * TILE_SIZE);
+
                 }
             }
         }
@@ -619,8 +671,13 @@ public class GameScreen implements Screen {
         shapeRenderer.setProjectionMatrix(camera.combined);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
         shapeRenderer.setColor(Color.RED);
+        
         for (Rectangle mur : mursHitboxes) {
             shapeRenderer.rect(mur.x, mur.y, mur.width, mur.height);    
+        }
+
+        for (Rectangle mur : porteHitboxes) {
+            shapeRenderer.rect(mur.x, mur.y, mur.width, mur.height);
         }
 
         shapeRenderer.setColor(Color.GREEN);
@@ -765,7 +822,11 @@ public class GameScreen implements Screen {
             return solTexture12;
         } else if (value == 200) {
             return murTexture2;
-        } else {
+        }else if (value == 20) {
+            return porteHOpen;
+        }else if (value == 30) {
+            return porteVOpen;
+        }else {
             return solTexture; // 1 ou autre = sol
         }
 
