@@ -2,6 +2,7 @@ package projet.java.entite;
 
 import java.util.List;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
@@ -59,6 +60,9 @@ public class Sbire implements Entite{
     private SbireAnimationHandler animationHandler;
     private Vector2 lastMovementDirection = new Vector2(0, -1); // Direction par défaut
 
+    // Dans la classe Sbire, ajouter ces attributs avec les autres variables
+    private com.badlogic.gdx.audio.Sound hitSound;
+    private Main game;
 
     public Sbire(int vie, int shield,int mana, float x, float y,float vitesseDeplacement,float vitesseProjectile,float cooldown,Rectangle hitbox, float porteeProjectile,float porteeCaC, int degats, int degatsCaC, Personnage cible, ComportementSbire comportement,Texture projectileTexture,Texture sbireTexture) {
         this.vie = vie;
@@ -80,6 +84,17 @@ public class Sbire implements Entite{
         this.comportement = comportement;
         this.projectileTexture = projectileTexture;
         this.sbireTexture = sbireTexture;
+
+        // Récupérer une référence au jeu principal
+        this.game = ((Main)Gdx.app.getApplicationListener());
+        
+        // Charger le son de dégât
+        try {
+            this.hitSound = Gdx.audio.newSound(Gdx.files.internal("degatmobsound.mp3"));
+        } catch (Exception e) {
+            System.err.println("Impossible de charger le son de dégât pour sbire: " + e.getMessage());
+        }
+
 
         // Initialiser l'animation handler
         this.animationHandler = new SbireAnimationHandler();
@@ -288,6 +303,17 @@ public class Sbire implements Entite{
         
         // Logs pour déboguer
         System.out.println("Sbire touché! Dégâts: " + degats + ", Vie restante: " + this.vie);
+        
+        // Jouer le son de dégât si le sbire est encore en vie
+        if (hitSound != null && game != null) {
+            // Calculer l'atténuation basée sur la distance au joueur (plus loin = moins fort)
+            float distance = getDistanceCible();
+            // Réduire l'atténuation par distance et ajouter un multiplicateur global (1.5f)
+            float volumeScale = Math.max(0.6f, 1.8f - (distance / 800f));
+            
+            // Jouer le son en respectant le volume global des effets mais plus fort
+            hitSound.play(game.getSoundVolume() * volumeScale);
+        }
         
         // Activer l'effet visuel de dégât
         damageEffect = true;
@@ -579,7 +605,11 @@ public class Sbire implements Entite{
         if (animationHandler != null) {
             animationHandler.dispose();
         }
-        // Autres nettoyages...
+        
+        // Libérer le son
+        if (hitSound != null) {
+            hitSound.dispose();
+        }
     }
 
     // Ajouter cette méthode dans la classe Sbire

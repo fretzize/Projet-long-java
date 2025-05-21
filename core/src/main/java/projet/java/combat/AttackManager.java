@@ -27,6 +27,9 @@ public class AttackManager {
     private final Main game;
     private com.badlogic.gdx.audio.Sound attackSound;
     
+    // Modificateur de volume pour le son d'attaque
+    private final float ATTACK_SOUND_VOLUME_MODIFIER = 0.3f; // 30% du volume normal
+    
     /**
      * Constructeur du gestionnaire d'attaque
      * 
@@ -46,7 +49,7 @@ public class AttackManager {
         
         // Charger le son d'attaque
         try {
-            this.attackSound = Gdx.audio.newSound(Gdx.files.internal("sword_swing.mp3"));
+            this.attackSound = Gdx.audio.newSound(Gdx.files.internal("swordattacksound.mp3"));
         } catch (Exception e) {
             System.err.println("Impossible de charger le son d'attaque: " + e.getMessage());
         }
@@ -119,15 +122,13 @@ public class AttackManager {
             // Déterminer l'animation correspondant à la direction de la souris
             updateAnimationForMouseDirection(mouseDirection);
             
-            // Logs pour déboguer
-            System.out.println("Exécution d'une attaque! Position: " + playerPos + ", Direction: " + mouseDirection);
-            
             // Passer la position et la taille de la hitbox à la méthode d'attaque
             armeMelee.attaquer_arme(playerPos, mouseDirection, hitboxInfo);
             
-            // Jouer le son d'attaque
+            // Jouer le son d'attaque avec le volume réduit
             if (attackSound != null) {
-                attackSound.play(game.getSoundVolume());
+                // Utiliser le modificateur de volume (0.3f = 30% du volume normal)
+                attackSound.play(game.getSoundVolume() * ATTACK_SOUND_VOLUME_MODIFIER);
             }
         } catch (Exception e) {
             System.err.println("Erreur lors de l'attaque: " + e.getMessage());

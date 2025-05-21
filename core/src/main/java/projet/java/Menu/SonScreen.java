@@ -127,7 +127,7 @@ public class SonScreen implements Screen {
             if (gameSliderArea.contains(touch.x, touch.y)) {
                 gameSoundVolume = (touch.x - (screenWidth/2 - 150)) / 300f;
                 gameSoundVolume = Math.max(0, Math.min(1, gameSoundVolume));
-                // À utiliser plus tard pour les sons du jeu
+                game.setSoundVolume(gameSoundVolume); // Cette ligne est importante
             }
 
             // Zone du bouton retour

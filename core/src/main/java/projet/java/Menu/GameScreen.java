@@ -16,6 +16,7 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 
 import projet.java.entite.ComportementBoss;
+import projet.java.entite.ComportementDistanceMax;
 import projet.java.entite.ComportementMelee;
 import projet.java.entite.Entite;
 import projet.java.entite.Personnage;
@@ -188,6 +189,9 @@ public class GameScreen implements Screen {
     private final float DAMAGE_EFFECT_DURATION = 0.5f; // Durée en secondes
     private final Color DAMAGE_COLOR = new Color(1, 0, 0, 0.5f); // Rouge semi-transparent
 
+    // Ajouter cette variable avec les autres attributs de la classe
+    private boolean gameInitialized = false;
+
     public GameScreen(final Main game) {
         this.game = game;
         camera = new OrthographicCamera();
@@ -203,7 +207,15 @@ public class GameScreen implements Screen {
     int une_fois = 1;
     @Override
     public void show() {
-        //map
+        // Si le jeu a déjà été initialisé, ne pas recréer les éléments
+        if (gameInitialized) {
+            return;
+        }
+        
+        // Marquer le jeu comme initialisé
+        gameInitialized = true;
+        
+        // Le reste du code d'initialisation reste inchangé
         mursHitboxes = new Array<>();
         porteHitboxes = new Array<>();
         carte.placerChambresGrille();
@@ -274,7 +286,7 @@ public class GameScreen implements Screen {
         niveau.ajouterSbire(sbiretest);
         projectiles = new ArrayList<>();
         // TEST SBIRE
-        sbireTest = new Sbire(3,3,3,300, 300,20,300,3,new Rectangle(0,0, 2,4), 1500,1, 1,0, personnage1, new ComportementBoss(),new Texture(Gdx.files.internal("coeur_plein.png")),new Texture("Hercule_haut.png"));
+        sbireTest = new Sbire(3,3,3,300, 300,20,300,3,new Rectangle(0,0, 2,4), 1500,1, 1,0, personnage1, new ComportementDistanceMax(),new Texture(Gdx.files.internal("coeur_plein.png")),new Texture("Hercule_haut.png"));
         //Gestion projectiles du sbire
         projectiles = new ArrayList<>();
         //
@@ -418,8 +430,10 @@ public class GameScreen implements Screen {
         }
         // Gestion de la pause
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE) || Gdx.input.isKeyJustPressed(Input.Keys.P)) {
+            // Assurez-vous que les timers sont sauvegardés avant la pause
+            // au lieu de les annuler dans hide()
             game.setScreen(new PauseScreen(game, this));
-            return; // Sortir de la méthode pour éviter de traiter d'autres entrées
+            return;
         }
         // Gestion du game Over
         if (!personnage1.enVie()) {
@@ -928,6 +942,15 @@ public class GameScreen implements Screen {
     if (attackManager != null) {
         attackManager.dispose();
     }
+
+    // Libérer les ressources des sbires
+    if (niveau != null && niveau.getSbires() != null) {
+        for (Sbire sbire : niveau.getSbires()) {
+            if (sbire != null) {
+                sbire.dispose();
+            }
+        }
+    }
     }
 
     @Override
@@ -960,6 +983,9 @@ public class GameScreen implements Screen {
 
     @Override
     public void hide() {
+        // Ne pas annuler les timers ici, sinon ils seront perdus après la pause
+        // Commentez ces lignes ou supprimez-les
+        /*
         if (timer != null) {
             timer.cancel();
             timer = null;
@@ -968,6 +994,7 @@ public class GameScreen implements Screen {
             timer2.cancel();
             timer2 = null;
         }
+        */
     }
 
     // public void update() {
