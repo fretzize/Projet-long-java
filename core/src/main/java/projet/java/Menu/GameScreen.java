@@ -419,6 +419,19 @@ public class GameScreen implements Screen {
             }
         }
 
+        // Activer/désactiver l'affichage des hitboxes avec la touche H
+        if (Gdx.input.isKeyJustPressed(Input.Keys.H)) {
+            if (debugger != null) {
+                // Activer le debug explicitement si ce n'est pas déjà fait
+                if (!debugger.isDebugEnabled()) {
+                    debugger.toggleDebug();
+                }
+                
+                // Puis basculer l'affichage des hitboxes
+                debugger.toggleHitboxDisplay();
+                System.out.println("État hitboxes après toggle: " + debugger.isShowingHitboxes());
+            }
+        }
         // Limiter le joueur à la map
         //personnage1.changePositionX(MathUtils.clamp(personnage1.getPositionX(), 0, mapSize - skin.getWidth())-personnage1.getPositionX());
         //personnage1.changePositionY(MathUtils.clamp(personnage1.getPositionY(), 0, mapSize - skin.getWidth())-personnage1.getPositionY());
@@ -693,31 +706,35 @@ public class GameScreen implements Screen {
         // Réinitialiser la couleur
         game.batch.setColor(1, 1, 1, 1);
         game.batch.end();
-        
+
         // === DESSIN DES HITBOXES ===
-        shapeRenderer.setProjectionMatrix(camera.combined);
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
-        
-        // Hitbox du joueur
-        shapeRenderer.setColor(0, 1, 0, 1);  // Vert
-        shapeRenderer.rect(playerX + hitboxX, playerY + hitboxY, playerHitbox.width, playerHitbox.height);
-        
-        // Hitbox du sbire UNIQUEMENT s'il est en vie
-        if (sbiretest != null && sbiretest.enVie()) {
-            shapeRenderer.setColor(1, 0, 0, 1);  // Rouge
-            Rectangle sbireHitbox = sbiretest.getHitbox();
-            shapeRenderer.rect(sbireHitbox.x, sbireHitbox.y, sbireHitbox.width, sbireHitbox.height);
+        if (debugger != null && debugger.isShowingHitboxes()) {
+            // Configuration du shape renderer
+            shapeRenderer.setProjectionMatrix(camera.combined);
+            shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
+            
+            // Hitbox du joueur
+            shapeRenderer.setColor(0, 1, 0, 1);  // Vert
+            shapeRenderer.rect(playerX + hitboxX, playerY + hitboxY, 10, 10);
+            
+            // Hitboxes des sbires
+            shapeRenderer.setColor(1, 0, 0, 1); // Rouge
+            for (Sbire sbire : niveau.getSbires()) {
+                if (sbire.enVie()) {
+                    Rectangle hitbox = sbire.getHitbox();
+                    shapeRenderer.rect(hitbox.x, hitbox.y, hitbox.width, hitbox.height);
+                }
+            }
+            
+            // Hitbox de l'attaque si active
+            if (attackManager.isAttacking()) {
+                shapeRenderer.setColor(0, 0, 1, 1);  // Bleu
+                Rectangle attackZone = attackManager.getArmeMelee().getZoneAttaque();
+                shapeRenderer.rect(attackZone.x, attackZone.y, attackZone.width, attackZone.height);
+            }
+            
+            shapeRenderer.end();
         }
-        
-        // Hitbox de l'attaque si active
-        if (attackManager.isAttacking()) {
-            shapeRenderer.setColor(0, 0, 1, 0.7f);  // Bleu
-            Rectangle attackZone = attackManager.getArmeMelee().getZoneAttaque();
-            shapeRenderer.rect(attackZone.x, attackZone.y, attackZone.width, attackZone.height);
-        }
-        
-        shapeRenderer.end();
-    
     }
 
     @Override

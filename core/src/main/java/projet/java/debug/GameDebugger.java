@@ -379,4 +379,26 @@ public class GameDebugger {
             this.remainingTime = LOG_DISPLAY_DURATION;
         }
     }
+
+    // Ajouter cette méthode pour activer/désactiver l'affichage des hitboxes
+    public void toggleHitboxDisplay() {
+        showHitboxes = !showHitboxes;
+        log("Affichage des hitboxes " + (showHitboxes ? "activé" : "désactivé"), LogType.INFO);
+    }
+
+    // Ajouter cette méthode pour vérifier si les hitboxes doivent être affichées
+    public boolean isShowingHitboxes() {
+        return debugEnabled && showHitboxes;
+    }
+
+    // Ajouter cette méthode pour vérifier si le débogage est activé
+    public boolean isDebugEnabled() {
+        return debugEnabled;
+    }
+
+    // Ajouter cette méthode
+    public void toggleDebug() {
+        debugEnabled = !debugEnabled;
+        log("Mode debug " + (debugEnabled ? "activé" : "désactivé"), LogType.INFO);
+    }
 }
