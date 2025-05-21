@@ -7,6 +7,7 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 
 import projet.java.Main;
+import projet.java.animation.ImpactEffect;
 
 public class Sbire implements Entite{
 
@@ -49,6 +50,9 @@ public class Sbire implements Entite{
     private boolean damageEffect = false;
     private float damageEffectTime = 0;
     private final float DAMAGE_EFFECT_DURATION = 0.5f; // Increased from 0.3f to 0.5f
+
+    private ImpactEffect impactEffect = new ImpactEffect();
+    private Vector2 lastKnockbackDirection = new Vector2();
 
 
     public Sbire(int vie, int shield,int mana, float x, float y,float vitesseDeplacement,float vitesseProjectile,float cooldown,Rectangle hitbox, float porteeProjectile,float porteeCaC, int degats, int degatsCaC, Personnage cible, ComportementSbire comportement,Texture projectileTexture,Texture sbireTexture) {
@@ -270,6 +274,21 @@ public class Sbire implements Entite{
         // Au lieu d'appliquer directement le déplacement, on initialise une vélocité
         knockbackVelocity.set(directionKnockback).scl(forceKnockback);
         isKnockedBack = true;
+        
+        // Sauvegarder la direction du knockback et démarrer l'effet d'impact
+        lastKnockbackDirection.set(directionKnockback);
+        
+        // Positionner l'effet d'impact légèrement derrière le sbire (dans la direction opposée au knockback)
+        float impactX = this.positionX + (this.hitbox.width / 2) - directionKnockback.x * 20;
+        float impactY = this.positionY + (this.hitbox.height / 2) - directionKnockback.y * 20;
+        
+        // Lancer l'animation d'impact
+        impactEffect.start(impactX, impactY, directionKnockback.cpy().scl(-1));
+    }
+
+    // Ajouter cette méthode à la classe Sbire
+    public ImpactEffect getImpactEffect() {
+        return impactEffect;
     }
 
     // Ajouter cette méthode qui sera appelée à chaque frame
@@ -295,11 +314,15 @@ public class Sbire implements Entite{
 
     // Modifier la méthode agir pour intégrer la mise à jour du knockback
     public void agir(float deltaTime, List<Projectile> projectiles) {
+        // Mise à jour de l'effet d'impact
+        impactEffect.update(deltaTime);
+        
         // Mise à jour du timer de l'effet de dégât
         if (damageEffect) {
             damageEffectTime += deltaTime;
             if (damageEffectTime >= DAMAGE_EFFECT_DURATION) {
                 damageEffect = false;
+                damageEffectTime = 0;
             }
         }
         

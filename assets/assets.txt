@@ -62,6 +62,12 @@ Hercule_bas.png
 Hercule_droite.png
 Hercule_gauche.png
 Hercule_haut.png
+Impact_1.png
+Impact_2.png
+Impact_3.png
+Impact_4.png
+Impact_5.png
+Impact_6.png
 barres_pleine.png
 barres_vide.png
 bouclier.png
