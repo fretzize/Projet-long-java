@@ -522,11 +522,6 @@ public class GameScreen implements Screen {
                 // Sauvegarder la couleur originale du batch
                 Color originalColor = new Color(game.batch.getColor());
                 
-                // Dessiner l'effet d'impact derrière le sbire si actif
-                if (sbire.getImpactEffect().isActive()) {
-                    sbire.getImpactEffect().draw(game.batch);
-                }
-                
                 // Appliquer l'effet de flash blanc si actif
                 if (sbire.isDamageEffectActive()) {
                     float intensity = sbire.getDamageEffectIntensity();
@@ -538,7 +533,7 @@ public class GameScreen implements Screen {
                         );
                 }
                 
-                // Dessiner le sbire
+                // INVERSER L'ORDRE : D'abord dessiner le sbire
                 game.batch.draw(
                     sbire.getSbireTexture(),
                     sbire.getPositionX(),
@@ -546,6 +541,11 @@ public class GameScreen implements Screen {
                     sbireScaledWidth,
                     sbireScaledHeight
                 );
+                
+                // PUIS dessiner l'effet d'impact par-dessus le sbire
+                if (sbire.getImpactEffect().isActive()) {
+                    sbire.getImpactEffect().draw(game.batch);
+                }
                 
                 // Restaurer la couleur originale
                 game.batch.setColor(originalColor);
