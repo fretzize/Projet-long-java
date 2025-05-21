@@ -41,7 +41,7 @@ public class AttackManager {
         this.cooldownAttaque = cooldownAttaque;
         
         // Initialiser l'arme avec une portée raisonnable
-        this.armeMelee = new ArmeMelee("Épée", 20, 0, 50f, cooldownAttaque, "menubackground.png", 90f, 150f);
+        this.armeMelee = new ArmeMelee("Épée", 20, 0, 35f, cooldownAttaque, "menubackground.png", 90f, 150f);
         
         // Charger le son d'attaque
         try {

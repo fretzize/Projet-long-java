@@ -269,21 +269,42 @@ public class Sbire implements Entite{
         }
     }
 
-    // Méthode modifiée pour appliquer le knockback
+    // Méthode modifiée pour que l'effet d'impact apparaisse dans la bonne direction
     public void appliquerKnockback(Vector2 directionKnockback, float forceKnockback) {
         // Au lieu d'appliquer directement le déplacement, on initialise une vélocité
         knockbackVelocity.set(directionKnockback).scl(forceKnockback);
         isKnockedBack = true;
         
-        // Sauvegarder la direction du knockback et démarrer l'effet d'impact
+        // Sauvegarder la direction du knockback
         lastKnockbackDirection.set(directionKnockback);
         
-        // Positionner l'effet d'impact légèrement derrière le sbire (dans la direction opposée au knockback)
-        float impactX = this.positionX + (this.hitbox.width / 2) - directionKnockback.x * 20;
-        float impactY = this.positionY + (this.hitbox.height / 2) - directionKnockback.y * 20;
+        // Calculer le centre de la hitbox du sbire
+        float centerX = this.positionX + (this.hitbox.width / 2);
+        float centerY = this.positionY + (this.hitbox.height / 2);
         
-        // Lancer l'animation d'impact
-        impactEffect.start(impactX, impactY, directionKnockback.cpy().scl(-1));
+        // La direction du knockback pointe du joueur vers le sbire
+        // Nous voulons que l'effet apparaisse du côté où l'attaque frappe le sbire
+        // C'est donc du côté d'où vient le knockback (direction opposée)
+        
+        // CORRECTION: Utiliser la direction du knockback directement, sans l'inverser
+        Vector2 knockbackDir = new Vector2(directionKnockback).nor();
+        
+        // Calculer la distance du centre au bord de la hitbox dans cette direction
+        float distanceToBorder;
+        if (Math.abs(knockbackDir.x) > Math.abs(knockbackDir.y)) {
+            // Si le mouvement est plus horizontal que vertical
+            distanceToBorder = (knockbackDir.x > 0 ? this.hitbox.width / 2 : -this.hitbox.width / 2) / knockbackDir.x;
+        } else {
+            // Si le mouvement est plus vertical qu'horizontal
+            distanceToBorder = (knockbackDir.y > 0 ? this.hitbox.height / 2 : -this.hitbox.height / 2) / knockbackDir.y;
+        }
+        
+        // Calculer le point d'impact sur le bord de la hitbox
+        float impactX = centerX + knockbackDir.x * distanceToBorder;
+        float impactY = centerY + knockbackDir.y * distanceToBorder;
+        
+        // Lancer l'animation d'impact avec la direction inverse pour l'orientation correcte
+        impactEffect.start(impactX, impactY, knockbackDir.cpy().scl(-1));
     }
 
     // Ajouter cette méthode à la classe Sbire

@@ -23,7 +23,7 @@ public class ImpactEffect {
             frames[i] = new TextureRegion(new Texture(Gdx.files.internal("Impact_" + (i + 1) + ".png")));
         }
         // Réduire la durée de chaque frame pour une animation plus rapide
-        impactAnimation = new Animation<>(0.05f, frames); // Animation très rapide (40fps au lieu de 20fps)
+        impactAnimation = new Animation<>(0.035f, frames); // Animation très rapide (40fps au lieu de 20fps)
     }
     
     public ImpactEffect() {
