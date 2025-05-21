@@ -42,6 +42,7 @@ public class GameScreen implements Screen {
     //tout ce qui est utile à la map :
     private ShapeRenderer shapeRenderer;
     Array<Rectangle> mursHitboxes ;
+    Array<Rectangle> porteHitboxes ;
     Texture solTexture;
     Texture solTexture2;
     Texture solTexture3;
@@ -217,7 +218,7 @@ public class GameScreen implements Screen {
         personnage1.create_entite();
 
         // TEST SBIRE
-        sbireTest = new Sbire(3,3,3,300, 300,20,300,3,new Rectangle(0,0, 2,4), 1500,1, 1,0, personnage1, new ComportementBoss(),new Texture(Gdx.files.internal("coeur_plein.png")),new Texture("Hercule_haut.png"));
+        sbireTest = new Sbire(3,3,3,300, 300,20,300,3,new Rectangle(0,0, 2,4), 1500,1, 1,0, personnage1, new ComportementMelee(),new Texture(Gdx.files.internal("coeur_plein.png")),new Texture("Hercule_haut.png"));
         //Gestion projectiles du sbire
         projectiles = new ArrayList<>();
         //
@@ -354,13 +355,15 @@ public class GameScreen implements Screen {
 
         float oldX = personnage1.getPositionX();
         float oldY = personnage1.getPositionY();
+        int xp = 0 ;
+        int yp = 0 ;
 
         // Déplacement du joueur
         if (Gdx.input.isKeyPressed(game.toucheHaut) || Gdx.input.isKeyPressed(Input.Keys.UP)) {
             //playerY += currentSpeed * avance;
             personnage1.changePositionY(currentSpeed * avance);
         }
-put.isKeyPressed(game.toucheGauche) || Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
+        if(Gdx.input.isKeyPressed(game.toucheGauche) || Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
             //playerX -= currentSpeed * avance;
             personnage1.changePositionX(-currentSpeed * avance);
         }
@@ -373,20 +376,22 @@ put.isKeyPressed(game.toucheGauche) || Gdx.input.isKeyPressed(Input.Keys.LEFT)) 
             personnage1.changePositionY(-currentSpeed * avance);
         }
 
+        //test mur en x
         playerHitbox.setPosition(personnage1.getPositionX()+hitboxX, oldY+hitboxY);
         for (int i = 0; i < mursHitboxes.size; i++) {
             if (playerHitbox.overlaps(mursHitboxes.get(i))) {
                 // collision détectée, on annule le déplacement
                 personnage1.setPositionX(oldX);
-                playerHitbox.setPosition(personnage1.getPositionX()+hitboxX, personnage1.getPositionY()+hitboxY);
+                playerHitbox.setPosition(personnage1.getPositionX()+hitboxX, personnage1.getPositionY() + hitboxY);
                 break;
             }
         }
+        //test porte en x
         playerHitbox.setPosition(personnage1.getPositionX()+hitboxX, personnage1.getPositionY()+hitboxY);
         for (int i = 0; i < porteHitboxes.size; i++) {
             if (playerHitbox.overlaps(porteHitboxes.get(i))) {
                 // collision détectée, on annule le déplacement
-                playerX = oldX;
+                personnage1.setPositionX(oldX);
                 playerHitbox.setPosition(oldY+hitboxX, oldY+hitboxY);
                 xp = (int) Math.floor(porteHitboxes.get(i).x/TILE_SIZE);
                 yp = (int) Math.floor(porteHitboxes.get(i).y/TILE_SIZE);
@@ -394,29 +399,29 @@ put.isKeyPressed(game.toucheGauche) || Gdx.input.isKeyPressed(Input.Keys.LEFT)) 
                 break;
             }
         }
-
-        playerHitbox.setPosition(playerX+hitboxX, playerY+hitboxY);
+        //test mur en Y
+        playerHitbox.setPosition(personnage1.getPositionX()+hitboxX, personnage1.getPositionY()+hitboxY);
         for (int i = 0; i < mursHitboxes.size; i++) {
             if (playerHitbox.overlaps(mursHitboxes.get(i))) {
                 // collision détectée, on annule le déplacement
-                //playerY = oldY;
                 personnage1.setPositionY(oldY);
+
                 playerHitbox.setPosition(personnage1.getPositionX()+hitboxX, personnage1.getPositionY()+hitboxY);
                 break;
             }
         }
+        //test porte en Y
         for (int i = 0; i < porteHitboxes.size; i++) {
             if (playerHitbox.overlaps(porteHitboxes.get(i))) {
                 // collision détectée, on annule le déplacement
-                playerY = oldY;
-                playerHitbox.setPosition(playerX+hitboxX, playerY+hitboxY);
+                personnage1.setPositionY(oldY);
+                playerHitbox.setPosition(personnage1.getPositionX()+hitboxX, personnage1.getPositionY()+hitboxY);
                 xp = (int) Math.floor(porteHitboxes.get(i).x/TILE_SIZE);
                 yp = (int) Math.floor(porteHitboxes.get(i).y/TILE_SIZE);
                 map[map.length - 1 - yp][xp] = 20;
                 break;
             }
         }
-
 
 
         // Mise à jour du dash
@@ -811,6 +816,10 @@ put.isKeyPressed(game.toucheGauche) || Gdx.input.isKeyPressed(Input.Keys.LEFT)) 
             return solTexture12;
         } else if (value == 200) {
             return murTexture2;
+        }else if (value == 20) {
+            return porteHOpen;
+        }else if (value == 30) {
+            return porteVOpen;
         } else {
             return solTexture; // 1 ou autre = sol
         }
