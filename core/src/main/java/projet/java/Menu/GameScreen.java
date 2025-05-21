@@ -199,7 +199,7 @@ public class GameScreen implements Screen {
     //TEST SBIRE
 
     private Sbire sbireTest;
-    private ArrayList<Projectile> projectiles;
+    
     int une_fois = 1;
     @Override
     public void show() {
@@ -557,8 +557,8 @@ public class GameScreen implements Screen {
         camera.position.y += (playerCenterY - camera.position.y) * lerpFactor;
 
         // Synchroniser la position de personnage1 avec les coordonnées réelles du joueur
-        personnage1.setPositionX(playerX);
-        personnage1.setPositionY(playerY);
+        //personnage1.setPositionX(player);
+        //personnage1.setPositionY(playerY);
         
         // Mettre à jour le sbire avec la position correcte du joueur SEULEMENT s'il est en vie
         if (sbiretest != null && sbiretest.enVie()) {
@@ -862,7 +862,7 @@ public class GameScreen implements Screen {
             
             // Hitbox du joueur
             shapeRenderer.setColor(0, 1, 0, 1);  // Vert
-            shapeRenderer.rect(playerX + hitboxX, playerY + hitboxY, 10, 10);
+            shapeRenderer.rect(personnage1.getPositionX() + hitboxX, personnage1.getPositionY() + hitboxY, 10, 10);
             
             // Hitboxes des sbires
             shapeRenderer.setColor(1, 0, 0, 1); // Rouge

@@ -68,6 +68,7 @@ Impact_3.png
 Impact_4.png
 Impact_5.png
 Impact_6.png
+Korcy.ttf
 Orc1/orc1_back_idle_1.png
 Orc1/orc1_back_idle_2.png
 Orc1/orc1_back_idle_3.png
@@ -151,6 +152,7 @@ Orc1/orc1_right_run_attack_8.png
 barres_pleine.png
 barres_vide.png
 bouclier.png
+case_inventaire.png
 clean-crispy-ui.atlas
 clean-crispy-ui.json
 clean-crispy-ui.png
@@ -159,13 +161,19 @@ dash.png
 dash2.png
 dash_gris.png
 doorv.png
+epee1.png
+epee2.png
+epee3.png
 floor.png
 font-export.fnt
+gameoversound.wav
 hs_err_pid32676.log
 image_heracles_normal.png
 map.png
 map/1.png
 map/2.png
+map/Door_OPEN_H.png
+map/Door_OPEN_V.png
 map/Tile_11.png
 map/Tile_20.png
 map/Tile_21.png
@@ -191,5 +199,6 @@ map/wall.png
 menubackground.png
 menumusic.mp3
 police.otf
+potion_de_vie.png
 sword_swing.mp3.mp3
 wall.png

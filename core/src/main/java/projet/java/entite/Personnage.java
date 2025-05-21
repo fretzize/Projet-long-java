@@ -406,13 +406,7 @@ public class Personnage extends ApplicationAdapter implements Entite {
         game.batch.end();
     }
 
-    public void setPositionX(float x) {
-        this.positionX = x;
-    }
 
-    public void setPositionY(float y) {
-        this.positionY = y;
-    }
 
     // Ajouter cette interface pour écouter les événements de dégâts
     public interface DamageListener {
