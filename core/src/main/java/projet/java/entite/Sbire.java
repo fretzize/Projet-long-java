@@ -8,8 +8,9 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 
 import projet.java.Main;
+import projet.java.animation.BossAnimationHandler;
 import projet.java.animation.ImpactEffect;
-import projet.java.animation.SbireAnimationHandler;
+import projet.java.animation.SbireAnimationHandler; // Ajouter cet import en haut de la classe avec les autres imports
 
 public class Sbire implements Entite{
 
@@ -57,7 +58,11 @@ public class Sbire implements Entite{
     private Vector2 lastKnockbackDirection = new Vector2();
 
     private SbireAnimationHandler animationHandler;
-    private Vector2 lastMovementDirection = new Vector2(0, -1); // Direction par défaut
+    private BossAnimationHandler bossAnimationHandler;
+    private boolean isBoss = false;
+
+    // Direction de déplacement pour l'animation
+    private Vector2 lastMovementDirection = new Vector2(0, -1); // Direction par défaut: vers le bas
 
 
     public Sbire(int vie, int shield,int mana, float x, float y,float vitesseDeplacement,float vitesseProjectile,float cooldown,Rectangle hitbox, float porteeProjectile,float porteeCaC, int degats, int degatsCaC, Personnage cible, ComportementSbire comportement,Texture projectileTexture,Texture sbireTexture) {
@@ -81,8 +86,19 @@ public class Sbire implements Entite{
         this.projectileTexture = projectileTexture;
         this.sbireTexture = sbireTexture;
 
-        // Initialiser l'animation handler
-        this.animationHandler = new SbireAnimationHandler();
+        // Réduire la hitbox
+        adjustHitbox();
+
+        // Déterminer si c'est un boss basé sur le comportement
+        this.isBoss = comportement instanceof ComportementBoss;
+        
+        // Initialiser le gestionnaire d'animation approprié
+        if (this.isBoss) {
+            this.bossAnimationHandler = new BossAnimationHandler();
+            System.out.println("Boss créé avec son animation spéciale!");
+        } else {
+            this.animationHandler = new SbireAnimationHandler();
+        }
     }
 
     public void setCible(Personnage cible) {
@@ -390,8 +406,8 @@ public class Sbire implements Entite{
         } 
         // Sinon, si le comportement normal est en cours
         else if (comportement != null) {
-            // Pour un sbire melee, vérifier s'il est à portée d'attaque
-            if (comportement instanceof ComportementMelee && estAPorteeCaC()) {
+            // Pour un sbire melee ou boss, vérifier s'il est à portée d'attaque
+            if ((comportement instanceof ComportementMelee || comportement instanceof ComportementBoss) && estAPorteeCaC()) {
                 isAttacking = true;
             } else if (cible != null) {
                 // Sbire se déplace vers la cible
@@ -402,8 +418,12 @@ public class Sbire implements Entite{
             }
         }
         
-        // Mettre à jour l'animation
-        animationHandler.update(deltaTime, movementDir, isAttacking);
+        // Mettre à jour l'animation appropriée
+        if (isBoss && bossAnimationHandler != null) {
+            bossAnimationHandler.update(deltaTime, movementDir, isAttacking);
+        } else if (animationHandler != null) {
+            animationHandler.update(deltaTime, movementDir, isAttacking);
+        }
         
         // Continuer avec le comportement normal si pas en knockback
         if (!isKnockedBack && comportement != null) {
@@ -570,29 +590,63 @@ public class Sbire implements Entite{
 
     // Ajouter une méthode pour obtenir la frame d'animation courante
     public TextureRegion getCurrentFrame() {
-        return animationHandler.getCurrentFrame();
+        if (isBoss && bossAnimationHandler != null) {
+            return bossAnimationHandler.getCurrentFrame();
+        } else if (animationHandler != null) {
+            return animationHandler.getCurrentFrame();
+        }
+        return null;
     }
-
 
     // Ajouter cette méthode dans dispose() pour nettoyer les ressources
     public void dispose() {
         if (animationHandler != null) {
             animationHandler.dispose();
         }
+        if (bossAnimationHandler != null) {
+            bossAnimationHandler.dispose();
+        }
         // Autres nettoyages...
     }
 
     // Ajouter cette méthode dans la classe Sbire
     private void updateHitboxPosition() {
-        // Calculer le centre visuel du sprite
-        float spriteWidth = getCurrentFrame().getRegionWidth();
-        float spriteHeight = getCurrentFrame().getRegionHeight();
+        // Réduire la taille de la hitbox à 60% pour les sbires normaux, 80% pour les boss
+        float reductionFactor = isBoss ? 0.8f : 0.6f;
         
-        // Calculer l'offset pour centrer la hitbox sur le sprite
-        float offsetX = (spriteWidth - hitbox.width) / 2;
-        float offsetY = (spriteHeight - hitbox.height) / 2;
+        // Calculer le décalage pour centrer la hitbox
+        float offsetX = (this.hitbox.width / reductionFactor - this.hitbox.width) / 2;
+        float offsetY = (this.hitbox.height / reductionFactor - this.hitbox.height) / 2;
         
-        // Positionner la hitbox de manière centrée
-        this.hitbox.setPosition(this.positionX + offsetX, this.positionY + offsetY);
+        // Mettre à jour la position de la hitbox
+        this.hitbox.x = this.positionX + offsetX;
+        this.hitbox.y = this.positionY + offsetY;
+    }
+
+    // Ajouter cette méthode pour réduire et centrer la hitbox
+    private void adjustHitbox() {
+        // Réduire la taille de la hitbox à 60% pour les sbires normaux, 80% pour les boss
+        float reductionFactor = isBoss ? 0.8f : 0.6f;
+        float newWidth = this.hitbox.width * reductionFactor;
+        float newHeight = this.hitbox.height * reductionFactor;
+        
+        // Calculer le décalage pour centrer la hitbox
+        float offsetX = (this.hitbox.width - newWidth) / 2;
+        float offsetY = (this.hitbox.height - newHeight) / 2;
+        
+        // Mettre à jour la hitbox avec les nouvelles dimensions et position
+        this.hitbox.width = newWidth;
+        this.hitbox.height = newHeight;
+        this.hitbox.x = this.positionX + offsetX;
+        this.hitbox.y = this.positionY + offsetY;
+    }
+
+    /**
+     * Vérifie si ce sbire est un boss.
+     * 
+     * @return true si c'est un boss, false sinon
+     */
+    public boolean isBoss() {
+        return this.isBoss;
     }
 }
