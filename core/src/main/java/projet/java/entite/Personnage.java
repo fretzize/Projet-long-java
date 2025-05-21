@@ -4,10 +4,12 @@ package projet.java.entite;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.Gdx;
 import projet.java.Main;
 
 import java.util.Timer;
+import projet.java.Inventaire.Inventaire;
 import java.util.TimerTask;
 
 
@@ -25,7 +27,8 @@ public class Personnage extends ApplicationAdapter implements Entite {
     private int mana_max;
     private int vie_max;
     private int bouclier_max;
-    
+    private Arme arme;
+    private Inventaire inventaire = new Inventaire();
 
     // etat bouclier et dash personnage
     private boolean etatbouclier = false;
@@ -40,7 +43,7 @@ public class Personnage extends ApplicationAdapter implements Entite {
     // cooldown fash et combien de temps se remet le bouclier
     int decompte = 3;
     int decompte_bouclier = 6;
-
+    private Rectangle hitbox; // Hitbox du personnage
     boolean prendre_des_degats = false;
     boolean gameOver =false;
     int acceleration = 2000;
@@ -107,7 +110,7 @@ public class Personnage extends ApplicationAdapter implements Entite {
 
     // on perd d'abord en bouclier et ensuite en vide si on n'a plus de vie
 
-
+    
     @Override
     public int getMana(){
         return this.mana;
@@ -132,18 +135,43 @@ public class Personnage extends ApplicationAdapter implements Entite {
     public float getPositionY(){
         return this.positionY;
     }
+    public Inventaire getInventaire(){
+            return this.inventaire;
+    }
 
-    public Personnage(int mana, int vie, int bouclier, String nom, Texture skin) {//}, Vector2 position) {
-        this.nom = nom;
-        this.vie = vie;
-        this.mana = mana;
+    public void changePositionX(float x){
+        this.positionX += x;
+        this.hitbox.setPosition(this.positionX, this.positionY);
+    }
+
+    public void changePositionY(float y){
+        this.positionY += y;
+        this.hitbox.setPosition(this.positionX, this.positionY);
+    }
+
+    public void setPositionX(float x){
+        this.positionX = x;
+        this.hitbox.setPosition(this.positionX, this.positionY);
+    }
+    public void setPositionY(float y){
+        this.positionY = y;
+        this.hitbox.setPosition(this.positionX, this.positionY);
+    }
+
+    public Personnage(Texture skin,Rectangle hitbox) {//}, Vector2 position) {
+        this.nom = "mathisvaillant";
+        this.vie = 5;
+        //this.mana = mana;
         // this.skin = skin;
-        this.mana_max = mana;
-        this.vie_max = vie;
-        this.bouclier = bouclier;
-        this.bouclier_max = bouclier;
-        this.positionY = 0;
-        this.positionX = 0;
+        //this.mana_max = mana;
+        this.vie_max = 5;
+        this.bouclier = 5;
+        this.bouclier_max = 5;
+        this.positionY = 250;
+        this.positionX = 250;
+        this.hitbox = hitbox;
+        this.vie_max = 5;
+        this.bouclier_max = 5;
     }
     
 
@@ -292,6 +320,19 @@ public class Personnage extends ApplicationAdapter implements Entite {
         }
     }
 
+
+    public Rectangle getHitbox() {
+        return hitbox;
+    }
+
+
+    public void addVie(int vie) {
+        if (this.vie + vie > this.vie_max) {
+            this.vie = this.vie_max;
+        } else {
+            this.vie += vie;
+        }
+    }
     //Methode pour récupérer le bouclier
 
     public void recupBouclier() {

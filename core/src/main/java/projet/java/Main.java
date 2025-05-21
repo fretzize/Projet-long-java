@@ -4,11 +4,11 @@ import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
-import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.utils.viewport.FitViewport;
 
 import projet.java.Menu.MenuScreen;
 
@@ -19,6 +19,8 @@ public class Main extends Game {
     public FitViewport viewport;
     public BitmapFont font;
     public Music menuMusic; // Musique de fond
+    public Music gameMusic; // Musique de jeu
+    public Music gameOverMusic; // Musique de fin de jeu
 
     private float menuMusicVolume = 0.2f;
     private float gameSoundVolume = 0.5f;
@@ -33,6 +35,7 @@ public class Main extends Game {
     public int toucheDroite = Input.Keys.D;
     public int toucheDash = Input.Keys.SPACE;
     public int toucheAttaque = MOUSE_LEFT_CLICK; // Clic gauche par défaut
+    public int toucheInventaire = Input.Keys.I;
 
     public void setTouche(int index, int keycode) {
         switch(index) {
@@ -42,9 +45,21 @@ public class Main extends Game {
             case 3: toucheDroite = keycode; break;
             case 4: toucheDash = keycode; break;
             case 5: toucheAttaque = keycode; break;
+            case 6: toucheInventaire = keycode; break;
         }
     }
 
+    public void playGameOverSound() {
+        
+        
+        // Charger et jouer le son de game over
+        if (gameOverMusic == null) {
+            gameOverMusic = Gdx.audio.newMusic(Gdx.files.internal("gameoversound.wav"));
+            gameOverMusic.setVolume(0.5f);
+        }
+        
+        gameOverMusic.play();
+    }
     public void stopMenuMusic() {
         if (menuMusic != null && menuMusic.isPlaying()) {
             menuMusic.stop(); // Arrêter la musique de fond
@@ -74,6 +89,13 @@ public class Main extends Game {
         this.gameSoundVolume = volume;
     }
     
+    public void disposeGameOverSound() {
+        if (gameOverMusic != null) {
+            
+            gameOverMusic.dispose();
+            gameOverMusic = null; 
+        }
+    }
     @Override
     public void create() {
         batch = new SpriteBatch();

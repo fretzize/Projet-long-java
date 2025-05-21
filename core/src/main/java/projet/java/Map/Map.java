@@ -11,6 +11,7 @@ public class Map {
     private Chambre[] chambres;
     private int nbChambre;
     private boolean[][] couloir;
+    private int[] coordspawn;
 
     public Map(int nb_chambre, int[] taille_chambre) {
         // Créer les chambres
@@ -19,15 +20,20 @@ public class Map {
         this.tailleInitChambres = taille_chambre;
         this.chambres = new Chambre[nbChambre];
         int[] initial = {0, 0};
+        int[] coordSpawn = {0, 0};
         boolean spawn = true;
         for (int i = 0; i < nbChambre; i++) {
             // Initialisation correcte des chambres
-            if (i !=0){
-                spawn = false;
-            }
+
             Chambre chambre = new Chambre(i, initial.clone(), taille_chambre.clone());
             chambre.createur_chambre(spawn);
             this.chambres[i] = chambre; // Stocke la chambre dans le tableau
+            if (spawn){
+                this.coordspawn = chambre.getSpawn();
+            }
+            if (i == 0){
+                spawn = false;
+            }
         }
 
         // Créer la map
@@ -40,11 +46,15 @@ public class Map {
             }
         }
     }
-
-    public Map(int[] taille, int[][] coord,int[][] mini_coord) {
+    public void setSpawn(int x, int y) {
+        coordspawn[0] = x;
+        coordspawn[1] = y;
+    }
+    public Map(int[] taille, int[][] coord,int[][] mini_coord, int[] spawn) {
         this.taille = taille;
         this.coord = coord;
         this.mini_coord = mini_coord;
+        this.coordspawn = spawn;
     }
 
     public void placerChambresGrille() {
@@ -83,6 +93,12 @@ public class Map {
         }
     }
 
+    public int getCoordspawnX() {
+        return coordspawn[0];
+    }
+    public int getCoordspawnY() {
+        return coordspawn[1];
+    }
     public void corridor_creator() {
         this.couloir = new boolean[nbChambre][nbChambre];
         Random rand = new Random();
@@ -386,6 +402,24 @@ public class Map {
         }
     }
 
+    public void afficherMapTest() {
+        for  (int i = 0; i < this.taille[0]+1; i++) {
+            System.out.print("--");
+        }
+        System.out.println();
+        for  (int i = 0; i < this.taille[0]; i++) {
+            System.out.print("|");
+            for (int j = 0; j < this.taille[1]; j++) {
+                System.out.print(coord[i][j] +" ");
+            }
+            System.out.print("|");
+            System.out.println();
+        }
+        for  (int i = 0; i < this.taille[0]+1; i++) {
+            System.out.print("--");
+        }
+    }
+
     public Map reducteur() {
         // Trouver les limites extrêmes des sols (valeur 1)
         int minX = this.taille[0] - 1;
@@ -432,7 +466,10 @@ public class Map {
             for (int j = 0; j < nouvelleHauteur; j++) {
                 int iOriginal = i + minX;
                 int jOriginal = j + minY;
-
+                if (this.coordspawn[0] == iOriginal && this.coordspawn[1] == jOriginal) {
+                    this.coordspawn[0] = i;
+                    this.coordspawn[1] = j;
+                }
                 // Copier la valeur de l'ancienne matrice
                 nouvelleCoord[i][j] = this.coord[iOriginal][jOriginal];
             }
@@ -441,7 +478,7 @@ public class Map {
         // Créer une nouvelle carte avec les dimensions réduites
         int[] nouvelleTaille = {nouvelleLargeur, nouvelleHauteur};
         this.reducteur_mini_coord();
-        return new Map(nouvelleTaille, nouvelleCoord,this.mini_coord);
+        return new Map(nouvelleTaille, nouvelleCoord,this.mini_coord,this.coordspawn);
     }
 
     public void afficherMiniCoord() {
@@ -612,6 +649,9 @@ public class Map {
 
     public void supColonne(int i) {
         // Vérifier que l'indice est valide
+        if (i < this.coordspawn[0]) {
+            this.coordspawn[0] --;
+        }
         if (i < 0 || i >= this.taille[0]) return;
 
         int nouvelleLargeur = this.taille[0] - 1;
@@ -633,6 +673,9 @@ public class Map {
 
     public void supLigne(int i) {
         // Vérifier que l'indice est valide
+        if (i < this.coordspawn[1]){
+            this.coordspawn[1] --;
+        }
         if (i < 0 || i >= this.taille[1]) return;
 
         int nouvelleHauteur = this.taille[1] - 1;
@@ -728,5 +771,70 @@ public class Map {
             }
         }
     }
-}
 
+
+
+   public int[] decoupage_spawn(){
+        int X = 0 ;
+        int Y = 0 ;
+        boolean continuex = true;
+        boolean continuey = true;
+        int compteurX = this.taille[0]-1;
+        int compteurY = 0;
+        int compteurMinX = this.taille[0]-1;
+        int compteurMaxY = 0;
+        while (continuex || continuey) {
+            System.out.println(compteurX + " " + compteurY + " " + this.coord[compteurX][compteurY] );
+            if (this.coord[compteurX][compteurY] == 3 || this.coord[compteurX][compteurY] == 2) {
+                X = compteurX;
+                Y = compteurY;
+                continuex = false;
+                continuey = false;
+            }
+//            if (this.coord[compteurX][compteurY] == 2 && continuey) {
+//                Y = compteurY;
+//                continuey = false;
+//            }
+
+            if (compteurX == compteurMinX && compteurY == compteurMaxY) {
+                compteurMaxY ++;
+                compteurMinX --;
+                compteurX = this.taille[0]-1;
+                compteurY ++;
+            }
+            else if(compteurX > compteurMinX + 1) {
+                compteurX --;
+            }
+            else if (compteurX == compteurMinX + 1) {
+                compteurY = 0;
+                compteurX = compteurMinX;
+            }
+            else if (compteurX == compteurMinX ){
+                compteurY ++;
+            }
+
+        }
+
+
+        int[] coord = new int[2
+                ];
+        coord[0] = X;
+        coord[1] = Y;
+        return coord;
+   }
+
+   public void testY(){
+        for (int i = 0; i < this.taille[0]; i++) {
+            for (int j = 0; j < this.taille[1]; j++) {
+                this.coord[i][j] = j;
+            }
+        }
+   }
+   public void testX(){
+        for (int i = 0; i < this.taille[0]; i++) {
+            for (int j = 0; j < this.taille[1]; j++) {
+                this.coord[i][j] = i;
+            }
+        }
+   }
+}

@@ -217,6 +217,7 @@ public class AnimationHandler {
         attackTimer = 0;
     }
     
+    
     public void dispose() {
         for (Animation<TextureRegion> animation : animations) {
             if (animation != null) {

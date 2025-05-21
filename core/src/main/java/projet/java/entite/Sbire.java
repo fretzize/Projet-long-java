@@ -36,9 +36,9 @@ public class Sbire implements Entite{
 
     //Texture du projectile lancé par le sbire
     private Texture projectileTexture;
-    public Texture sbireTexture;
+    private Texture sbireTexture;
     private float porteeProjectile;  //Portée du projectile
-    private int degats;
+    private int degats; // Dégâts infligés par les projectiles
     private float cooldown; // temps entre deux tirs (en secondes)
     private float tempsDepuisDernierTir = 0f;
     private Rectangle hitbox; // Hitbox du sbire
@@ -91,6 +91,18 @@ public class Sbire implements Entite{
 
     public float getPorteeProjectile() {
         return this.porteeProjectile;
+    }
+
+    public float getVitesseProjectile() {
+        return this.vitesseProjectile;
+    }
+
+    public Texture getProjectileTexture(){
+        return this.projectileTexture;
+    }
+
+    public int getDegats(){
+        return this.degats;
     }
 
     public int getMana(){
@@ -236,7 +248,10 @@ public class Sbire implements Entite{
     
         Vector2 vitesseVecteur = direction.scl(vitesseProjectile);
 
-        Rectangle hitboxProjectile = new Rectangle(positionX, positionY, 100, 100);
+        float hitboxWidth = 100;
+        float hitboxHeight = 100;
+
+        Rectangle hitboxProjectile = new Rectangle(positionX - hitboxWidth/2, positionY - hitboxHeight/2, hitboxWidth, hitboxHeight);
         Projectile projectile = new Projectile(
             positionX,
             positionY,
@@ -427,10 +442,19 @@ public class Sbire implements Entite{
         }
     }
 
+    public void setPosition(float x, float y) {
+        this.positionX = x;
+        this.positionY = y;
+        hitbox.setPosition(x, y);
+    }
+
+
+
     //affichage de l'entité
     public void draw(Main game,float scaledWidth,float scaledHeight){
         game.batch.draw(sbireTexture,this.positionX,this.positionY,scaledWidth,scaledHeight);
     }
+
 
     //USELESS
 

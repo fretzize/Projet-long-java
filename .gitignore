@@ -40,3 +40,5 @@ Thumbs.db
 
 # Generated files
 *.generated
+*.bin
+*.lock
