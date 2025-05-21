@@ -283,7 +283,7 @@ public class GameScreen implements Screen {
             20, 300, 3,       // vitesseDeplacement, vitesseProjectile, cooldown
             bossHitbox,
             1500, 100,        // porteeProjectile, porteeCaC 
-            3, 10,            // degats, degatsCaC (plus élevés que le sbire normal)
+            1, 5,             // degats (projectile réduit de 3 à 1), degatsCaC (réduit de 10 à 5)
             personnage1, 
             new ComportementBoss(), // Important: utiliser ComportementBoss pour que isBoss=true
             new Texture(Gdx.files.internal("coeur_plein.png")),
