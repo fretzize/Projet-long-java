@@ -45,6 +45,11 @@ public class Sbire implements Entite{
     private boolean isKnockedBack = false;
     private float knockbackFriction = 0.9f; // Valeur entre 0 et 1, plus elle est proche de 1, plus le knockback dure longtemps
 
+    // Ajouter ces variables pour l'effet visuel de dégâts (en haut avec les autres variables d'instance)
+    private boolean damageEffect = false;
+    private float damageEffectTime = 0;
+    private final float DAMAGE_EFFECT_DURATION = 0.5f; // Increased from 0.3f to 0.5f
+
 
     public Sbire(int vie, int shield,int mana, float x, float y,float vitesseDeplacement,float vitesseProjectile,float cooldown,Rectangle hitbox, float porteeProjectile,float porteeCaC, int degats, int degatsCaC, Personnage cible, ComportementSbire comportement,Texture projectileTexture,Texture sbireTexture) {
         this.vie = vie;
@@ -161,6 +166,15 @@ public class Sbire implements Entite{
                     tempsDepuisDernierTir = 0;
                 }
             }
+
+            // Mettre à jour l'effet de dégâts visuel
+            if (damageEffect) {
+                damageEffectTime += delta;
+                if (damageEffectTime >= DAMAGE_EFFECT_DURATION) {
+                    damageEffect = false; // Arrêter l'effet après sa durée
+                    damageEffectTime = 0;
+                }
+            }
         } catch (Exception e) {
             System.err.println("Erreur dans update du sbire : " + e.getMessage());
         }
@@ -240,6 +254,12 @@ public class Sbire implements Entite{
 
     public void prendreDegats(int degats) {
         this.vie -= degats;
+        
+        // Activer l'effet visuel de dégât avec une durée plus longue
+        damageEffect = true;
+        damageEffectTime = 0;
+        System.out.println("SBIRE HIT! Damage effect activated."); // Debug message
+        
         if (this.vie <= 0) {
             mourir();
         }
@@ -275,6 +295,14 @@ public class Sbire implements Entite{
 
     // Modifier la méthode agir pour intégrer la mise à jour du knockback
     public void agir(float deltaTime, List<Projectile> projectiles) {
+        // Mise à jour du timer de l'effet de dégât
+        if (damageEffect) {
+            damageEffectTime += deltaTime;
+            if (damageEffectTime >= DAMAGE_EFFECT_DURATION) {
+                damageEffect = false;
+            }
+        }
+        
         // Mise à jour du knockback
         updateKnockback(deltaTime);
         
@@ -406,5 +434,31 @@ public class Sbire implements Entite{
     public int getDash() {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'getDash'");
+    }
+
+    // Ajouter ces méthodes à la classe Sbire
+    public boolean isDamageEffectActive() {
+        return damageEffect;
+    }
+
+    public float getDamageEffectIntensity() {
+        if (!damageEffect) return 0;
+        // Retourne une valeur entre 0 et 1 qui diminue au fil du temps
+        return 1 - (damageEffectTime / DAMAGE_EFFECT_DURATION);
+    }
+
+    public Texture getSbireTexture() {
+        return this.sbireTexture;
+    }
+
+    // Add this method to explicitly update the damage effect
+    public void updateDamageEffect(float deltaTime) {
+        if (damageEffect) {
+            damageEffectTime += deltaTime;
+            if (damageEffectTime >= DAMAGE_EFFECT_DURATION) {
+                damageEffect = false;
+                damageEffectTime = 0;
+            }
+        }
     }
 }

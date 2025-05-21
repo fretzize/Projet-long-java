@@ -324,6 +324,16 @@ public class GameScreen implements Screen {
             }
         }
         
+        // Update damage effects for all sbires
+        for (Sbire sbire : niveau.getSbires()) {
+            if (sbire.enVie()) {
+                // Update damage effect timer
+                if (sbire.isDamageEffectActive()) {
+                    sbire.updateDamageEffect(delta);
+                }
+            }
+        }
+        
         logic();
         draw();
         if (!dashOk) {
@@ -503,15 +513,41 @@ public class GameScreen implements Screen {
         float scaledHeight = hauteur_skin * scalePlayer;
         float scaledWidth = scaledHeight * aspectRatio;
 
-        // Dessiner le sbire UNIQUEMENT s'il est en vie
-        if (sbiretest != null && sbiretest.enVie()) {
-            float sbireScaledWidth = largeur_skin * scalePlayer;
-            float sbireScaledHeight = hauteur_skin * scalePlayer;
-            game.batch.draw(sbiretest.sbireTexture, 
-                            sbiretest.getPositionX(), 
-                            sbiretest.getPositionY(), 
-                            sbireScaledWidth, 
-                            sbireScaledHeight);
+        // Dessiner les sbires
+        for (Sbire sbire : niveau.getSbires()) {
+            if (sbire.enVie()) {
+                float sbireScaledWidth = largeur_skin * scalePlayer;
+                float sbireScaledHeight = hauteur_skin * scalePlayer;
+                
+                // Sauvegarder la couleur originale du batch
+                Color originalColor = new Color(game.batch.getColor());
+                
+                // Appliquer l'effet de flash blanc si actif
+                if (sbire.isDamageEffectActive()) {
+                    // Utiliser l'intensité du sbire et non celle du personnage
+                    float intensity = sbire.getDamageEffectIntensity();
+                    
+                    // Définir une couleur blanche avec alpha basé sur l'intensité du sbire
+                    float flash = 1f + 1.5f * intensity; // Entre 2.5 et 1
+                    game.batch.setColor(1,                                  // rouge à 100%
+                        originalColor.g * (1 - intensity),  // réduire le vert
+                        originalColor.b * (1 - intensity),  // réduire le bleu
+                        originalColor.a 
+                    );
+                }
+                
+                // Dessiner le sbire
+                game.batch.draw(
+                    sbire.getSbireTexture(),
+                    sbire.getPositionX(),
+                    sbire.getPositionY(),
+                    sbireScaledWidth,
+                    sbireScaledHeight
+                );
+                
+                // Restaurer la couleur originale
+                game.batch.setColor(originalColor);
+            }
         }
         
         // Sauvegarder la couleur originale du batch
