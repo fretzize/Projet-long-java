@@ -106,19 +106,17 @@ public class AttackManager {
         Vector2 direction = getAttackDirection();
         
         try {
-            // Récupérer la position du personnage avec un décalage pour la hitbox
-            // Ajouter la différence entre la position du personnage et sa hitbox
+            // Position ajustée du personnage (centrée sur la hitbox)
             Vector2 playerPos = new Vector2(
-                personnage.getPositionX() + 22, // Ajout du hitboxX (valeur de GameScreen)
-                personnage.getPositionY() + 18  // Ajout du hitboxY (valeur de GameScreen)
+                personnage.getPositionX() + 22, // Décalage horizontal de la hitbox
+                personnage.getPositionY() + 18  // Décalage vertical de la hitbox
             );
             
-            // Obtenir la taille de la hitbox (estimée)
-            float hitboxWidth = 10;  // Largeur estimée de la hitbox du joueur
-            float hitboxHeight = 10; // Hauteur estimée de la hitbox du joueur
+            // Taille de la hitbox du joueur
+            Vector2 hitboxInfo = new Vector2(10, 10);
             
-            // Créer un Vector2 avec les infos de la hitbox pour placer l'attaque correctement
-            Vector2 hitboxInfo = new Vector2(hitboxWidth, hitboxHeight);
+            // Logs pour déboguer
+            System.out.println("Exécution d'une attaque! Position: " + playerPos + ", Direction: " + direction);
             
             // Passer la position et la taille de la hitbox à la méthode d'attaque
             armeMelee.attaquer_arme(playerPos, direction, hitboxInfo);
@@ -129,6 +127,7 @@ public class AttackManager {
             }
         } catch (Exception e) {
             System.err.println("Erreur lors de l'attaque: " + e.getMessage());
+            e.printStackTrace(); // Afficher la stack trace complète
         }
     }
     

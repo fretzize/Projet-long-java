@@ -3,11 +3,13 @@ package projet.java.entite;
 import java.util.List;
 
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 
 import projet.java.Main;
 import projet.java.animation.ImpactEffect;
+import projet.java.animation.SbireAnimationHandler;
 
 public class Sbire implements Entite{
 
@@ -54,6 +56,9 @@ public class Sbire implements Entite{
     private ImpactEffect impactEffect = new ImpactEffect();
     private Vector2 lastKnockbackDirection = new Vector2();
 
+    private SbireAnimationHandler animationHandler;
+    private Vector2 lastMovementDirection = new Vector2(0, -1); // Direction par défaut
+
 
     public Sbire(int vie, int shield,int mana, float x, float y,float vitesseDeplacement,float vitesseProjectile,float cooldown,Rectangle hitbox, float porteeProjectile,float porteeCaC, int degats, int degatsCaC, Personnage cible, ComportementSbire comportement,Texture projectileTexture,Texture sbireTexture) {
         this.vie = vie;
@@ -75,6 +80,9 @@ public class Sbire implements Entite{
         this.comportement = comportement;
         this.projectileTexture = projectileTexture;
         this.sbireTexture = sbireTexture;
+
+        // Initialiser l'animation handler
+        this.animationHandler = new SbireAnimationHandler();
     }
 
     public void setCible(Personnage cible) {
@@ -257,14 +265,22 @@ public class Sbire implements Entite{
     }
 
     public void prendreDegats(int degats) {
+        // S'assurer que le sbire est vivant avant d'appliquer les dégâts
+        if (!enVie()) return;
+        
+        // Appliquer les dégâts
         this.vie -= degats;
         
-        // Activer l'effet visuel de dégât avec une durée plus longue
+        // Logs pour déboguer
+        System.out.println("Sbire touché! Dégâts: " + degats + ", Vie restante: " + this.vie);
+        
+        // Activer l'effet visuel de dégât
         damageEffect = true;
         damageEffectTime = 0;
-        System.out.println("SBIRE HIT! Damage effect activated."); // Debug message
         
+        // Vérifier si le sbire est mort
         if (this.vie <= 0) {
+            System.out.println("Sbire tué!");
             mourir();
         }
     }
@@ -315,17 +331,16 @@ public class Sbire implements Entite{
     // Ajouter cette méthode qui sera appelée à chaque frame
     private void updateKnockback(float deltaTime) {
         if (isKnockedBack && knockbackVelocity.len() > 0.5f) {
-            // Déplacer le sbire selon la vélocité actuelle
             this.positionX += knockbackVelocity.x * deltaTime;
             this.positionY += knockbackVelocity.y * deltaTime;
             
-            // Mettre à jour la hitbox pour suivre le sbire
-            this.hitbox.setPosition(this.positionX, this.positionY);
+            // Mettre à jour la hitbox
+            updateHitboxPosition();
             
-            // Réduire graduellement la vélocité (effet de friction)
+            // Réduire la vélocité du knockback
             knockbackVelocity.scl(knockbackFriction);
             
-            // Si la vélocité devient trop faible, arrêter le knockback
+            // Arrêter le knockback si la vélocité est trop faible
             if (knockbackVelocity.len() < 0.5f) {
                 isKnockedBack = false;
                 knockbackVelocity.set(0, 0);
@@ -350,7 +365,32 @@ public class Sbire implements Entite{
         // Mise à jour du knockback
         updateKnockback(deltaTime);
         
-        // Si le sbire est en knockback, ne pas exécuter le comportement normal
+        // Calculer la direction de mouvement pour l'animation
+        Vector2 movementDir = null;
+        boolean isAttacking = false;
+        
+        // Si le sbire est en knockback, utiliser cette direction pour l'animation
+        if (isKnockedBack && knockbackVelocity.len() > 0.5f) {
+            movementDir = new Vector2(knockbackVelocity).nor();
+        } 
+        // Sinon, si le comportement normal est en cours
+        else if (comportement != null) {
+            // Pour un sbire melee, vérifier s'il est à portée d'attaque
+            if (comportement instanceof ComportementMelee && estAPorteeCaC()) {
+                isAttacking = true;
+            } else if (cible != null) {
+                // Sbire se déplace vers la cible
+                float dx = cible.getPositionX() - this.positionX;
+                float dy = cible.getPositionY() - this.positionY;
+                movementDir = new Vector2(dx, dy).nor();
+                lastMovementDirection.set(movementDir);
+            }
+        }
+        
+        // Mettre à jour l'animation
+        animationHandler.update(deltaTime, movementDir, isAttacking);
+        
+        // Continuer avec le comportement normal si pas en knockback
         if (!isKnockedBack && comportement != null) {
             comportement.executerAction(this, deltaTime, projectiles);
         }
@@ -362,16 +402,14 @@ public class Sbire implements Entite{
 
     //Méthode pour se déplacer où l'on veut
     public void deplacer(float deltaTime, Vector2 direction) {
-        if (cible != null) {
-            // Calcul de la direction vers la cible
+        if (direction != null && !direction.isZero()) {
             direction.nor();
             
-            // Déplacement
-            positionX += direction.x * vitesseDeplacement * deltaTime;
-            positionY += direction.y * vitesseDeplacement * deltaTime;
+            this.positionX += direction.x * vitesseDeplacement * deltaTime;
+            this.positionY += direction.y * vitesseDeplacement * deltaTime;
             
-            // Mise à jour de la hitbox
-            hitbox.setPosition(this.positionX, this.positionY);
+            // Mettre à jour la hitbox avec la nouvelle position
+            updateHitboxPosition();
         }
     }
 
@@ -504,5 +542,33 @@ public class Sbire implements Entite{
                 damageEffectTime = 0;
             }
         }
+    }
+
+    // Ajouter une méthode pour obtenir la frame d'animation courante
+    public TextureRegion getCurrentFrame() {
+        return animationHandler.getCurrentFrame();
+    }
+
+
+    // Ajouter cette méthode dans dispose() pour nettoyer les ressources
+    public void dispose() {
+        if (animationHandler != null) {
+            animationHandler.dispose();
+        }
+        // Autres nettoyages...
+    }
+
+    // Ajouter cette méthode dans la classe Sbire
+    private void updateHitboxPosition() {
+        // Calculer le centre visuel du sprite
+        float spriteWidth = getCurrentFrame().getRegionWidth();
+        float spriteHeight = getCurrentFrame().getRegionHeight();
+        
+        // Calculer l'offset pour centrer la hitbox sur le sprite
+        float offsetX = (spriteWidth - hitbox.width) / 2;
+        float offsetY = (spriteHeight - hitbox.height) / 2;
+        
+        // Positionner la hitbox de manière centrée
+        this.hitbox.setPosition(this.positionX + offsetX, this.positionY + offsetY);
     }
 }

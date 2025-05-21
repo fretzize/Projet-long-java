@@ -125,28 +125,38 @@ public class ArmeMelee extends ArmeBase {
         float angle = new Vector2(normalizedDirection).angleDeg();
         
         for (Sbire sbire : sbires) {
-            // Vérification simple avec le rectangle
-            if (zoneAttaque.overlaps(sbire.getHitbox())) {
+            if (!sbire.enVie()) continue; // Ignorer les sbires morts
+            
+            // Vérification avec des logs pour déboguer
+            boolean overlaps = zoneAttaque.overlaps(sbire.getHitbox());
+            if (overlaps) {
+                System.out.println("Hitbox overlap détecté avec sbire: " + sbire);
+                
                 // Vérification supplémentaire: l'sbire est-il dans l'arc d'attaque?
-                Vector2 directionVersSbire = new Vector2(sbire.getPositionX(),sbire.getPositionY()).sub(position).nor();
+                Vector2 directionVersSbire = new Vector2(
+                    sbire.getPositionX() + sbire.getHitbox().width/2, 
+                    sbire.getPositionY() + sbire.getHitbox().height/2
+                ).sub(position).nor();
+                
                 float angleVersSbire = directionVersSbire.angleDeg();
                 float angleDifference = Math.abs(angle - angleVersSbire);
                 angleDifference = angleDifference > 180 ? 360 - angleDifference : angleDifference;
                 
+                System.out.println("Angle d'attaque: " + angle + ", Angle vers sbire: " + angleVersSbire + 
+                                  ", Différence: " + angleDifference + ", Max permis: " + (angleAttaque / 2));
+                
                 // Si l'sbire est dans l'arc d'attaque (défini par angleAttaque)
                 if (angleDifference <= angleAttaque / 2) {
+                    System.out.println("Sbire touché! Application des dégâts: " + degats);
+                    
                     // Appliquer les dégâts à l'sbire
                     sbire.prendreDegats(degats);
                     
                     // Appliquer le knockback si la force est > 0
                     if (forceKnockback > 0) {
                         // Direction du knockback = direction de l'attaque
-                        // Alternative: directionVersSbire pour pousser dans la direction exacte de l'sbire
                         sbire.appliquerKnockback(normalizedDirection, forceKnockback);
                     }
-                    
-                    // Effet visuel: projection de sang ou particules
-                    spawnParticules(new Vector2(sbire.getPositionX(),sbire.getPositionY()), 10); // 10 particules
                 }
             }
         }

@@ -516,8 +516,17 @@ public class GameScreen implements Screen {
         // Dessiner les sbires
         for (Sbire sbire : niveau.getSbires()) {
             if (sbire.enVie()) {
-                float sbireScaledWidth = largeur_skin * scalePlayer;
+                // Récupérer la frame courante pour obtenir ses dimensions
+                TextureRegion currentFrame2 = sbire.getCurrentFrame();
+                
+                // Calculer le ratio d'aspect de la texture actuelle
+                float sbireAspectRatio = (float)currentFrame2.getRegionWidth() / (float)currentFrame2.getRegionHeight();
+                
+                // Définir une hauteur fixe pour le sbire
                 float sbireScaledHeight = hauteur_skin * scalePlayer;
+                
+                // Calculer la largeur en fonction du ratio d'aspect pour éviter l'étirement
+                float sbireScaledWidth = sbireScaledHeight * sbireAspectRatio;
                 
                 // Sauvegarder la couleur originale du batch
                 Color originalColor = new Color(game.batch.getColor());
@@ -530,12 +539,12 @@ public class GameScreen implements Screen {
                         originalColor.g * (1 - intensity),  // réduire le vert
                         originalColor.b * (1 - intensity),  // réduire le bleu
                         originalColor.a                     // conserver l'alpha original
-                        );
+                    );
                 }
                 
-                // INVERSER L'ORDRE : D'abord dessiner le sbire
+                // Dessiner le sbire avec les dimensions corrigées
                 game.batch.draw(
-                    sbire.getSbireTexture(),
+                    currentFrame2,
                     sbire.getPositionX(),
                     sbire.getPositionY(),
                     sbireScaledWidth,
