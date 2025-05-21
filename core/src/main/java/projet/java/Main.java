@@ -35,7 +35,7 @@ public class Main extends Game {
     public int toucheDroite = Input.Keys.D;
     public int toucheDash = Input.Keys.SPACE;
     public int toucheAttaque = MOUSE_LEFT_CLICK; // Clic gauche par défaut
-    public int toucheInventaire = Input.Keys.I;
+    public int toucheInventaire = Input.Keys.E;
 
     public void setTouche(int index, int keycode) {
         switch(index) {

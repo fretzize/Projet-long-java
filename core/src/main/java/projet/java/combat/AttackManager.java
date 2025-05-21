@@ -2,6 +2,7 @@ package projet.java.combat;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 
 import projet.java.Main;
@@ -56,16 +57,15 @@ public class AttackManager {
      * À appeler dans la boucle de rendu principale.
      * 
      * @param delta Temps écoulé depuis la dernière mise à jour
+     * @param mouseDirection Direction vers la souris (normalisée)
      * @return true si une attaque a été déclenchée, false sinon
      */
-    public boolean update(float delta) {
+    public boolean update(float delta, Vector2 mouseDirection) {
         boolean attackTriggered = false;
         
         // Gestion du cooldown de l'attaque
         if (!peutAttaquer) {
             tempsDepuisAttaque += delta;
-            // Debug pour voir le cooldown en action
-            // System.out.println("Cooldown: " + tempsDepuisAttaque + "/" + cooldownAttaque);
             
             if (tempsDepuisAttaque >= cooldownAttaque) {
                 // On attend que l'animation soit terminée avant de permettre une nouvelle attaque
@@ -87,10 +87,11 @@ public class AttackManager {
         if (inputAttack && peutAttaquer) {
             // N'autoriser l'attaque que si l'animation précédente est terminée
             if (!animationHandler.isAttacking()) {
-                executeAttack();
+                // Utiliser la direction de la souris pour l'attaque
+                executeAttack(mouseDirection);
                 attackTriggered = true;
                 
-                // IMPORTANT: Désactiver immédiatement la possibilité d'attaquer à nouveau
+                // Désactiver immédiatement la possibilité d'attaquer à nouveau
                 peutAttaquer = false;
                 tempsDepuisAttaque = 0f;
             }
@@ -100,11 +101,11 @@ public class AttackManager {
     }
     
     /**
-     * Exécute l'attaque proprement dite
+     * Exécute l'attaque proprement dite avec la direction donnée
+     * 
+     * @param mouseDirection Direction vers la souris (normalisée)
      */
-    private void executeAttack() {
-        Vector2 direction = getAttackDirection();
-        
+    private void executeAttack(Vector2 mouseDirection) {
         try {
             // Position ajustée du personnage (centrée sur la hitbox)
             Vector2 playerPos = new Vector2(
@@ -115,11 +116,14 @@ public class AttackManager {
             // Taille de la hitbox du joueur
             Vector2 hitboxInfo = new Vector2(10, 10);
             
+            // Déterminer l'animation correspondant à la direction de la souris
+            updateAnimationForMouseDirection(mouseDirection);
+            
             // Logs pour déboguer
-            System.out.println("Exécution d'une attaque! Position: " + playerPos + ", Direction: " + direction);
+            System.out.println("Exécution d'une attaque! Position: " + playerPos + ", Direction: " + mouseDirection);
             
             // Passer la position et la taille de la hitbox à la méthode d'attaque
-            armeMelee.attaquer_arme(playerPos, direction, hitboxInfo);
+            armeMelee.attaquer_arme(playerPos, mouseDirection, hitboxInfo);
             
             // Jouer le son d'attaque
             if (attackSound != null) {
@@ -127,31 +131,46 @@ public class AttackManager {
             }
         } catch (Exception e) {
             System.err.println("Erreur lors de l'attaque: " + e.getMessage());
-            e.printStackTrace(); // Afficher la stack trace complète
+            e.printStackTrace();
         }
     }
     
     /**
-     * Détermine la direction de l'attaque en fonction de l'orientation du personnage
+     * Met à jour l'animation en fonction de la direction de la souris
      * 
-     * @return Vecteur de direction unitaire (normalisé)
+     * @param mouseDirection Direction vers la souris
      */
-    private Vector2 getAttackDirection() {
-        Vector2 direction = new Vector2();
+    private void updateAnimationForMouseDirection(Vector2 mouseDirection) {
+        // Calculer l'angle de la direction (en radians)
+        float angle = (float) Math.atan2(mouseDirection.y, mouseDirection.x);
         
-        if (animationHandler.isFacingUp()) {
-            direction.set(0, 1);
-        } else if (animationHandler.isFacingDown()) {
-            direction.set(0, -1);
-        } else if (animationHandler.isFacingLeft()) {
-            direction.set(-1, 0);
-        } else if (animationHandler.isFacingRight()) {
-            direction.set(1, 0);
+        // Convertir l'angle en degrés (-180 à 180)
+        float degrees = angle * MathUtils.radiansToDegrees;
+        
+        // Déterminer la direction principale (haut, bas, gauche, droite)
+        // Diviser l'espace en 4 quadrants de 90 degrés
+        if (degrees >= -45 && degrees < 45) {
+            // Droite (animation vers la droite)
+            animationHandler.setAttackAnimationRight();
+        } else if (degrees >= 45 && degrees < 135) {
+            // Haut (animation vers le haut)
+            animationHandler.setAttackAnimationUp();
+        } else if (degrees >= -135 && degrees < -45) {
+            // Bas (animation vers le bas)
+            animationHandler.setAttackAnimationDown();
         } else {
-            direction.set(0, -1); // Direction par défaut
+            // Gauche (animation vers la gauche)
+            animationHandler.setAttackAnimationLeft();
         }
-        
-        return direction;
+    }
+    
+    /**
+     * Indique si une attaque est actuellement en cours d'exécution.
+     * 
+     * @return true si une attaque est en cours, false sinon
+     */
+    public boolean isAttacking() {
+        return !peutAttaquer && tempsDepuisAttaque < 0.3f; // Les premières 300ms du cooldown sont considérées comme "attaque active"
     }
     
     /**
@@ -159,13 +178,6 @@ public class AttackManager {
      */
     public ArmeMelee getArmeMelee() {
         return armeMelee;
-    }
-    
-    /**
-     * @return true si le personnage peut attaquer, false sinon
-     */
-    public boolean peutAttaquer() {
-        return peutAttaquer;
     }
     
     /**
@@ -178,15 +190,8 @@ public class AttackManager {
     }
     
     /**
-     * Indique si une attaque est actuellement en cours d'exécution.
-     * 
-     * @return true si une attaque est en cours, false sinon
+     * Libère les ressources
      */
-    public boolean isAttacking() {
-        return !peutAttaquer && tempsDepuisAttaque < 0.3f; // Les premières 300ms du cooldown sont considérées comme "attaque active"
-    }
-    
-    // Ajouter une méthode dispose pour libérer les ressources
     public void dispose() {
         if (attackSound != null) {
             attackSound.dispose();

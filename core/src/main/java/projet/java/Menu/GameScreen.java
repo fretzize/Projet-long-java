@@ -11,6 +11,8 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 
 import projet.java.entite.ComportementBoss;
@@ -92,12 +94,10 @@ public class GameScreen implements Screen {
     private float dashDuration = 0.08f; // Durée du dash en secondes pour maintenir la même distance
     private float currentDashTime = 0f; // Pour suivre la durée du dash en cours
     private boolean isDashing = false; // Pour savoir si on est en train de dasher
-    private float mapSize = 2000; // Taille de la map carrée
     private OrthographicCamera camera;
     private Personnage personnage1; // = new Personnage(4, 2, 3, "mathis", skin);
     private Texture dash_texture;
     private TextureRegion dash;
-    private Texture dash_gris;
     private float largeur_dash;
     private float hauteur_dash;
     private Texture coeur_plein;
@@ -360,11 +360,19 @@ public class GameScreen implements Screen {
         boolean isMovingLeft = Gdx.input.isKeyPressed(game.toucheGauche) || Gdx.input.isKeyPressed(Input.Keys.LEFT);
         boolean isMovingRight = Gdx.input.isKeyPressed(game.toucheDroite) || Gdx.input.isKeyPressed(Input.Keys.RIGHT);
         
+
+        Vector2 mouseDirection = getMouseDirection();
+
         // Mettre à jour le système d'attaque et récupérer l'état d'attaque
-        boolean isAttacking = attackManager.update(delta);
+        boolean isAttacking = attackManager.update(delta,mouseDirection);
         
-        // Mettre à jour l'animation en fonction de l'état du personnage
-        animationHandler.update(delta, isMovingUp, isMovingDown, isMovingLeft, isMovingRight, isAttacking);
+        // Ne mettre à jour l'animation en fonction du mouvement que si on n'est pas en train d'attaquer
+        if (!isAttacking && !animationHandler.isAttacking()) {
+            animationHandler.update(delta, isMovingUp, isMovingDown, isMovingLeft, isMovingRight, false);
+        } else {
+            // Juste mettre à jour le timer d'animation sans changer la direction
+            animationHandler.updateTimerOnly(delta);
+        }
         
         // Mémoriser l'état de mouvement pour le dash
         wasMovingUp = isMovingUp;
@@ -1030,5 +1038,19 @@ public class GameScreen implements Screen {
             return solTexture; // 1 ou autre = sol
         }
 
+    }
+
+    private Vector2 getMouseDirection() {
+        float characterCenterX = personnage1.getPositionX() + hitboxX + 5; // Centre approximatif
+        float characterCenterY = personnage1.getPositionY() + hitboxY + 5;
+        
+        Vector3 mousePos = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);
+        camera.unproject(mousePos); 
+        
+        // Calculer et normaliser la direction
+        Vector2 direction = new Vector2(mousePos.x - characterCenterX, mousePos.y - characterCenterY);
+        direction.nor(); // Normaliser pour avoir un vecteur unitaire
+        
+        return direction;
     }
 }

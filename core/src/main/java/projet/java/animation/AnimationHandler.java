@@ -5,6 +5,8 @@ import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Vector2;
 
 
 public class AnimationHandler {
@@ -186,6 +188,26 @@ public class AnimationHandler {
         }
     }
     
+
+    public void updateTimerOnly(float delta) {
+        stateTime += delta;
+        
+        // Si une attaque est en cours, gérer sa progression
+        if (isAttacking) {
+            attackTimer += delta;
+            if (attackTimer >= attackDuration) {
+                isAttacking = false;
+                attackTimer = 0;
+                
+                // Rétablir la dernière animation non-attaque
+                if (currentAnimation == ATTACK_UP) currentAnimation = IDLE_UP;
+                else if (currentAnimation == ATTACK_DOWN) currentAnimation = IDLE_DOWN;
+                else if (currentAnimation == ATTACK_LEFT) currentAnimation = IDLE_LEFT;
+                else if (currentAnimation == ATTACK_RIGHT) currentAnimation = IDLE_RIGHT;
+            }
+        }
+    }
+    
     public TextureRegion getCurrentFrame() {
         return animations[currentAnimation].getKeyFrame(stateTime, !isAttacking); // N'utiliser le looping que pour les animations non-attaque
     }
@@ -217,6 +239,74 @@ public class AnimationHandler {
         attackTimer = 0;
     }
     
+    /**
+     * Définit l'animation d'attaque vers le haut
+     */
+    public void setAttackAnimationUp() {
+        isAttacking = true;
+        attackTimer = 0;
+        currentAnimation = ATTACK_UP;
+        stateTime = 0; // Réinitialiser pour démarrer l'animation du début
+    }
+
+    /**
+     * Définit l'animation d'attaque vers le bas
+     */
+    public void setAttackAnimationDown() {
+        isAttacking = true;
+        attackTimer = 0;
+        currentAnimation = ATTACK_DOWN;
+        stateTime = 0;
+    }
+
+    /**
+     * Définit l'animation d'attaque vers la gauche
+     */
+    public void setAttackAnimationLeft() {
+        isAttacking = true;
+        attackTimer = 0;
+        currentAnimation = ATTACK_LEFT;
+        stateTime = 0;
+    }
+
+    /**
+     * Définit l'animation d'attaque vers la droite
+     */
+    public void setAttackAnimationRight() {
+        isAttacking = true;
+        attackTimer = 0;
+        currentAnimation = ATTACK_RIGHT;
+        stateTime = 0;
+    }
+    
+    /**
+     * Met à jour l'animation en fonction de la direction de la souris
+     * 
+     * @param mouseDirection Direction vers la souris
+     */
+    private void updateAnimationForMouseDirection(Vector2 mouseDirection) {
+        // Calculer l'angle de la direction (en radians)
+        float angle = (float) Math.atan2(mouseDirection.y, mouseDirection.x);
+        
+        // Convertir l'angle en degrés (-180 à 180)
+        float degrees = angle * MathUtils.radiansToDegrees;
+        
+        // Déterminer la direction principale (haut, bas, gauche, droite)
+        // Diviser l'espace en 4 quadrants de 90 degrés
+        if (degrees >= -45 && degrees < 45) {
+            // Droite (animation vers la droite)
+            setAttackAnimationRight();
+        } else if (degrees >= 45 && degrees < 135) {
+            // Haut (animation vers le haut)
+            setAttackAnimationUp();
+        } else if (degrees >= -135 && degrees < -45) {
+            // Bas (animation vers le bas)
+            setAttackAnimationDown();
+        } else {
+            // Gauche (animation vers la gauche)
+            setAttackAnimationLeft();
+        }
+    }
     
     public void dispose() {
         for (Animation<TextureRegion> animation : animations) {
