@@ -47,7 +47,7 @@ public class InventaireScreen implements Screen {
     Inventaire inventaire;
     int place_item_ligne = ligne_grille-1;
     int place_item_colonne = 0;
-    int taille_cote_case = 10;
+    int taille_cote_case = 25;
     int nombre_element_grille = 0;
 
     @Override
@@ -140,6 +140,14 @@ public class InventaireScreen implements Screen {
                         if (Gdx.input.justTouched()) {
                             if (item.getType() == Item.ItemType.POTION) {
                                 personnage.addVie(item.getNombre());
+                                // System.out.println(personnage.getVie());
+                                personnage.getInventaire().removeItem(item);
+                                grille.removeItem(i, j);
+                                nombre_element_grille --;
+                            }
+                            if (item.getType() == Item.ItemType.POTIONVITESSE) {
+                                personnage.setVitesse(personnage.getVitesse() + item.getNombre());
+                                personnage.setAcceleration(true);
                                 // System.out.println(personnage.getVie());
                                 personnage.getInventaire().removeItem(item);
                                 grille.removeItem(i, j);

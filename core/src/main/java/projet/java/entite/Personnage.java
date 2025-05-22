@@ -46,7 +46,9 @@ public class Personnage extends ApplicationAdapter implements Entite {
     private Rectangle hitbox; // Hitbox du personnage
     boolean prendre_des_degats = false;
     boolean gameOver =false;
-    int acceleration = 2000;
+    private int vitesse  = 100;
+    private int vitesse_de_base = 100;
+    private boolean estAcceleration =false; //dit si le personnage est en train d'accélérer, si il a pris une potion d'acceleration
 
     // draw(Texture texture, float x, float y, float originX, float originY, float width, float height, float scaleX, float scaleY, float rotation)
 
@@ -108,6 +110,25 @@ public class Personnage extends ApplicationAdapter implements Entite {
         return this.touche_dash;
     }
 
+    public int getVitesse() {
+        return this.vitesse;
+    }
+
+    public void setVitesse(int vitesse) {
+        this.vitesse = vitesse;
+    }
+
+    public boolean getAcceleration() {
+        return this.estAcceleration;
+    }
+
+    public void setAcceleration(boolean acceleration) {
+        this.estAcceleration = acceleration;
+    }
+
+    public int getVitesseBase() {
+        return this.vitesse_de_base;
+    }
     // on perd d'abord en bouclier et ensuite en vide si on n'a plus de vie
 
     

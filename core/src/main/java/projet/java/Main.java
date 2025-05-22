@@ -32,7 +32,7 @@ public class Main extends Game {
     public int toucheGauche = Input.Keys.A;
     public int toucheDroite = Input.Keys.D;
     public int toucheDash = Input.Keys.SPACE;
-    public int toucheInventaire = Input.Keys.I;
+    public int toucheInventaire = Input.Keys.E;
 
     public void setTouche(int index, int keycode) {
         switch(index) {

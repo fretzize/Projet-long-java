@@ -8,7 +8,7 @@ public class Item {
     private int nombre; // ça va être ici les degats de l'arme et le nombre de vie que recupere le joueur
 
     public enum ItemType {
-        ARME, POTION
+        ARME, POTION, POTIONVITESSE
     }
 
     public Item(String nom, Texture icone, ItemType type, int nombre) {

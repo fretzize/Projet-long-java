@@ -56,6 +56,7 @@ public class GameScreen implements Screen {
     Texture solTexture12;
     Texture murTexture;
     Texture murTexture2;
+    Texture coffreTexture;
     Texture porteH;
     Texture porteV;
     Texture videTexture;
@@ -74,7 +75,7 @@ public class GameScreen implements Screen {
     //private float playerY = 250;
     private float hitboxX = 22;
     private float hitboxY = 18;
-    private float playerSpeed = 100; // Vitesse normale en pixels par seconde
+    private float playerSpeed; // Vitesse normale en pixels par seconde
     private float speed = 500; // Vitesse du dash réduite (était 10000)
     private float dashDuration = 0.08f; // Durée du dash en secondes pour maintenir la même distance
     private float currentDashTime = 0f; // Pour suivre la durée du dash en cours
@@ -115,8 +116,8 @@ public class GameScreen implements Screen {
     // texture pour essayer inventaire
 
     private Texture arme1;
-    private Texture arme2;
-    private Texture arme3;
+    // private Texture arme2;
+    // private Texture arme3;
 
     // largeur et longueur
 
@@ -154,6 +155,9 @@ public class GameScreen implements Screen {
     private float tempsDash = 3;
     private float dashCooldown = 2f;
 
+    private float tempsAcceleration = 0;
+    private float tempsMaxAcceleration = 10f;
+
     public GameScreen(final Main game) {
         this.game = game;
         camera = new OrthographicCamera();
@@ -182,6 +186,8 @@ public class GameScreen implements Screen {
         carteReduite.creation_vide();
         //carteReduite.afficherMap();
         mapCollision = carteReduite.getCoord();
+        int[] chambresAvecCoffres = {0, 1, 2, 3, 4, 5, 6};
+        carteReduite.placerCoffresDansChambres(chambresAvecCoffres);
         carteReduite.randomiseur_sol();
         //carteReduite.naturalisation_mur();
         map = carteReduite.getCoord();
@@ -203,11 +209,12 @@ public class GameScreen implements Screen {
         solTexture10 = new Texture(Gdx.files.internal("map/Tile_83.png"));
         solTexture11 = new Texture(Gdx.files.internal("map/Tile_84.png"));
         solTexture12 = new Texture(Gdx.files.internal("map/Tile_95.png"));
-
+        coffreTexture = new Texture(Gdx.files.internal("Chest1.png"));
         mapTexture = new Texture(Gdx.files.internal("map.png")); // Créez une image "map.png"
         skin = new Texture(Gdx.files.internal("image_heracles_normal.png")); // Créez une image "player.png"
         largeur_skin = skin.getWidth();
         hauteur_skin = skin.getHeight();
+        
 
         personnage1.create_entite();
 
@@ -264,21 +271,25 @@ public class GameScreen implements Screen {
         }
 
         arme1 = new Texture("epee1.png");
-        arme2 = new Texture("epee2.png");
-        arme3 = new Texture("epee3.png");
+        // arme2 = new Texture("epee2.png");
+        // arme3 = new Texture("epee3.png");
         Potion potionvie = new Potion(3);
-        Texture potion = potionvie.getImage();
+        Texture potion = potionvie.getImage(1);
+        Potion potion_vit = new Potion(60);
+        Texture potion_vitesse = potion_vit.getImage(2);
 
         Item Arme1 = new Item("arme1", arme1, Item.ItemType.ARME, 3);
-        Item Arme2 = new Item("arme2", arme2, Item.ItemType.ARME, 2);
-        Item Arme3 = new Item("arme3", arme3, Item.ItemType.ARME, 3);
+        // Item Arme2 = new Item("arme2", arme2, Item.ItemType.ARME, 2);
+        // Item Arme3 = new Item("arme3", arme3, Item.ItemType.ARME, 3);
         Item Potion = new Item("potion", potion, Item.ItemType.POTION, potionvie.getVie());
+        Item Potion_Vitesse = new Item("potion", potion_vitesse, Item.ItemType.POTIONVITESSE, potion_vit.getVie());
 
         if (une_fois == 1) {
             personnage1.getInventaire().addItem(Arme1);
-            personnage1.getInventaire().addItem(Arme2);
-            personnage1.getInventaire().addItem(Arme3);
+            // personnage1.getInventaire().addItem(Arme2);
+            // personnage1.getInventaire().addItem(Arme3);
             personnage1.getInventaire().addItem(Potion);
+            personnage1.getInventaire().addItem(Potion_Vitesse);
             une_fois ++;
         }
 
@@ -287,6 +298,8 @@ public class GameScreen implements Screen {
     @Override
     public void render(float delta) {
         input(delta);
+
+        playerSpeed = personnage1.getVitesse();
         boolean isMovingUp = Gdx.input.isKeyPressed(game.toucheHaut) || Gdx.input.isKeyPressed(Input.Keys.UP);
         boolean isMovingDown = Gdx.input.isKeyPressed(game.toucheBas) || Gdx.input.isKeyPressed(Input.Keys.DOWN);
         boolean isMovingLeft = Gdx.input.isKeyPressed(game.toucheGauche) || Gdx.input.isKeyPressed(Input.Keys.LEFT);
@@ -308,6 +321,16 @@ public class GameScreen implements Screen {
         if (tempsDash > dashCooldown) {
             dashOk = true;
         }
+
+        if (personnage1.getAcceleration()) {
+            tempsAcceleration += delta;
+        }
+        if (tempsAcceleration > tempsMaxAcceleration) {
+            personnage1.setAcceleration(false);
+            personnage1.setVitesse(personnage1.getVitesseBase());
+            tempsAcceleration = 0;
+        }
+
     }
 
     private void input(float avance) {
@@ -644,6 +667,7 @@ public class GameScreen implements Screen {
     Hercule_haut.dispose();
     Hercule_gauche.dispose();
     Hercule_droite.dispose();
+    coffreTexture.dispose();
     
     if (barre_vide != null) barre_vide.dispose();
     if (barre_pleine != null) barre_pleine.dispose();
@@ -765,6 +789,8 @@ public class GameScreen implements Screen {
             return solTexture12;
         } else if (value == 200) {
             return murTexture2;
+        } else if (value == 500) {
+            return coffreTexture;
         } else {
             return solTexture; // 1 ou autre = sol
         }
