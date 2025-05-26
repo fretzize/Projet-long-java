@@ -252,17 +252,9 @@ public class GameScreen implements Screen {
         skin = new Texture(Gdx.files.internal("image_heracles_normal.png")); // Créez une image "player.png"
         largeur_skin = skin.getWidth();
         hauteur_skin = skin.getHeight();
-        niveau = new Niveau();
         
-        // Définir le listener pour les dégâts
-        personnage1.setDamageListener(new Personnage.DamageListener() {
-            @Override
-            public void onDamageTaken(int damage) {
-                // Activer l'effet de dégât
-                damageEffect = true;
-                damageEffectTime = 0;
-            }
-        });
+        // Créer le niveau avant l'AttackManager
+        niveau = new Niveau();
         
         // Créer le sbire normal avec sa texture normale
         Rectangle sbireHitbox = new Rectangle(300, 300, 32, 32);
@@ -323,12 +315,25 @@ public class GameScreen implements Screen {
         barre_pleine = new Texture("barres_pleine.png");
         barre_vide = new Texture("barres_vide.png");
 
+        // Définir le listener pour les dégâts
+        personnage1.setDamageListener(new Personnage.DamageListener() {
+            @Override
+            public void onDamageTaken(int damage) {
+                // Activer l'effet de dégât
+                damageEffect = true;
+                damageEffectTime = 0;
+            }
+        });
+        
         // Initialiser le gestionnaire d'animations
         animationHandler = new AnimationHandler();
         
-        // Créer le gestionnaire d'attaques
-        attackManager = new AttackManager(game, personnage1, animationHandler, 0.4f);
+        // Créer le gestionnaire d'attaques avec le niveau
+        attackManager = new AttackManager(game, personnage1, animationHandler, 0.4f, niveau);
+        
+        // Initialiser FireballManager après avoir créé le niveau
         fireballManager = new FireballManager(game, personnage1, niveau);
+        
         if (timer != null) {
             timer.cancel();
         }

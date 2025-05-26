@@ -8,6 +8,7 @@ import projet.java.Main;
 import projet.java.animation.AnimationHandler;
 import projet.java.entite.ArmeMelee;
 import projet.java.entite.Entite;
+import projet.java.entite.Niveau;
 
 /**
  * Cette classe gère toute la logique d'attaque, isolant ainsi cette fonctionnalité
@@ -26,6 +27,9 @@ public class AttackManager {
     private final Main game;
     private com.badlogic.gdx.audio.Sound attackSound;
     
+    // Ajouter un champ niveau
+    private Niveau niveau;
+    
     /**
      * Constructeur du gestionnaire d'attaque
      * 
@@ -33,15 +37,20 @@ public class AttackManager {
      * @param personnage Le personnage qui attaque
      * @param animationHandler Le gestionnaire d'animations
      * @param cooldownAttaque Le temps entre deux attaques en secondes
+     * @param niveau Le niveau actuel contenant les sbires
      */
-    public AttackManager(Main game, Entite personnage, AnimationHandler animationHandler, float cooldownAttaque) {
+    public AttackManager(Main game, Entite personnage, AnimationHandler animationHandler, float cooldownAttaque, Niveau niveau) {
         this.game = game;
         this.personnage = personnage;
         this.animationHandler = animationHandler;
         this.cooldownAttaque = cooldownAttaque;
+        this.niveau = niveau;
         
         // Initialiser l'arme avec une portée raisonnable
         this.armeMelee = new ArmeMelee("Épée", 20, 0, 35f, cooldownAttaque, "menubackground.png", 90f, 150f);
+        
+        // IMPORTANT: Associer le niveau à l'arme
+        this.armeMelee.setNiveau(niveau);
         
         // Charger le son d'attaque
         try {
@@ -49,6 +58,12 @@ public class AttackManager {
         } catch (Exception e) {
             System.err.println("Impossible de charger le son d'attaque: " + e.getMessage());
         }
+    }
+    
+    // Ajouter ce constructeur pour la compatibilité
+    public AttackManager(Main game, Entite personnage, AnimationHandler animationHandler, float cooldownAttaque) {
+        this(game, personnage, animationHandler, cooldownAttaque, null);
+        System.err.println("ATTENTION: AttackManager créé sans niveau. Les attaques ne fonctionneront pas correctement.");
     }
     
     /**
@@ -190,6 +205,14 @@ public class AttackManager {
     public void dispose() {
         if (attackSound != null) {
             attackSound.dispose();
+        }
+    }
+    
+    // Ajouter une méthode pour définir le niveau après construction
+    public void setNiveau(Niveau niveau) {
+        this.niveau = niveau;
+        if (armeMelee != null) {
+            armeMelee.setNiveau(niveau);
         }
     }
 }
