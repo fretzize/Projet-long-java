@@ -21,7 +21,7 @@ public class TouchesScreen implements Screen {
 
     private Texture backgroundTexture;
     private int selectedIndex = 0;
-    private final String[] keyOptions = {"Haut", "Bas", "Gauche", "Droite", "Dash", "Attaque", "Inventaire", "Retour"};
+    private final String[] keyOptions = {"Haut", "Bas", "Gauche", "Droite", "Dash", "Attaque", "Inventaire", "Debug HitBox", "Retour"};
     private Rectangle[] optionBounds;
     private int[] keyBindings;
     private boolean waitingForInput = false;
@@ -44,7 +44,8 @@ public class TouchesScreen implements Screen {
             game.toucheDroite,
             game.toucheDash,
             game.toucheAttaque,
-            game.toucheInventaire
+            game.toucheInventaire,
+            game.toucheDebugHitBox
         };
     }
 
@@ -67,7 +68,8 @@ public class TouchesScreen implements Screen {
             game.toucheDroite,
             game.toucheDash,
             game.toucheAttaque,
-            game.toucheInventaire
+            game.toucheInventaire,
+            game.toucheDebugHitBox
         };
     }
     private String getKeyName(int keycode) {
@@ -110,6 +112,10 @@ public class TouchesScreen implements Screen {
         game.font.getData().setScale(1.5f);
         game.font.setColor(Color.WHITE);
 
+        // Calculer une hauteur d'espacement proportionnelle à l'écran
+        float spacing = Math.min(screenHeight / 12, 60); // Limite l'espacement maximum
+
+        // Positionner les options de manière plus dynamique
         for (int i = 0; i < keyOptions.length; i++) {
             String option = keyOptions[i];
             if (i < keyBindings.length) {
@@ -118,11 +124,22 @@ public class TouchesScreen implements Screen {
             
             float textWidth = game.font.draw(game.batch, option, 0, 0).width;
             float textHeight = game.font.draw(game.batch, option, 0, 0).height;
+            
+            // Centrer horizontalement
             float x = (screenWidth - textWidth) / 2;
-            float y = (screenHeight + 5 * textHeight) / 2 - i * 100;
+            
+            // Calculer la position verticale avec un espacement adaptatif
+            // Position démarrant du bas vers le haut, avec plus d'espace pour le titre
+            float y = screenHeight / 2 + (keyOptions.length / 2 - i) * spacing;
+            
+            // Pour le dernier élément (Retour), le placer plus bas
+            if (i == keyOptions.length - 1) {
+                y = textHeight * 3; // En bas de l'écran avec une marge
+            }
 
             optionBounds[i].set(x, y - textHeight, textWidth, textHeight);
 
+            // Gestion de la surbrillance et sélection
             if (isMouseOver(optionBounds[i])) {
                 selectedIndex = i;
                 if (Gdx.input.justTouched() && !waitingForInput) {

@@ -1152,7 +1152,6 @@ public class GameScreen implements Screen {
         
     mapTexture.dispose();
     skin.dispose();
-    dash_texture.dispose();
     coeur_plein.dispose();
     bouclierIntact.dispose();
     Hercule_bas.dispose();

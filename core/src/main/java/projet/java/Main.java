@@ -37,6 +37,7 @@ public class Main extends Game {
     public int toucheDash = Input.Keys.SPACE;
     public int toucheAttaque = MOUSE_LEFT_CLICK; // Clic gauche par défaut
     public int toucheInventaire = Input.Keys.E;
+    public int toucheDebugHitBox = Input.Keys.H; // Touche pour activer/désactiver les hitboxes
 
     public void setTouche(int index, int keycode) {
         switch(index) {
