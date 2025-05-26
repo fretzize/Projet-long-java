@@ -35,16 +35,22 @@ import projet.java.Inventaire.Inventaire;
 import projet.java.Inventaire.Coffre;
 import projet.java.Inventaire.Item.ItemType;
 
+import java.util.TimerTask;
+import java.util.ArrayList;
+import java.util.Timer;
+
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.utils.ScreenUtils;
 
 import com.badlogic.gdx.math.MathUtils;
+
 import projet.java.Menu.GameOverScreen;
 import projet.java.Inventaire.Potion;
 
 
 import projet.java.animation.AnimationHandler;
 import projet.java.combat.AttackManager;
+import projet.java.combat.FireballManager;
 import projet.java.debug.GameDebugger;
 import projet.java.entite.ComportementMelee;
 import projet.java.entite.Niveau;
@@ -212,6 +218,9 @@ public class GameScreen implements Screen {
     
    
 
+    // Ajouter cette variable avec les autres attributs
+    private FireballManager fireballManager;
+
     public GameScreen(final Main game) {
         this.game = game;
         camera = new OrthographicCamera();
@@ -294,6 +303,8 @@ public class GameScreen implements Screen {
         skin = new Texture(Gdx.files.internal("image_heracles_normal.png")); // Créez une image "player.png"
         largeur_skin = skin.getWidth();
         hauteur_skin = skin.getHeight();
+        
+        // Créer le niveau avant l'AttackManager
         niveau = new Niveau();
         
         // Définir le listener pour les dégâts
@@ -387,12 +398,25 @@ public class GameScreen implements Screen {
         barre_pleine = new Texture("barres_pleine.png");
         barre_vide = new Texture("barres_vide.png");
 
+        // Définir le listener pour les dégâts
+        personnage1.setDamageListener(new Personnage.DamageListener() {
+            @Override
+            public void onDamageTaken(int damage) {
+                // Activer l'effet de dégât
+                damageEffect = true;
+                damageEffectTime = 0;
+            }
+        });
+        
         // Initialiser le gestionnaire d'animations
         animationHandler = new AnimationHandler();
         
-        // Initialiser le gestionnaire d'attaques avec un cooldown de 3 secondes
-        attackManager = new AttackManager(game, personnage1, animationHandler, 0.5f);
-        attackManager.getArmeMelee().setNiveau(niveau);
+        // Créer le gestionnaire d'attaques avec le niveau
+        attackManager = new AttackManager(game, personnage1, animationHandler, 0.4f, niveau);
+        
+        // Initialiser FireballManager après avoir créé le niveau
+        fireballManager = new FireballManager(game, personnage1, niveau);
+        
         if (timer != null) {
             timer.cancel();
         }
@@ -987,6 +1011,46 @@ public class GameScreen implements Screen {
         // Restaurer la couleur originale
         game.batch.setColor(originalColor);
         
+        // Dessiner les boules de feu avant le personnage
+        if (fireballManager != null) {
+            fireballManager.render(game.batch);
+        }
+
+        // afficher le dash selon la direction
+        if (Gdx.input.isKeyPressed(game.toucheDash)) {
+            if (dash_afficher) {
+                if ((Gdx.input.isKeyPressed(game.toucheHaut) && Gdx.input.isKeyPressed(game.toucheDroite)) ||
+                        (Gdx.input.isKeyPressed(Input.Keys.RIGHT) && Gdx.input.isKeyPressed(Input.Keys.UP))) {
+                    game.batch.draw(dash, personnage1.getPositionX(), personnage1.getPositionY(), largeur_dash, hauteur_dash, largeur_dash, hauteur_dash, 1,
+                            1, 45);
+                } else if ((Gdx.input.isKeyPressed(game.toucheHaut) && Gdx.input.isKeyPressed(game.toucheGauche)) ||
+                        (Gdx.input.isKeyPressed(Input.Keys.LEFT) && Gdx.input.isKeyPressed(Input.Keys.UP))) {
+                    game.batch.draw(dash, personnage1.getPositionX(), personnage1.getPositionY(), largeur_dash, hauteur_dash, largeur_dash, hauteur_dash, 1,
+                            1, -45);
+                } else if ((Gdx.input.isKeyPressed(game.toucheBas) && Gdx.input.isKeyPressed(game.toucheDroite)) ||
+                        (Gdx.input.isKeyPressed(Input.Keys.DOWN) && Gdx.input.isKeyPressed(Input.Keys.RIGHT))) {
+                    game.batch.draw(dash, personnage1.getPositionX(), personnage1.getPositionY(), largeur_dash, hauteur_dash, largeur_dash, hauteur_dash, 1,
+                            1, 135);
+                } else if ((Gdx.input.isKeyPressed(game.toucheBas) && Gdx.input.isKeyPressed(game.toucheGauche)) ||
+                        (Gdx.input.isKeyPressed(Input.Keys.DOWN) && Gdx.input.isKeyPressed(Input.Keys.LEFT))) {
+                    game.batch.draw(dash, personnage1.getPositionX(), personnage1.getPositionY(), largeur_dash, hauteur_dash, largeur_dash, hauteur_dash, 1,
+                            1, -135);
+                } else if (Gdx.input.isKeyPressed(game.toucheHaut) || Gdx.input.isKeyPressed(Input.Keys.UP)) {
+                    game.batch.draw(dash, personnage1.getPositionX(), personnage1.getPositionY(), largeur_dash, hauteur_dash, largeur_dash, hauteur_dash, 1,
+                            1, 90);
+                } else if (Gdx.input.isKeyPressed(game.toucheGauche) || Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
+                    game.batch.draw(dash, personnage1.getPositionX(), personnage1.getPositionY(), largeur_dash, hauteur_dash, largeur_dash, hauteur_dash, 1,
+                            1, 0);
+                } else if (Gdx.input.isKeyPressed(game.toucheBas) || Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
+                    game.batch.draw(dash, personnage1.getPositionX(), personnage1.getPositionY(), largeur_dash, hauteur_dash, largeur_dash, hauteur_dash, 1,
+                            1, -90);
+                } else if (Gdx.input.isKeyPressed(game.toucheDroite) || Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
+                    game.batch.draw(dash, personnage1.getPositionX(), personnage1.getPositionY(), largeur_dash, hauteur_dash, largeur_dash, hauteur_dash, 1,
+                            1, 180);
+                }
+                dash_afficher = false;
+            }
+        }
         // cooldown
 
         float progress = tempsDash / dashCooldown;
@@ -1199,6 +1263,9 @@ public class GameScreen implements Screen {
             sbiretest.get(i).dispose();
         }
     }
+    if (fireballManager != null) {
+        fireballManager.dispose();
+    }
     }
 
     @Override
@@ -1256,6 +1323,11 @@ public class GameScreen implements Screen {
                 });
             }
         }, 0, 1000); // 1000 ms = 1s
+    }
+
+    // Ajoutez cette méthode pour permettre l'accès à la caméra
+    public OrthographicCamera getCamera() {
+        return camera;
     }
 
     private Texture getTextureForTile(int value) {

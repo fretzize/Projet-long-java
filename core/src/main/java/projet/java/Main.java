@@ -29,6 +29,9 @@ public class Main extends Game {
     // Constante spéciale pour le clic gauche
     public static final int MOUSE_LEFT_CLICK = -1;
 
+    // Ajouter cette constante pour le clic droit
+    public static final int MOUSE_RIGHT_CLICK = -2;
+
     // Ajout des touches configurables
     public int toucheHaut = Input.Keys.W;
     public int toucheBas = Input.Keys.S;
@@ -36,6 +39,7 @@ public class Main extends Game {
     public int toucheDroite = Input.Keys.D;
     public int toucheDash = Input.Keys.SPACE;
     public int toucheAttaque = MOUSE_LEFT_CLICK; // Clic gauche par défaut
+    public int toucheBouleFeu = MOUSE_RIGHT_CLICK; // Clic droit par défaut
     public int toucheInventaire = Input.Keys.E;
     public int toucheDebugHitBox = Input.Keys.H; // Touche pour activer/désactiver les hitboxes
 
@@ -47,7 +51,8 @@ public class Main extends Game {
             case 3: toucheDroite = keycode; break;
             case 4: toucheDash = keycode; break;
             case 5: toucheAttaque = keycode; break;
-            case 6: toucheInventaire = keycode; break;
+            case 6: toucheBouleFeu = keycode; break; // Nouvelle touche pour la boule de feu
+            case 7: toucheInventaire = keycode; break;
         }
     }
 

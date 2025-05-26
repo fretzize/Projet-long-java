@@ -1,7 +1,15 @@
+<<<<<<< HEAD
 Chest1.png
 Chest2.png
 Chest3.png
 Chest4.png
+=======
+FB001.png
+FB002.png
+FB003.png
+FB004.png
+FB005.png
+>>>>>>> origin/ArmeRaph
 HERCULEpng/HERCULEpng/Sword_Attack_back_1.png
 HERCULEpng/HERCULEpng/Sword_Attack_back_2.png
 HERCULEpng/HERCULEpng/Sword_Attack_back_3.png
