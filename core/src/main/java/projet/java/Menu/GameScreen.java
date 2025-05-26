@@ -202,7 +202,7 @@ public class GameScreen implements Screen {
 
     //TEST SBIRE
 
-    private Sbire sbireTest;
+    private Sbire sbireBoss;
     
     int une_fois = 1;
     @Override
@@ -270,12 +270,14 @@ public class GameScreen implements Screen {
             }
         });
         
+        // Créer le sbire normal avec sa texture normale
+        Rectangle sbireHitbox = new Rectangle(300, 300, 32, 32);
         sbiretest = new Sbire(
             300, 0, 3,            // vie, bouclier, mana
             300, 300,           // positionX, positionY
             25,                 // vitesseDeplacement (peut être augmenté si le sbire est trop lent)
             300, 3,             // vitesseProjectile, cooldown
-            new Rectangle(300, 300, 32, 32),  // hitbox plus grande et correctement positionnée
+            sbireHitbox,  // hitbox plus grande et correctement positionnée
             1500, 30,           // porteeProjectile, porteeCaC (augmentée pour faciliter l'attaque)
             1, 1,              // degats (projectile), degatsCaC (augmenté de 0 à 15)
             personnage1,         
@@ -284,6 +286,22 @@ public class GameScreen implements Screen {
             new Texture("Hercule_haut.png")
         );
         niveau.ajouterSbire(sbiretest);
+        
+        // Créer le boss avec une hitbox plus grande et le ComportementBoss
+        Rectangle bossHitbox = new Rectangle(300, 300, 48, 48); // Hitbox plus grande pour le boss
+        sbireBoss = new Sbire(
+            400, 50, 5,       // vie, bouclier, mana (plus élevés que le sbire normal)
+            300, 300,         // positionX, positionY
+            20, 300, 3,       // vitesseDeplacement, vitesseProjectile, cooldown
+            bossHitbox,
+            1500, 100,        // porteeProjectile, porteeCaC 
+            1, 5,             // degats (projectile réduit de 3 à 1), degatsCaC (réduit de 10 à 5)
+            personnage1, 
+            new ComportementBoss(), // Important: utiliser ComportementBoss pour que isBoss=true
+            new Texture(Gdx.files.internal("coeur_plein.png")),
+            null              // La texture du sbire n'est plus utilisée directement
+        );
+        niveau.ajouterSbire(sbireBoss);
         projectiles = new ArrayList<>();
         // TEST SBIRE
         sbireTest = new Sbire(3,3,3,300, 300,20,300,3,new Rectangle(0,0, 2,4), 1500,1, 1,0, personnage1, new ComportementDistanceMax(),new Texture(Gdx.files.internal("coeur_plein.png")),new Texture("Hercule_haut.png"));
@@ -599,7 +617,7 @@ public class GameScreen implements Screen {
         camera.position.x = MathUtils.clamp(camera.position.x, cameraHalfWidth, mapWidthPixels - cameraHalfWidth);
         camera.position.y = MathUtils.clamp(camera.position.y, cameraHalfHeight, mapHeightPixels - cameraHalfHeight);
         
-        sbireTest.agir(Gdx.graphics.getDeltaTime(), projectiles);
+        sbireBoss.agir(Gdx.graphics.getDeltaTime(), projectiles);
 
         // Mise à jour et gestion des projectiles (parcours la liste à l'envers pour éviter les problèmes de suppression)
         for (int i = projectiles.size() - 1; i >= 0; i--) {
@@ -704,8 +722,15 @@ public class GameScreen implements Screen {
                 // Calculer le ratio d'aspect de la texture actuelle
                 float sbireAspectRatio = (float)currentFrame2.getRegionWidth() / (float)currentFrame2.getRegionHeight();
                 
-                // Définir une hauteur fixe pour le sbire
-                float sbireScaledHeight = hauteur_skin * scalePlayer;
+                // Définir des tailles différentes selon le type de sbire
+                float sbireScaledHeight;
+                if (sbire.isBoss()) {
+                    // Le boss est 50% plus grand que les sbires normaux
+                    sbireScaledHeight = hauteur_skin * scalePlayer * 1.5f;
+                } else {
+                    // Taille normale pour les sbires standards
+                    sbireScaledHeight = hauteur_skin * scalePlayer;
+                }
                 
                 // Calculer la largeur en fonction du ratio d'aspect pour éviter l'étirement
                 float sbireScaledWidth = sbireScaledHeight * sbireAspectRatio;
@@ -716,15 +741,11 @@ public class GameScreen implements Screen {
                 // Appliquer l'effet de flash blanc si actif
                 if (sbire.isDamageEffectActive()) {
                     float intensity = sbire.getDamageEffectIntensity();
-                    game.batch.setColor(
-                        1,                                  // rouge à 100%
-                        originalColor.g * (1 - intensity),  // réduire le vert
-                        originalColor.b * (1 - intensity),  // réduire le bleu
-                        originalColor.a                     // conserver l'alpha original
-                    );
+                    float flash = 1f + 0.5f * intensity; // Entre 1.5 et 1
+                    game.batch.setColor(flash, flash, flash, 1f);
                 }
                 
-                // Dessiner le sbire avec les dimensions corrigées
+                // Dessiner le sbire avec les dimensions adaptées
                 game.batch.draw(
                     currentFrame2,
                     sbire.getPositionX(),
