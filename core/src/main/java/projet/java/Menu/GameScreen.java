@@ -10,7 +10,8 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
-
+import java.util.ArrayList;
+import java.util.List;
 import projet.java.entite.ComportementBoss;
 import projet.java.entite.ComportementMelee;
 import projet.java.entite.Entite;
@@ -20,16 +21,19 @@ import projet.java.entite.Sbire;
 import projet.java.Main;
 import projet.java.Map.Chambre;
 import projet.java.Map.Map;
+import projet.java.Inventaire.DatabaseItem;
 import projet.java.Inventaire.Inventaire;
 import projet.java.Menu.InventaireScreen;
 import projet.java.Inventaire.Item;
 import projet.java.Inventaire.Inventaire;
+import projet.java.Inventaire.Coffre;
 import projet.java.Inventaire.Item.ItemType;
 import java.util.TimerTask;
 import java.util.ArrayList;
 import java.util.Timer;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.utils.ScreenUtils;
+
 import com.badlogic.gdx.math.MathUtils;
 import projet.java.Menu.GameOverScreen;
 import projet.java.Inventaire.Potion;
@@ -57,6 +61,7 @@ public class GameScreen implements Screen {
     Texture murTexture;
     Texture murTexture2;
     Texture coffreTexture;
+    Texture coffreTextureouvert;
     Texture porteH;
     Texture porteV;
     Texture videTexture;
@@ -158,6 +163,17 @@ public class GameScreen implements Screen {
     private float tempsAcceleration = 0;
     private float tempsMaxAcceleration = 10f;
 
+
+    // creation de la liste de coffre present sur la liste
+
+    private List<Coffre> coffres = new ArrayList<>();
+
+    Texture itemcoffre;
+    float tempsitem = 2;
+    float tempscoffre = 0;
+    
+   
+
     public GameScreen(final Main game) {
         this.game = game;
         camera = new OrthographicCamera();
@@ -178,16 +194,16 @@ public class GameScreen implements Screen {
         carte.placerChambresGrille();
         carte.corridor_creator();
         carte.creuser_couloir();
+        carte.placerCoffresDansChambres();
+        System.out.println(carte.compterCoffres());
         shapeRenderer = new ShapeRenderer();
         Map carteReduite = carte.reducteur();
         carteReduite.rotation90Trigo();
-        //carteReduite.afficherMap();
+        // carteReduite.afficherMap();
         carteReduite.coupureCoord();
         carteReduite.creation_vide();
         //carteReduite.afficherMap();
         mapCollision = carteReduite.getCoord();
-        int[] chambresAvecCoffres = {0, 1, 2, 3, 4, 5, 6};
-        carteReduite.placerCoffresDansChambres(chambresAvecCoffres);
         carteReduite.randomiseur_sol();
         //carteReduite.naturalisation_mur();
         map = carteReduite.getCoord();
@@ -210,6 +226,7 @@ public class GameScreen implements Screen {
         solTexture11 = new Texture(Gdx.files.internal("map/Tile_84.png"));
         solTexture12 = new Texture(Gdx.files.internal("map/Tile_95.png"));
         coffreTexture = new Texture(Gdx.files.internal("Chest1.png"));
+        coffreTextureouvert = new Texture(Gdx.files.internal("Chest3.png"));
         mapTexture = new Texture(Gdx.files.internal("map.png")); // Créez une image "map.png"
         skin = new Texture(Gdx.files.internal("image_heracles_normal.png")); // Créez une image "player.png"
         largeur_skin = skin.getWidth();
@@ -277,13 +294,26 @@ public class GameScreen implements Screen {
         Texture potion = potionvie.getImage(1);
         Potion potion_vit = new Potion(60);
         Texture potion_vitesse = potion_vit.getImage(2);
+        DatabaseItem database = new DatabaseItem();
+        List<Item> data = database.getData();
 
-        Item Arme1 = new Item("arme1", arme1, Item.ItemType.ARME, 3);
+        Item Arme1 = data.get(2);
         // Item Arme2 = new Item("arme2", arme2, Item.ItemType.ARME, 2);
         // Item Arme3 = new Item("arme3", arme3, Item.ItemType.ARME, 3);
-        Item Potion = new Item("potion", potion, Item.ItemType.POTION, potionvie.getVie());
-        Item Potion_Vitesse = new Item("potion", potion_vitesse, Item.ItemType.POTIONVITESSE, potion_vit.getVie());
-
+        Item Potion = new Item("potion", potion, Item.ItemType.POTION, potionvie.getVie(), 0);
+        Item Potion_Vitesse = new Item("potion", potion_vitesse, Item.ItemType.POTIONVITESSE, potion_vit.getVie(), 0);
+        for (int y = 0; y < map.length; y++) {
+            for (int x = 0; x < map[0].length; x++) {
+                if (map[y][x] == 500) {
+                    Rectangle hitbox = new Rectangle(x * TILE_SIZE, (map.length - 1 - y) * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                    Item itemAlea = new DatabaseItem().getItemAlea(); // ou un item défini
+                    Coffre coffre = new Coffre(x, y, itemAlea, hitbox, coffreTexture);
+                    coffre.setPositionX(x * TILE_SIZE);
+                    coffre.setPositionY((map.length - 1 - y) * TILE_SIZE);
+                    coffres.add(coffre);
+                }
+            }
+        }
         if (une_fois == 1) {
             personnage1.getInventaire().addItem(Arme1);
             // personnage1.getInventaire().addItem(Arme2);
@@ -421,6 +451,12 @@ public class GameScreen implements Screen {
             }
         }
 
+        if (tempsitem > tempscoffre) {
+                tempscoffre += avance;
+            } else {
+                tempscoffre = 0;
+        }
+
     }
 
     private void logic() {
@@ -467,6 +503,18 @@ public class GameScreen implements Screen {
             }
         }
         camera.update();
+        for (Coffre coffre : coffres) {
+            if (!coffre.estOuvert() && coffre.getHitbox().overlaps(personnage1.getHitbox())) {
+                coffre.setOuvert(true);
+                coffre.setvientouvrir(true);
+                coffre.setTexture(coffreTextureouvert);
+                Item item = coffre.estOuvert() ? coffre.getDatabase().getItemAlea() : null;
+                if (item != null) {
+                    personnage1.getInventaire().addItem(item);
+                    itemcoffre = item.getIcone();
+                }
+            }
+        }
     }
 
     private void draw() {
@@ -490,7 +538,7 @@ public class GameScreen implements Screen {
                 if (x < 0 || x >= map[0].length) continue;
                 
                 Texture texture = getTextureForTile(map[mapY][x]);
-                if (texture != null && texture != porteH && texture != porteV) {
+                if (texture != null && texture != porteH && texture != porteV && texture != coffreTexture && texture != coffreTextureouvert) {
                     game.batch.draw(texture, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
                     if (texture == murTexture) {
                         mursHitboxes.add(new Rectangle(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE));
@@ -498,17 +546,42 @@ public class GameScreen implements Screen {
                 } else if (texture == porteH || texture == porteV) {
                     game.batch.draw(solTexture, x * TILE_SIZE, y * TILE_SIZE);
                     game.batch.draw(texture, x * TILE_SIZE, y * TILE_SIZE);
-                    if (texture == porteH){
-                        mursHitboxes.add(new Rectangle(x * TILE_SIZE  , y * TILE_SIZE+ 4, TILE_SIZE , TILE_SIZE-8));
-                    }
-                    else if (texture == porteV){
-                        mursHitboxes.add(new Rectangle(x * TILE_SIZE+2, y * TILE_SIZE, TILE_SIZE-12, TILE_SIZE));
+                    // if (texture == porteH){
+                    //     mursHitboxes.add(new Rectangle(x * TILE_SIZE  , y * TILE_SIZE+ 4, TILE_SIZE , TILE_SIZE-8));
+                    // }
+                    // else if (texture == porteV){
+                    //     mursHitboxes.add(new Rectangle(x * TILE_SIZE+2, y * TILE_SIZE, TILE_SIZE-12, TILE_SIZE));
 
+                    // }
+                }
+                // } else if (texture == coffreTexture) {
+                //      game.batch.draw(solTexture, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                //     // Puis le coffre par-dessus
+                //     game.batch.draw(coffreTexture, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                // }
+            }
+        }
+
+        // gerer l'affichage des coffres
+
+        
+
+        for (Coffre coffre : coffres) {
+            if (!coffre.estOuvert()) {
+                game.batch.draw(solTexture, coffre.getHitbox().x, coffre.getHitbox().y, TILE_SIZE, TILE_SIZE);
+                game.batch.draw(coffre.getTexture(), coffre.getHitbox().x, coffre.getHitbox().y, TILE_SIZE, TILE_SIZE);
+            } else {
+                game.batch.draw(solTexture, coffre.getHitbox().x, coffre.getHitbox().y, TILE_SIZE, TILE_SIZE);
+                game.batch.draw(coffre.getTexture(), coffre.getHitbox().x, coffre.getHitbox().y, TILE_SIZE, TILE_SIZE); 
+                if (coffre.vientouvrir()) {
+                    if ((tempsitem > tempscoffre)) {
+                        game.batch.draw(itemcoffre, coffre.getHitbox().x, coffre.getHitbox().y, TILE_SIZE, TILE_SIZE);
+                    } else {
+                        coffre.setvientouvrir(false);
                     }
                 }
             }
         }
-
 
 
         // Dessiner le joueur avec l'animation actuelle
@@ -619,13 +692,19 @@ public class GameScreen implements Screen {
                     game.batch.setColor(0.9f, 0.6f, 0.2f, 1); // Orange
                 } else if (map[mapY][mapX] == 4) { // Vide
                     continue;
+                } else if (map[mapY][mapX] == 500) {
+                    game.batch.setColor(1f, 0.843f, 0f, 1f); // Or
                 } else { // Sol
                     game.batch.setColor(0.7f, 0.7f, 0.7f, 1); // Gris clair
                 }
                 
                 float tileX = minimapX + mapX * TILE_SIZE * scale;
                 float tileY = minimapY + (map.length - 1 - mapY) * TILE_SIZE * scale;
-                game.batch.draw(solTexture, tileX, tileY, TILE_SIZE * scale, TILE_SIZE * scale);
+                if (map[mapY][mapX] == 500) {
+                    game.batch.draw(solTexture, tileX, tileY, TILE_SIZE * scale*4, TILE_SIZE * scale*4);
+                } else {
+                    game.batch.draw(solTexture, tileX, tileY, TILE_SIZE * scale, TILE_SIZE * scale);
+                }
             }
         }
 

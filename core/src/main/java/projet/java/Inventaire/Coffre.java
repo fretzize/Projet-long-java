@@ -16,6 +16,8 @@ public class Coffre {
     private float positionY;
     private boolean Estouvert = false;
     private DatabaseItem databaseItem = new DatabaseItem();
+    private boolean vientouvrir = false;
+    // private Item itemcoffre;
 
     public Coffre(int x, int y, Item item, Rectangle hitbox, Texture image_coffre) {
         this.item = item;
@@ -25,6 +27,10 @@ public class Coffre {
 
     public Texture getTexture() {
         return image_coffre;
+    }
+
+    public void setTexture(Texture image) {
+        this.image_coffre = image;
     }
 
     public void setPositionX(float x){
@@ -48,10 +54,40 @@ public class Coffre {
         return this.Estouvert;
     }
 
+    public DatabaseItem getDatabase() {
+        return this.databaseItem;
+    }
+
+    public boolean vientouvrir() {
+        return this.vientouvrir;
+    }
+
+    public void setvientouvrir(boolean change) {
+        this.vientouvrir = change;
+    }
     // // à mettre dans game screen
     // if (coffre.estOuvert()) {
     //     Item gain = databaseItem.getItemAlea();
     //     personnage1.getInventaire().addItem(gain);
-    //     game.batch.draw(gain.getIcone(), coffre.getPositionX, coffre.getPositionY, largeur_coffre*2, hauteur_coffre*2);
+    //     armeOk = true;
+    //     tempscoffre = 0;
+    //     itemcoffre = gain.getIcone();
+    //     positioncoffreX = coffre.getPositionX()
+    //     positioncoffreY = coffre.getPositionY()
+    //     //game.batch.draw(gain.getIcone(), coffre.getPositionX(), coffre.getPositionY(), largeur_coffre*2, hauteur_coffre*2);
+    //     // j'essaye de faire un compteur pendant quelques secondes
+    //     
+    // }
+    // Texture itemcoffre
+    // int positioncoffreX
+    // int positioncoffreY
+    // int tempsitem = 3;
+    // int tempscoffre = 0;
+    
+    // if (armeOk && (tempsitem > tempscoffre)) {
+    //      tempscoffre += delta;
+    //      game.batch.draw(itemcoffre, positioncoffreX, positioncoffreY, largeur_coffre*2, hauteur_coffre*2);
+    // } else {
+    //      tempscoffre = 0;
     // }
 }

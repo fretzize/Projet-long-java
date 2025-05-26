@@ -766,100 +766,6 @@ public class Map {
         }
     }
 
-    public void placerCoffres() {
-        Random rand = new Random();
-        
-        // Parcourir chaque chambre pour décider si elle aura un coffre
-        for (int chambreId = 0; chambreId < nbChambre; chambreId++) {
-            // Probabilité qu'une chambre ait un coffre (30% par exemple)
-            if (rand.nextDouble() < 0.3) {
-                // Trouver la position de cette chambre dans mini_coord
-                int chambreX = -1, chambreY = -1;
-                
-                for (int i = 0; i < mini_coord.length; i++) {
-                    for (int j = 0; j < mini_coord[0].length; j++) {
-                        if (mini_coord[i][j] == chambreId + 1) {
-                            chambreX = i;
-                            chambreY = j;
-                            break;
-                        }
-                    }
-                    if (chambreX != -1) break;
-                }
-                
-                if (chambreX != -1 && chambreY != -1) {
-                    // Calculer les limites de la chambre dans la carte principale
-                    int startX = chambreX * tailleInitChambres[0];
-                    int startY = chambreY * tailleInitChambres[1];
-                    int endX = Math.min(startX + tailleInitChambres[0], this.taille[0]);
-                    int endY = Math.min(startY + tailleInitChambres[1], this.taille[1]);
-                    
-                    // Chercher une position valide pour le coffre dans cette chambre
-                    List<int[]> positionsSol = new ArrayList<>();
-                    
-                    for (int x = startX; x < endX; x++) {
-                        for (int y = startY; y < endY; y++) {
-                            // Vérifier si c'est un sol (valeur 1 ou 100-110)
-                            if (coord[x][y] == 1 || (coord[x][y] >= 100 && coord[x][y] <= 110)) {
-                                positionsSol.add(new int[]{x, y});
-                            }
-                        }
-                    }
-                    
-                    // Placer le coffre sur une position aléatoire parmi les sols disponibles
-                    if (!positionsSol.isEmpty()) {
-                        int[] positionCoffre = positionsSol.get(rand.nextInt(positionsSol.size()));
-                        coord[positionCoffre[0]][positionCoffre[1]] = 500; // Code pour coffre
-                    }
-                }
-            }
-        }
-    }
-
-    // Méthode alternative pour placer des coffres dans des chambres spécifiques
-    public void placerCoffresDansChambres(int[] chambresAvecCoffres) {
-        Random rand = new Random();
-        
-        for (int chambreId : chambresAvecCoffres) {
-            if (chambreId >= 0 && chambreId < nbChambre) {
-                // Même logique que ci-dessus pour trouver et placer le coffre
-                int chambreX = -1, chambreY = -1;
-                
-                for (int i = 0; i < mini_coord.length; i++) {
-                    for (int j = 0; j < mini_coord[0].length; j++) {
-                        if (mini_coord[i][j] == chambreId + 1) {
-                            chambreX = i;
-                            chambreY = j;
-                            break;
-                        }
-                    }
-                    if (chambreX != -1) break;
-                }
-                
-                if (chambreX != -1 && chambreY != -1) {
-                    int startX = chambreX * tailleInitChambres[0];
-                    int startY = chambreY * tailleInitChambres[1];
-                    int endX = Math.min(startX + tailleInitChambres[0], this.taille[0]);
-                    int endY = Math.min(startY + tailleInitChambres[1], this.taille[1]);
-                    
-                    List<int[]> positionsSol = new ArrayList<>();
-                    
-                    for (int x = startX; x < endX; x++) {
-                        for (int y = startY; y < endY; y++) {
-                            if (coord[x][y] == 1 || (coord[x][y] >= 100 && coord[x][y] <= 110)) {
-                                positionsSol.add(new int[]{x, y});
-                            }
-                        }
-                    }
-                    
-                    if (!positionsSol.isEmpty()) {
-                        int[] positionCoffre = positionsSol.get(rand.nextInt(positionsSol.size()));
-                        coord[positionCoffre[0]][positionCoffre[1]] = 500; // Code pour coffre
-                    }
-                }
-            }
-        }
-    }
     public void naturalisation_mur(){
         for (int i = 0; i < this.taille[0]-1; i++) {
             for (int j = 0; j < this.taille[1]; j++) {
@@ -935,4 +841,31 @@ public class Map {
             }
         }
    }
+
+   public void placerCoffresDansChambres() {
+    for (Chambre chambre : this.chambres) {
+        boolean coffrePlace = chambre.placerCoffreAvecProbabilite(1);
+        if (coffrePlace) {
+            int[][] grille = chambre.getGrille();
+            int[] initial = chambre.getInitial();
+            for (int i = 0; i < grille.length; i++) {
+                for (int j = 0; j < grille[0].length; j++) {
+                    if (grille[i][j] == 500) {
+                        coord[initial[0] + i][initial[1] + j] = 500;
+                    }
+                }
+            }
+        }
+    }
+}
+
+    public int compterCoffres() {
+        int compteur = 0;
+        for (int i = 0; i < coord.length; i++) {
+            for (int j = 0; j < coord[0].length; j++) {
+                if (coord[i][j] == 500) compteur++;
+            }
+        }
+        return compteur;
+    }
 }

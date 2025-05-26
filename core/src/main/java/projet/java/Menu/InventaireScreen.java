@@ -153,6 +153,9 @@ public class InventaireScreen implements Screen {
                                 grille.removeItem(i, j);
                                 nombre_element_grille --;
                             }
+                            if (item.getType() == Item.ItemType.ARME) {
+                                
+                            }
                             // personnage.setArme(null);
                         } else {
                             Color previousColor = game.batch.getColor().cpy();

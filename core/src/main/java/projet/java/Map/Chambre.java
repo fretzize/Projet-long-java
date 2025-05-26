@@ -1,4 +1,6 @@
 package projet.java.Map;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -361,4 +363,29 @@ public class Chambre {
             this.grille[centreX][i] = 1;
         }
     }
+
+    public boolean placerCoffreAvecProbabilite(float probabilite) {
+        Random rand = new Random();
+        if (rand.nextFloat() > probabilite) {
+            return false;
+        }
+
+        // Recherche d'une case sol aléatoire pour y mettre un coffre (avec la valeur 500)
+        List<int[]> sols = new ArrayList<>();
+        for (int i = 0; i < taille[0]; i++) {
+            for (int j = 0; j < taille[1]; j++) {
+                if (grille[i][j] == 1) {
+                    sols.add(new int[]{i, j});
+                }
+            }
+        }
+
+        if (sols.isEmpty()) return false;
+
+        int[] emplacement = sols.get(rand.nextInt(sols.size()));
+        grille[emplacement[0]][emplacement[1]] = 500; // valeur dédiée aux coffres
+
+        return true;
+    }
+
 }
