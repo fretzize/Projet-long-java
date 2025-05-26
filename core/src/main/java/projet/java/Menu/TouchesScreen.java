@@ -21,7 +21,8 @@ public class TouchesScreen implements Screen {
 
     private Texture backgroundTexture;
     private int selectedIndex = 0;
-    private final String[] keyOptions = {"Haut", "Bas", "Gauche", "Droite", "Dash", "Attaque", "Inventaire", "Retour"};
+    // Ajouter la touche "Boule de feu" à la liste des options
+    private final String[] keyOptions = {"Haut", "Bas", "Gauche", "Droite", "Dash", "Attaque", "Boule de feu", "Inventaire", "Retour"};
     private Rectangle[] optionBounds;
     private int[] keyBindings;
     private boolean waitingForInput = false;
@@ -44,6 +45,7 @@ public class TouchesScreen implements Screen {
             game.toucheDroite,
             game.toucheDash,
             game.toucheAttaque,
+            game.toucheBouleFeu,   // Nouvelle touche pour la boule de feu
             game.toucheInventaire
         };
     }
@@ -67,12 +69,16 @@ public class TouchesScreen implements Screen {
             game.toucheDroite,
             game.toucheDash,
             game.toucheAttaque,
+            game.toucheBouleFeu,   // Nouvelle touche pour la boule de feu
             game.toucheInventaire
         };
     }
+    
     private String getKeyName(int keycode) {
         if (keycode == Main.MOUSE_LEFT_CLICK) {
             return "Clic Gauche";
+        } else if (keycode == Main.MOUSE_RIGHT_CLICK) {
+            return "Clic Droit";
         } else if (keycode < 0) {
             return "Non défini";
         }
@@ -154,9 +160,12 @@ public class TouchesScreen implements Screen {
                 }
             }
             
-            // Vérifier également si un clic gauche est fait pour la touche d'attaque
+            // Vérifier si un clic gauche ou droit est fait (pour les touches d'attaque et de boule de feu)
             if (selectedIndex == 5 && Gdx.input.justTouched() && Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
                 keyBindings[selectedIndex] = Main.MOUSE_LEFT_CLICK;
+                waitingForInput = false;
+            } else if (selectedIndex == 6 && Gdx.input.justTouched() && Gdx.input.isButtonPressed(Input.Buttons.RIGHT)) {
+                keyBindings[selectedIndex] = Main.MOUSE_RIGHT_CLICK;
                 waitingForInput = false;
             }
         }
@@ -183,10 +192,10 @@ public class TouchesScreen implements Screen {
                 game.setTouche(i, keyBindings[i]);
             }
             if (fromPause) {
-            game.setScreen(new OptionScreen(game, pauseScreen, gameScreen));
-        } else {
-            game.setScreen(new OptionScreen(game));
-        }
+                game.setScreen(new OptionScreen(game, pauseScreen, gameScreen));
+            } else {
+                game.setScreen(new OptionScreen(game));
+            }
             dispose();
         }
     }

@@ -27,6 +27,7 @@ import projet.java.Menu.InventaireScreen;
 import projet.java.Inventaire.Item;
 import projet.java.Inventaire.Inventaire;
 import projet.java.Inventaire.Item.ItemType;
+
 import java.util.TimerTask;
 import java.util.ArrayList;
 import java.util.Timer;
@@ -34,12 +35,14 @@ import java.util.Timer;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.math.MathUtils;
+
 import projet.java.Menu.GameOverScreen;
 import projet.java.Inventaire.Potion;
 
 
 import projet.java.animation.AnimationHandler;
 import projet.java.combat.AttackManager;
+import projet.java.combat.FireballManager;
 import projet.java.debug.GameDebugger;
 import projet.java.entite.ComportementMelee;
 import projet.java.entite.Niveau;
@@ -188,6 +191,9 @@ public class GameScreen implements Screen {
     private final float DAMAGE_EFFECT_DURATION = 0.5f; // Durée en secondes
     private final Color DAMAGE_COLOR = new Color(1, 0, 0, 0.5f); // Rouge semi-transparent
 
+    // Ajouter cette variable avec les autres attributs
+    private FireballManager fireballManager;
+
     public GameScreen(final Main game) {
         this.game = game;
         camera = new OrthographicCamera();
@@ -320,9 +326,9 @@ public class GameScreen implements Screen {
         // Initialiser le gestionnaire d'animations
         animationHandler = new AnimationHandler();
         
-        // Initialiser le gestionnaire d'attaques avec un cooldown de 3 secondes
-        attackManager = new AttackManager(game, personnage1, animationHandler, 0.5f);
-        attackManager.getArmeMelee().setNiveau(niveau);
+        // Créer le gestionnaire d'attaques
+        attackManager = new AttackManager(game, personnage1, animationHandler, 0.4f);
+        fireballManager = new FireballManager(game, personnage1, niveau);
         if (timer != null) {
             timer.cancel();
         }
@@ -558,6 +564,15 @@ public class GameScreen implements Screen {
 
     }
 
+    // Gérer les entrées clavier pour le déplacement
+
+    // Contrôles du jeu: noter que le FireballManager gère directement la touche boule de feu
+    // dans sa méthode update() (FireballManager utilise game.toucheBouleFeu)
+    
+    // La touche game.toucheBouleFeu est configurée dans l'écran ToucheScreen
+    // Par défaut, il s'agit du clic droit (Main.MOUSE_RIGHT_CLICK)
+    
+
     private void logic() {
         // Calculer le centre du personnage pour un meilleur suivi
         float playerCenterX = personnage1.getPositionX() + ((largeur_skin * scalePlayer) / 2);
@@ -576,6 +591,16 @@ public class GameScreen implements Screen {
         // Mettre à jour le sbire avec la position correcte du joueur SEULEMENT s'il est en vie
         if (sbiretest != null && sbiretest.enVie()) {
             sbiretest.agir(Gdx.graphics.getDeltaTime(), projectiles);
+        }
+        
+        // Mettre à jour le gestionnaire d'attaques
+        if (attackManager != null) {
+            attackManager.update(Gdx.graphics.getDeltaTime());
+        }
+        
+        // Mettre à jour le gestionnaire de boules de feu
+        if (fireballManager != null) {
+            fireballManager.update(Gdx.graphics.getDeltaTime());
         }
         
         // Calculer les dimensions effectives de la vue caméra
@@ -760,6 +785,10 @@ public class GameScreen implements Screen {
         // Restaurer la couleur originale
         game.batch.setColor(originalColor);
         
+        // Dessiner les boules de feu avant le personnage
+        if (fireballManager != null) {
+            fireballManager.render(game.batch);
+        }
 
         // afficher le dash selon la direction
         if (Gdx.input.isKeyPressed(game.toucheDash)) {
@@ -936,6 +965,9 @@ public class GameScreen implements Screen {
     if (attackManager != null) {
         attackManager.dispose();
     }
+    if (fireballManager != null) {
+        fireballManager.dispose();
+    }
     }
 
     @Override
@@ -1002,6 +1034,11 @@ public class GameScreen implements Screen {
                 });
             }
         }, 0, 1000); // 1000 ms = 1s
+    }
+
+    // Ajoutez cette méthode pour permettre l'accès à la caméra
+    public OrthographicCamera getCamera() {
+        return camera;
     }
 
     private Texture getTextureForTile(int value) {
