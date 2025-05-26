@@ -62,7 +62,7 @@ public class Projectile {
         this.texture = texture;
         this.degats = degats;
         this.porteeMax = porteeMax;
-        this.hitbox = new Rectangle(x, y, texture.getWidth(), texture.getHeight());
+        this.hitbox = new Rectangle(x, y, 10, 10);
     }
 
     /**
@@ -175,8 +175,9 @@ public class Projectile {
     }
 
 
-    //affichage de l'entité
-    public void draw(Main game,float scaledWidth,float scaledHeight){
-        game.batch.draw(texture,this.position.x,this.position.y,scaledWidth,scaledHeight);
+    // Dans la classe Projectile, modifiez la méthode draw :
+    public void draw(Main game, float width, float height, float x, float y) {
+        // Au lieu d'utiliser this.x et this.y pour la position, utiliser x et y fournis
+        game.batch.draw(this.texture, x, y, width, height);
     }
 }

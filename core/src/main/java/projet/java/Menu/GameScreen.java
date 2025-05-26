@@ -210,12 +210,25 @@ public class GameScreen implements Screen {
     public void show() {
         // Si le jeu a déjà été initialisé, ne pas recréer les éléments
         if (gameInitialized) {
+            if (game.gameMusic != null) {
+                game.stopMenuMusic();
+                game.gameMusic.play();
+            }
             return;
         }
         
         // Marquer le jeu comme initialisé
         gameInitialized = true;
         
+        if (game.gameMusic == null) {
+            game.gameMusic = Gdx.audio.newMusic(Gdx.files.internal("OST.mp3"));
+            game.gameMusic.setLooping(true);
+            game.gameMusic.setVolume(game.getSoundVolume()); // Volume de la musique de jeu
+        }
+
+        game.stopMenuMusic();
+        game.gameMusic.play(); // Démarrer la musique de jeu
+
         // Le reste du code d'initialisation reste inchangé
         mursHitboxes = new Array<>();
         porteHitboxes = new Array<>();
@@ -274,50 +287,38 @@ public class GameScreen implements Screen {
         // Créer le sbire normal avec sa texture normale
         Rectangle sbireHitbox = new Rectangle(300, 300, 32, 32);
         sbiretest = new Sbire(
-            300, 0, 3,            // vie, bouclier, mana
-            300, 300,           // positionX, positionY
-            25,                 // vitesseDeplacement (peut être augmenté si le sbire est trop lent)
-            300, 3,             // vitesseProjectile, cooldown
-            sbireHitbox,  // hitbox plus grande et correctement positionnée
-            1500, 30,           // porteeProjectile, porteeCaC (augmentée pour faciliter l'attaque)
-            1, 1,              // degats (projectile), degatsCaC (augmenté de 0 à 15)
-            personnage1,         
-            new ComportementMelee(),
-            new Texture(Gdx.files.internal("coeur_plein.png")),
-            new Texture("Hercule_haut.png")
-        );
-        niveau.ajouterSbire(sbiretest);
+             300, 0, 3,            // vie, bouclier, mana
+             300, 300,           // positionX, positionY
+             30,                 // vitesseDeplacement (peut être augmenté si le sbire est trop lent)
+             300, 1.5f,             // vitesseProjectile, cooldown
+             sbireHitbox,  // hitbox plus grande et correctement positionnée
+             1500, 30,           // porteeProjectile, porteeCaC (augmentée pour faciliter l'attaque)
+             1, 1,              // degats (projectile), degatsCaC (augmenté de 0 à 15)
+             personnage1,         
+             new ComportementMelee(),
+             new Texture(Gdx.files.internal("bomba.png")),
+             new Texture("Hercule_haut.png"),
+             new Rectangle(300,300, 32, 32) // Hitbox du sbire
+         );
+         niveau.ajouterSbire(sbiretest);
         
         // Créer le boss avec une hitbox plus grande et le ComportementBoss
         Rectangle bossHitbox = new Rectangle(300, 300, 48, 48); // Hitbox plus grande pour le boss
         sbireBoss = new Sbire(
             400, 50, 5,       // vie, bouclier, mana (plus élevés que le sbire normal)
             300, 300,         // positionX, positionY
-            20, 300, 3,       // vitesseDeplacement, vitesseProjectile, cooldown
+            45, 300, 1.5f,       // vitesseDeplacement, vitesseProjectile, cooldown
             bossHitbox,
             1500, 100,        // porteeProjectile, porteeCaC 
-            0, 0,             // degats (projectile réduit de 3 à 1), degatsCaC (réduit de 10 à 5)
+            1, 1,             // degats (projectile réduit de 3 à 1), degatsCaC (réduit de 10 à 5)
             personnage1, 
             new ComportementBoss(), // Important: utiliser ComportementBoss pour que isBoss=true
-            new Texture(Gdx.files.internal("coeur_plein.png")),
-            new Texture("Orc1/orc3_front_idle_1.png")              // La texture du sbire n'est plus utilisée directement
+            new Texture(Gdx.files.internal("bomba.png")),
+            new Texture("Orc1/orc3_front_idle_1.png"),// La texture du sbire n'est plus utilisée directement
+            new Rectangle(300, 300, 48, 48) // Hitbox du boss
         );
         niveau.ajouterSbire(sbireBoss);
         projectiles = new ArrayList<>();
-        // TEST SBIRE
-        //sbireTest = new Sbire(3,3,3,300, 300,20,300,3,new Rectangle(0,0, 2,4), 1500,1, 1,0, personnage1, new ComportementDistanceMax(),new Texture(Gdx.files.internal("coeur_plein.png")),new Texture("Hercule_haut.png"));
-        //Gestion projectiles du sbire
-        projectiles = new ArrayList<>();
-        //
-
-        // sprint ou dash //mettre un boutton dash pour montrer quand il a de nouveau
-        // acces au dash, par exemple dans un coin le symbole de dash gris si il n'y a
-        // pas acces et en couleur sinon
-
-        dash_texture = new Texture("dash.png");
-        dash = new TextureRegion(dash_texture);
-        largeur_dash = dash_texture.getWidth();
-        hauteur_dash = dash_texture.getHeight();
 
         bouclierIntact = new Texture("bouclier.png");
         largeur_bouclier = bouclierIntact.getWidth();
@@ -456,6 +457,9 @@ public class GameScreen implements Screen {
         }
         // Gestion du game Over
         if (!personnage1.enVie()) {
+            if (game.gameMusic != null) {
+                game.gameMusic.stop();
+            }
             game.setScreen(new GameOverScreen(game));
             return; // Sortir de la méthode pour éviter de traiter d'autres entrées
         }
@@ -580,9 +584,6 @@ public class GameScreen implements Screen {
                 System.out.println("État hitboxes après toggle: " + debugger.isShowingHitboxes());
             }
         }
-        // Limiter le joueur à la map
-        //personnage1.changePositionX(MathUtils.clamp(personnage1.getPositionX(), 0, mapSize - skin.getWidth())-personnage1.getPositionX());
-        //personnage1.changePositionY(MathUtils.clamp(personnage1.getPositionY(), 0, mapSize - skin.getWidth())-personnage1.getPositionY());
 
     }
 
@@ -597,9 +598,7 @@ public class GameScreen implements Screen {
         camera.position.x += (playerCenterX - camera.position.x) * lerpFactor;
         camera.position.y += (playerCenterY - camera.position.y) * lerpFactor;
 
-        // Synchroniser la position de personnage1 avec les coordonnées réelles du joueur
-        //personnage1.setPositionX(player);
-        //personnage1.setPositionY(playerY);
+
         
         // Mettre à jour le sbire avec la position correcte du joueur SEULEMENT s'il est en vie
         if (sbiretest != null && sbiretest.enVie()) {
@@ -711,7 +710,25 @@ public class GameScreen implements Screen {
         
         //Dessiner les projectiles
         for (Projectile projectile : projectiles) {
-            projectile.draw(game, scaledWidth / 2, scaledHeight / 2);
+            // Récupérer les dimensions de la hitbox du projectile
+            Rectangle hitbox = projectile.getHitbox();
+            
+            // Calculer le centre de la hitbox
+            float centerX = hitbox.x + hitbox.width / 2;
+            float centerY = hitbox.y + hitbox.height / 2;
+            
+            // Calculer les dimensions du sprite à dessiner
+            float projWidth = scaledWidth / 2;
+            float projHeight = scaledHeight / 2;
+            
+            // Dessiner le projectile en centrant le sprite sur la hitbox
+            projectile.draw(
+                game,
+                projWidth, 
+                projHeight,
+                centerX - projWidth / 2,  // Ajuster la position X pour centrer
+                centerY - projHeight / 2   // Ajuster la position Y pour centrer
+            );
         }
 
         // Dessiner les sbires
@@ -806,42 +823,6 @@ public class GameScreen implements Screen {
         // Restaurer la couleur originale
         game.batch.setColor(originalColor);
         
-
-        // afficher le dash selon la direction
-        if (Gdx.input.isKeyPressed(game.toucheDash)) {
-            if (dash_afficher) {
-                if ((Gdx.input.isKeyPressed(game.toucheHaut) && Gdx.input.isKeyPressed(game.toucheDroite)) ||
-                        (Gdx.input.isKeyPressed(Input.Keys.RIGHT) && Gdx.input.isKeyPressed(Input.Keys.UP))) {
-                    game.batch.draw(dash, personnage1.getPositionX(), personnage1.getPositionY(), largeur_dash, hauteur_dash, largeur_dash, hauteur_dash, 1,
-                            1, 45);
-                } else if ((Gdx.input.isKeyPressed(game.toucheHaut) && Gdx.input.isKeyPressed(game.toucheGauche)) ||
-                        (Gdx.input.isKeyPressed(Input.Keys.LEFT) && Gdx.input.isKeyPressed(Input.Keys.UP))) {
-                    game.batch.draw(dash, personnage1.getPositionX(), personnage1.getPositionY(), largeur_dash, hauteur_dash, largeur_dash, hauteur_dash, 1,
-                            1, -45);
-                } else if ((Gdx.input.isKeyPressed(game.toucheBas) && Gdx.input.isKeyPressed(game.toucheDroite)) ||
-                        (Gdx.input.isKeyPressed(Input.Keys.DOWN) && Gdx.input.isKeyPressed(Input.Keys.RIGHT))) {
-                    game.batch.draw(dash, personnage1.getPositionX(), personnage1.getPositionY(), largeur_dash, hauteur_dash, largeur_dash, hauteur_dash, 1,
-                            1, 135);
-                } else if ((Gdx.input.isKeyPressed(game.toucheBas) && Gdx.input.isKeyPressed(game.toucheGauche)) ||
-                        (Gdx.input.isKeyPressed(Input.Keys.DOWN) && Gdx.input.isKeyPressed(Input.Keys.LEFT))) {
-                    game.batch.draw(dash, personnage1.getPositionX(), personnage1.getPositionY(), largeur_dash, hauteur_dash, largeur_dash, hauteur_dash, 1,
-                            1, -135);
-                } else if (Gdx.input.isKeyPressed(game.toucheHaut) || Gdx.input.isKeyPressed(Input.Keys.UP)) {
-                    game.batch.draw(dash, personnage1.getPositionX(), personnage1.getPositionY(), largeur_dash, hauteur_dash, largeur_dash, hauteur_dash, 1,
-                            1, 90);
-                } else if (Gdx.input.isKeyPressed(game.toucheGauche) || Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
-                    game.batch.draw(dash, personnage1.getPositionX(), personnage1.getPositionY(), largeur_dash, hauteur_dash, largeur_dash, hauteur_dash, 1,
-                            1, 0);
-                } else if (Gdx.input.isKeyPressed(game.toucheBas) || Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
-                    game.batch.draw(dash, personnage1.getPositionX(), personnage1.getPositionY(), largeur_dash, hauteur_dash, largeur_dash, hauteur_dash, 1,
-                            1, -90);
-                } else if (Gdx.input.isKeyPressed(game.toucheDroite) || Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
-                    game.batch.draw(dash, personnage1.getPositionX(), personnage1.getPositionY(), largeur_dash, hauteur_dash, largeur_dash, hauteur_dash, 1,
-                            1, 180);
-                }
-                dash_afficher = false;
-            }
-        }
         // cooldown
 
         float progress = tempsDash / dashCooldown;
@@ -952,6 +933,31 @@ public class GameScreen implements Screen {
                 shapeRenderer.rect(attackZone.x, attackZone.y, attackZone.width, attackZone.height);
             }
 
+            for (Sbire sbire : niveau.getSbires()) {
+                if (sbire.isAttacking) {
+                    shapeRenderer.setColor(1, 0.5f, 0, 1); // Orange
+                    Rectangle attackZone = sbiretest.getZoneAttaque();
+                    shapeRenderer.rect(attackZone.x, attackZone.y, attackZone.width, attackZone.height);
+                }
+            }
+            // Hitboxes des projectiles
+            shapeRenderer.setColor(1, 0, 1, 1); // Violet/Purple
+            for (Projectile projectile : projectiles) {
+                Rectangle hitbox = projectile.getHitbox();
+                shapeRenderer.rect(hitbox.x, hitbox.y, hitbox.width, hitbox.height);
+                
+                // Dessiner une ligne indiquant la direction du projectile
+                Vector2 vitesse = projectile.getVitesse();
+                if (vitesse != null && vitesse.len() > 0) {
+                    Vector2 direction = new Vector2(vitesse).nor().scl(10); // Normaliser et mettre à l'échelle
+                    shapeRenderer.line(
+                        hitbox.x + hitbox.width/2, 
+                        hitbox.y + hitbox.height/2,
+                        hitbox.x + hitbox.width/2 + direction.x,
+                        hitbox.y + hitbox.height/2 + direction.y
+                    );
+                }
+            }
             shapeRenderer.end();
         }
     }
@@ -968,7 +974,8 @@ public class GameScreen implements Screen {
     Hercule_haut.dispose();
     Hercule_gauche.dispose();
     Hercule_droite.dispose();
-    
+    game.gameMusic.dispose();
+
     if (barre_vide != null) barre_vide.dispose();
     if (barre_pleine != null) barre_pleine.dispose();
     
@@ -1028,32 +1035,19 @@ public class GameScreen implements Screen {
 
     @Override
     public void resume() {
-        
+        // Reprendre la musique du jeu quand on revient sur l'écran
+        if (game.gameMusic != null && !game.gameMusic.isPlaying()) {
+            game.gameMusic.play();
+        }
     }
 
     @Override
     public void hide() {
-        // Ne pas annuler les timers ici, sinon ils seront perdus après la pause
-        // Commentez ces lignes ou supprimez-les
-        /*
-        if (timer != null) {
-            timer.cancel();
-            timer = null;
+        // Mettre en pause la musique du jeu quand on quitte l'écran
+        if (game.gameMusic != null && game.gameMusic.isPlaying()) {
+            game.gameMusic.pause();
         }
-        if (timer2 != null) {
-            timer2.cancel();
-            timer2 = null;
-        }
-        */
     }
-
-    // public void update() {
-    // if (TimeUtils.timeSinceMillis(startTime) >= temps_recharge) {
-    // // System.out.println("Tâche exécutée après " + DELAY + " millisecondes !");
-    // dashOk = true;
-    // startTime = TimeUtils.millis(); // Réinitialiser le timer
-    // }
-    // }
 
     public void decompter() {
         timer.scheduleAtFixedRate(new TimerTask() {

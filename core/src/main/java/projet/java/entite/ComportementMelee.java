@@ -10,10 +10,8 @@ public class ComportementMelee implements ComportementSbire {
             return;
         }
 
-        // Se déplacer vers la cible
-        sbire.deplacerVersCible(deltaTime);
+        sbire.deplacerVersCible(deltaTime); // Déplacement vers la cible
+        sbire.update(deltaTime, projectiles); // Met à jour la position et l'état du sbire
         
-        // Mettre à jour l'état et attaquer si possible
-        sbire.update(deltaTime, projectiles);
     }
 }

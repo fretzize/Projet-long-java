@@ -86,9 +86,6 @@ public class Main extends Game {
         return gameSoundVolume;
     }
     
-    public void setSoundVolume(float volume) {
-        this.gameSoundVolume = MathUtils.clamp(volume, 0.0f, 1.0f);
-    }
     
     public void disposeGameOverSound() {
         if (gameOverMusic != null) {
@@ -125,6 +122,35 @@ public class Main extends Game {
         super.render();
     }
 
+    // Ajouter ces méthodes dans la classe Main:
+
+    public void playGameMusic() {
+        if (gameMusic != null) {
+            gameMusic.play();
+        }
+    }
+
+    public void pauseGameMusic() {
+        if (gameMusic != null && gameMusic.isPlaying()) {
+            gameMusic.pause();
+        }
+    }
+
+    public void stopGameMusic() {
+        if (gameMusic != null) {
+            gameMusic.stop();
+        }
+    }
+
+    // Modifier setSoundVolume pour qu'il affecte aussi le volume de la musique du jeu
+    public void setSoundVolume(float volume) {
+        this.gameSoundVolume = MathUtils.clamp(volume, 0.0f, 1.0f);
+        
+        // Appliquer le volume à la musique du jeu
+        if (gameMusic != null) {
+            gameMusic.setVolume(gameSoundVolume);
+        }
+    }
     @Override
     public void dispose() {
         Screen screen = this.getScreen();

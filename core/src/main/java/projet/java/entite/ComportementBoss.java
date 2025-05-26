@@ -25,13 +25,13 @@ public class ComportementBoss implements ComportementSbire {
         tempsPhase += deltaTime;
 
         // Debug log
-        System.out.println("Phase actuelle: " + phaseActuelle + " | Temps: " + tempsPhase);
+        //System.out.println("Phase actuelle: " + phaseActuelle + " | Temps: " + tempsPhase);
 
         // Change de phase toutes les X secondes
         switch (phaseActuelle) {
 
             case 0: // Phase de poursuite
-                executerPhaseChasing(sbire, deltaTime);
+                executerPhaseChasing(sbire, deltaTime, projectiles);
                 if (tempsPhase >= phaseChasing)
                     changerPhase();
                 break;
@@ -43,7 +43,7 @@ public class ComportementBoss implements ComportementSbire {
                 break;
 
             case 2: // Phase de poursuite après tir
-                executerPhaseChasing(sbire, deltaTime);
+                executerPhaseChasing(sbire, deltaTime, projectiles);
                 if (tempsPhase >= phaseCooldown)
                     changerPhase();
                 break;
@@ -68,10 +68,11 @@ public class ComportementBoss implements ComportementSbire {
         }
     }
 
-    private void executerPhaseChasing(Sbire sbire, float deltaTime) {
+    private void executerPhaseChasing(Sbire sbire, float deltaTime, List<Projectile> projectiles) {
         // Phase de poursuite
         sbire.deplacerVersCible(deltaTime); // Déplacement vers la cible
-
+        sbire.update(deltaTime, projectiles); // Met à jour la position et l'état du sbire
+        
         if (tempsPhase >= phaseChasing)
             changerPhase();
     }
@@ -101,8 +102,8 @@ public class ComportementBoss implements ComportementSbire {
                 Rectangle hitboxProjectile = new Rectangle(
                         sbire.getPositionX() - 4f, // Centrer la hitbox
                         sbire.getPositionY() - 4f,
-                        8f, // Taille de la hitbox
-                        8f);
+                        15f, // Taille de la hitbox
+                        15f);
 
                 Projectile projectile = new Projectile(
                         sbire.getPositionX(),

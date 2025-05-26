@@ -64,10 +64,15 @@ public class Sbire implements Entite{
     private BossAnimationHandler bossAnimationHandler;
     private boolean isBoss = false;
     public boolean isAttacking = false;
-
+    public Rectangle zoneAttaque; // Zone d'attaque du sbire
 
     private ArrayList<Leurre> leurres;
     private static final float DUREE_LEURRE = 5.0f; // Durée de vie des leurres en secondes
+
+    // Ajouter ces variables à la classe Sbire avec les autres attributs
+    private float attackAnimationTimer = 0;
+    private final float ATTACK_ANIMATION_DURATION = 0.5f; // Durée en secondes de l'animation d'attaque
+
 
 
     // Direction de déplacement pour l'animation
@@ -77,7 +82,11 @@ public class Sbire implements Entite{
     private com.badlogic.gdx.audio.Sound hitSound;
     private Main game;
 
-    public Sbire(int vie, int shield,int mana, float x, float y,float vitesseDeplacement,float vitesseProjectile,float cooldown,Rectangle hitbox, float porteeProjectile,float porteeCaC, int degats, int degatsCaC, Personnage cible, ComportementSbire comportement,Texture projectileTexture,Texture sbireTexture) {
+    public Sbire(int vie, int shield,int mana, float x, float y,float vitesseDeplacement,
+                float vitesseProjectile,float cooldown,Rectangle hitbox, float porteeProjectile,
+                float porteeCaC, int degats, int degatsCaC, Personnage cible, ComportementSbire comportement,
+                Texture projectileTexture,Texture sbireTexture,Rectangle zoneAttaque) {
+
         this.vie = vie;
         this.bouclier = shield;
         this.mana = mana;
@@ -98,6 +107,7 @@ public class Sbire implements Entite{
         this.projectileTexture = projectileTexture;
         this.sbireTexture = sbireTexture;
         this.leurres = new ArrayList<>();
+        this.zoneAttaque = zoneAttaque;
 
         // Récupérer une référence au jeu principal
         this.game = ((Main)Gdx.app.getApplicationListener());
@@ -225,6 +235,14 @@ public class Sbire implements Entite{
         try {
             tempsDepuisDernierTir += delta;
 
+            // Gestion de la durée de l'animation d'attaque
+            if (isAttacking) {
+                attackAnimationTimer += delta;
+                if (attackAnimationTimer >= ATTACK_ANIMATION_DURATION) {
+                    isAttacking = false;
+                    attackAnimationTimer = 0;
+                }
+            }
             if (cible != null && peutAttaquer()) {
                 if(estAPorteeCaC()){
                     attaquerMelee();
@@ -268,20 +286,17 @@ public class Sbire implements Entite{
         if (cible == null) {
             return false;
         }
+
+        updateZoneAttaque(); // Mettre à jour la zone d'attaque avant de vérifier
+        if (zoneAttaque.overlaps(cible.getHitbox())) {
+            // System.out.println("Coordonnées hitbox joueur : "+ cible.getHitbox().getX() + " " + cible.getHitbox().getY());
+            // System.out.println("Taille hitbox joueur : " + cible.getHitbox().getWidth() + " " + cible.getHitbox().getHeight());
+            // System.out.println("Coordonnées attaque sbire" + zoneAttaque.getX() + " " + zoneAttaque.getY());
         
-        // Calculer la distance entre les centres
-        float sbireX = this.positionX + this.hitbox.width / 2;
-        float sbireY = this.positionY + this.hitbox.height / 2;
+            return true; // La zone d'attaque intersecte la hitbox de la cible
+        }
         
-        float cibleX = cible.getPositionX() + 32; // Estimer le centre du joueur
-        float cibleY = cible.getPositionY() + 32;
-        
-        float dx = sbireX - cibleX;
-        float dy = sbireY - cibleY;
-        float distance = (float) Math.sqrt(dx * dx + dy * dy);
-        
-        //System.out.println("Distance: " + distance + ", Portée: " + porteeCaC);
-        return distance <= porteeCaC;
+        return false; // La cible n'est pas à portée
     }
 
     public void tirerSurCible(List<Projectile> projectiles) {
@@ -293,8 +308,8 @@ public class Sbire implements Entite{
     
         Vector2 vitesseVecteur = direction.scl(vitesseProjectile);
 
-        float hitboxWidth = 100;
-        float hitboxHeight = 100;
+        float hitboxWidth = 15;
+        float hitboxHeight = 15;
 
         Rectangle hitboxProjectile = new Rectangle(positionX - hitboxWidth/2, positionY - hitboxHeight/2, hitboxWidth, hitboxHeight);
         Projectile projectile = new Projectile(
@@ -314,13 +329,20 @@ public class Sbire implements Entite{
     }
 
     public void attaquerMelee() {
-        if (cible != null && estAPorteeCaC()) {
-            // Appliquer les dégâts
-            cible.prendreDegat(degatsCaC);
+        if (cible != null) {
             
-            // Ajouter des logs pour débugger
-            System.out.println("Sbire attaque! Dégâts infligés: " + degatsCaC);
-            System.out.println("Vie restante du personnage: " + cible.getVie() + ", Bouclier: " + cible.getBouclier());
+            // Vérifier si la zone d'attaque intersecte avec la hitbox du joueur
+            if (estAPorteeCaC()) {
+                // Appliquer les dégâts
+                cible.prendreDegat(degatsCaC);
+                
+                // Ajouter des logs pour débugger
+                System.out.println("Sbire attaque! Dégâts infligés: " + degatsCaC);
+                System.out.println("Vie restante du personnage: " + cible.getVie() + ", Bouclier: " + cible.getBouclier());
+                
+                // Mettre à jour isAttacking pour l'animation
+                isAttacking = true;
+            }
         }
     }
 
@@ -443,18 +465,24 @@ public class Sbire implements Entite{
         // Si le sbire est en knockback, utiliser cette direction pour l'animation
         if (isKnockedBack && knockbackVelocity.len() > 0.5f) {
             movementDir = new Vector2(knockbackVelocity).nor();
+            isAttacking = false; // Ne pas attaquer pendant le knockback
         } 
         // Sinon, si le comportement normal est en cours
         else if (comportement != null) {
             // Pour un sbire melee ou boss, vérifier s'il est à portée d'attaque
             if ((comportement instanceof ComportementMelee || comportement instanceof ComportementBoss) && estAPorteeCaC()) {
                 isAttacking = true;
-            } else if (cible != null) {
-                // Sbire se déplace vers la cible
-                float dx = cible.getPositionX() - this.positionX;
-                float dy = cible.getPositionY() - this.positionY;
-                movementDir = new Vector2(dx, dy).nor();
-                lastMovementDirection.set(movementDir);
+            } else {
+                isAttacking = false; // Ne pas attaquer si pas à portée
+
+                if (cible != null) {
+                    // Sbire se déplace vers la cible
+                    float dx = cible.getPositionX() - this.positionX;
+                    float dy = cible.getPositionY() - this.positionY;
+                    movementDir = new Vector2(dx, dy).nor();
+                    lastMovementDirection.set(movementDir);
+                }
+
             }
         }
         
@@ -727,7 +755,35 @@ public class Sbire implements Entite{
 
 
     public Rectangle getZoneAttaque() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getZoneAttaque'");
+        return zoneAttaque;
+    }
+
+    public void updateZoneAttaque(){
+        if (cible == null) return;
+
+        // Calculer le centre du sbire
+        float sbireX = this.positionX + this.hitbox.width / 2;
+        float sbireY = this.positionY + this.hitbox.height / 2;
+        
+        // Calculer la direction vers le joueur
+        float dirX = cible.getPositionX() - sbireX;
+        float dirY = cible.getPositionY() - sbireY;
+        
+        // Normaliser la direction
+        float length = (float) Math.sqrt(dirX * dirX + dirY * dirY);
+        if (length > 0) {
+            dirX /= length;
+            dirY /= length;
+        }
+        
+
+        
+        // Position de la zone d'attaque (devant le sbire dans la direction du joueur)
+        float attackDistance = hitbox.width / 2; // Distance depuis le centre du sbire
+        float attackX = sbireX + dirX * attackDistance - zoneAttaque.width / 2;
+        float attackY = sbireY + dirY * attackDistance - zoneAttaque.height / 2;
+        
+        // Mettre à jour la zone d'attaque
+        zoneAttaque.set(attackX, attackY, zoneAttaque.width, zoneAttaque.height);
     }
 }
