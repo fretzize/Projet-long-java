@@ -503,9 +503,18 @@ public class Sbire implements Entite{
     }
 
     public void setPosition(float x, float y) {
+        this.setPositionX(x);
+        this.setPositionY(y);
+    }
+
+    public void setPositionX(float x) {
         this.positionX = x;
+        hitbox.setPosition(x, this.positionY); // Mettre à jour la position de la hitbox
+    }
+
+    public void setPositionY(float y) {
         this.positionY = y;
-        hitbox.setPosition(x, y);
+        hitbox.setPosition(this.positionX, y);
     }
 
 

@@ -24,9 +24,6 @@ public class ComportementBoss implements ComportementSbire {
 
         tempsPhase += deltaTime;
 
-        // Debug log
-        System.out.println("Phase actuelle: " + phaseActuelle + " | Temps: " + tempsPhase);
-
         // Change de phase toutes les X secondes
         switch (phaseActuelle) {
 
