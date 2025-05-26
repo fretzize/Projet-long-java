@@ -1,5 +1,7 @@
 package projet.java.entite;
 
+import com.badlogic.gdx.math.Rectangle;
+
 import projet.java.Main;
 
 // import com.badlogic.gdx.math.Vector2;
@@ -28,4 +30,8 @@ public interface Entite {
     int getGauche();
     int getDash();
 
+    Rectangle getHitbox();
+    
+    void setPositionX(float x);
+    void setPositionY(float y);
 }

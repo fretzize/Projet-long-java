@@ -67,7 +67,7 @@ public class ArmeMelee extends ArmeBase {
         
         // Calcule les dimensions de la zone d'attaque
         float zoneWidth = portee;
-        float zoneHeight = portee / 2;
+        float zoneHeight = portee / 1.5f; 
         
         // Ajuster les dimensions selon la direction pour une meilleure jouabilité
         if (Math.abs(direction.y) > Math.abs(direction.x)) {

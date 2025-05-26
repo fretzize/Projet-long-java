@@ -14,8 +14,6 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
-import java.util.ArrayList;
-import java.util.List;
 
 import projet.java.entite.ArmeMelee;
 import projet.java.entite.ComportementBoss;
@@ -36,8 +34,6 @@ import projet.java.Inventaire.Item;
 import projet.java.Inventaire.Inventaire;
 import projet.java.Inventaire.Coffre;
 import projet.java.Inventaire.Item.ItemType;
-
-import java.util.ArrayList;
 
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.utils.ScreenUtils;
@@ -309,26 +305,33 @@ public class GameScreen implements Screen {
                 damageEffectTime = 0;
             }
         });
-<<<<<<< HEAD
         
-        // Créer le sbire normal avec sa texture normale
-        Rectangle sbireHitbox = new Rectangle(300, 300, 32, 32);
-        sbiretest = new Sbire(
-             300, 0, 3,            // vie, bouclier, mana
-             300, 300,           // positionX, positionY
-             30,                 // vitesseDeplacement (peut être augmenté si le sbire est trop lent)
-             300, 1.5f,             // vitesseProjectile, cooldown
-             sbireHitbox,  // hitbox plus grande et correctement positionnée
-             1500, 30,           // porteeProjectile, porteeCaC (augmentée pour faciliter l'attaque)
-             1, 1,              // degats (projectile), degatsCaC (augmenté de 0 à 15)
-             personnage1,         
-             new ComportementMelee(),
-             new Texture(Gdx.files.internal("bomba.png")),
-             new Texture("Hercule_haut.png"),
-             new Rectangle(300,300, 32, 32) // Hitbox du sbire
-         );
-         niveau.ajouterSbire(sbiretest);
-        
+        for (int i = 0; i < map.length; i++) {
+            for (int j = 0; j < map[0].length; j++) {
+                Random rand  = new Random();
+                if ((map[i][j] == 1 || map[i][j] ==101 || map[i][j] == 102 || map[i][j] ==103 || map[i][j] == 104 || map[i][j] ==105 || map[i][j] == 106
+                        || map[i][j] ==107 || map[i][j] == 108 || map[i][j] ==109 || map[i][j] == 110 ) && rand.nextFloat() < 0.006 && voisinNotMur(map,i,j)) {
+                    Sbire sbiretemp;
+                    System.out.println("map = " + map[i][j]);
+                    sbiretemp = new Sbire(
+                            300, 0, 3,            // vie, bouclier, mana
+                            i * TILE_SIZE , j* TILE_SIZE ,           // positionX, positionY
+                            25,                 // vitesseDeplacement (peut être augmenté si le sbire est trop lent)
+                            300, 3,             // vitesseProjectile, cooldown
+                            new Rectangle(i * TILE_SIZE+1, j * TILE_SIZE, 30, 30),  // hitbox plus grande et correctement positionnée
+                            1500, 30,           // porteeProjectile, porteeCaC (augmentée pour faciliter l'attaque)
+                            0, 0,              // degats (projectile), degatsCaC (augmenté de 0 à 15)
+                            personnage1,
+                            new ComportementMelee(),
+                            new Texture(Gdx.files.internal("bomba.png")),
+                            new Texture("Hercule_haut.png"),
+                            new Rectangle(300,300, 32, 32)
+                    );
+                    sbiretest.add(sbiretemp);
+                }
+            }
+        }
+
         // Créer le boss avec une hitbox plus grande et le ComportementBoss
         Rectangle bossHitbox = new Rectangle(300, 300, 48, 48); // Hitbox plus grande pour le boss
         sbireBoss = new Sbire(
@@ -344,32 +347,8 @@ public class GameScreen implements Screen {
             new Texture("Orc1/orc3_front_idle_1.png"),// La texture du sbire n'est plus utilisée directement
             new Rectangle(300, 300, 48, 48) // Hitbox du boss
         );
-        niveau.ajouterSbire(sbireBoss);
-=======
-        for (int i = 0; i < map.length; i++) {
-            for (int j = 0; j < map[0].length; j++) {
-                Random rand  = new Random();
-                if ((map[i][j] == 1 || map[i][j] ==101 || map[i][j] == 102 || map[i][j] ==103 || map[i][j] == 104 || map[i][j] ==105 || map[i][j] == 106
-                        || map[i][j] ==107 || map[i][j] == 108 || map[i][j] ==109 || map[i][j] == 110 ) && rand.nextFloat() < 0.02 && voisinNotMur(map,i,j)) {
-                    Sbire sbiretemp;
-                    System.out.println("map = " + map[i][j]);
-                    sbiretemp = new Sbire(
-                            300, 0, 3,            // vie, bouclier, mana
-                            i * TILE_SIZE , j* TILE_SIZE ,           // positionX, positionY
-                            25,                 // vitesseDeplacement (peut être augmenté si le sbire est trop lent)
-                            300, 3,             // vitesseProjectile, cooldown
-                            new Rectangle(i * TILE_SIZE+1, i * TILE_SIZE, 15, 15),  // hitbox plus grande et correctement positionnée
-                            1500, 30,           // porteeProjectile, porteeCaC (augmentée pour faciliter l'attaque)
-                            0, 0,              // degats (projectile), degatsCaC (augmenté de 0 à 15)
-                            personnage1,
-                            new ComportementMelee(),
-                            new Texture(Gdx.files.internal("coeur_plein.png")),
-                            new Texture("Hercule_haut.png")
-                    );
-                    sbiretest.add(sbiretemp);
-                }
-            }
-        }
+        sbiretest.add(sbireBoss); // Ajouter le boss à la liste des sbires
+
 //        Sbire sbiretemp;
 //        System.out.println("map = " + carteR.getCoordspawnX()*16 + " " + carteR.getCoordspawnX()*16);
 //        sbiretemp = new Sbire(
@@ -390,7 +369,6 @@ public class GameScreen implements Screen {
             niveau.ajouterSbire(sbiretest.get(i));
         }
 
->>>>>>> origin/main
         projectiles = new ArrayList<>();
 
         bouclierIntact = new Texture("bouclier.png");
@@ -694,7 +672,6 @@ public class GameScreen implements Screen {
                 System.out.println("État hitboxes après toggle: " + debugger.isShowingHitboxes());
             }
         }
-<<<<<<< HEAD
 
         if (tempsitem > tempscoffre) {
                 tempscoffre += avance;
@@ -702,8 +679,6 @@ public class GameScreen implements Screen {
                 tempscoffre = 0;
         }
 
-=======
->>>>>>> origin/main
     }
 
     private void logic() {
@@ -722,14 +697,22 @@ public class GameScreen implements Screen {
         // Mettre à jour le sbire avec la position correcte du joueur SEULEMENT s'il est en vie
         for (int i =0 ; i < sbiretest.size(); i++) {
             if (sbiretest.get(i).enVie()) {
-                float oldX = sbiretest.get(i).getPositionX();
-                float oldY = sbiretest.get(i).getPositionY();
-                sbiretest.get(i).agir(Gdx.graphics.getDeltaTime(), projectiles);
-                gererCollisionsEntite(
+
+                boolean estVisible = isEntityOnScreen(sbiretest.get(i), 200);
+                if (estVisible) {
+                    float oldX = sbiretest.get(i).getPositionX();
+                    float oldY = sbiretest.get(i).getPositionY();
+                    sbiretest.get(i).agir(Gdx.graphics.getDeltaTime(), projectiles);
+                    gererCollisionsEntite(
                         sbiretest.get(i), oldX, oldY,
-                    mursHitboxes, porteHitboxes,
-                    hitboxX, hitboxY,
-                    map, TILE_SIZE);
+                        mursHitboxes, porteHitboxes,
+                        hitboxX, hitboxY,
+                        map, TILE_SIZE);
+                } else {
+                    sbiretest.get(i).updateDamageEffect(Gdx.graphics.getDeltaTime());
+                }
+
+                
             }
         }
 
@@ -813,22 +796,21 @@ public class GameScreen implements Screen {
                 if (texture == porteH || texture == porteV || texture == porteHOpen || texture == porteVOpen) {
                     game.batch.draw(solTexture, x * TILE_SIZE, y * TILE_SIZE);
                     if (texture == porteH){
-                        porteHitboxes.add(new Rectangle(x * TILE_SIZE  , y * TILE_SIZE+ 4, TILE_SIZE , TILE_SIZE-8));
+                        //porteHitboxes.add(new Rectangle(x * TILE_SIZE  , y * TILE_SIZE+ 4, TILE_SIZE , TILE_SIZE-8));
                     }
                     else if (texture == porteV){
-                        porteHitboxes.add(new Rectangle(x * TILE_SIZE+2, y * TILE_SIZE, TILE_SIZE-12, TILE_SIZE));
+                        //porteHitboxes.add(new Rectangle(x * TILE_SIZE+2, y * TILE_SIZE, TILE_SIZE-12, TILE_SIZE));
 
                     }
                 }else if (texture != null ) {
                     game.batch.draw(texture, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
                     if (texture == murTexture) {
-                        mursHitboxes.add(new Rectangle(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE));
+                        //mursHitboxes.add(new Rectangle(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE));
                     }
                 }
             }
         }
 
-<<<<<<< HEAD
         
         for (Coffre coffre : coffres) {
             if (!coffre.estOuvert()) {
@@ -842,8 +824,10 @@ public class GameScreen implements Screen {
                         game.batch.draw(itemcoffre, coffre.getHitbox().x, coffre.getHitbox().y, TILE_SIZE, TILE_SIZE);
                     } else {
                         coffre.setvientouvrir(false);
-=======
-
+                    }
+                }
+            }
+        }
         for (int y = 0; y < map.length ; y++) {
             int mapY = map.length - 1 - y;
             if (mapY < 0 || mapY >= map.length) continue;
@@ -862,15 +846,10 @@ public class GameScreen implements Screen {
                 }else if (texture != null ) {
                     if (texture == murTexture) {
                         mursHitboxes.add(new Rectangle(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE));
->>>>>>> origin/main
                     }
                 }
             }
         }
-<<<<<<< HEAD
-=======
-
->>>>>>> origin/main
         //porte
         for (int y = startY; y <= endY; y++) {
             int mapY = map.length - 1 - y;
@@ -1103,9 +1082,16 @@ public class GameScreen implements Screen {
             
             // Hitboxes des sbires
             shapeRenderer.setColor(1, 0, 0, 1); // Rouge
-            for (Sbire sbire : niveau.getSbires()) {
-                if (sbire.enVie()) {
-                    Rectangle hitbox = sbire.getHitbox();
+            // for (Sbire sbire : niveau.getSbires()) {
+            //     if (sbire.enVie()) {
+            //         Rectangle hitbox = sbire.getHitbox();
+            //         shapeRenderer.rect(hitbox.x, hitbox.y, hitbox.width, hitbox.height);
+            //     }
+            // }
+
+            for (int i = 0; i < sbiretest.size(); i++) {
+                if (sbiretest.get(i).enVie()) {
+                    Rectangle hitbox = sbiretest.get(i).getHitbox();
                     shapeRenderer.rect(hitbox.x, hitbox.y, hitbox.width, hitbox.height);
                 }
             }
@@ -1124,12 +1110,20 @@ public class GameScreen implements Screen {
                 shapeRenderer.rect(attackZone.x, attackZone.y, attackZone.width, attackZone.height);
             }
 
-            for (Sbire sbire : niveau.getSbires()) {
-                if (sbire.isAttacking) {
+            // for (Sbire sbire : niveau.getSbires()) {
+            //     if (sbire.isAttacking) {
+            //         shapeRenderer.setColor(1, 0.5f, 0, 1); // Orange
+            //         Rectangle attackZone = sbire.getZoneAttaque();
+            //         shapeRenderer.rect(attackZone.x, attackZone.y, attackZone.width, attackZone.height);
+            //     }
+
+            for (int i = 0; i < sbiretest.size(); i++) {
+                if (sbiretest.get(i).isAttacking) {
                     shapeRenderer.setColor(1, 0.5f, 0, 1); // Orange
-                    Rectangle attackZone = sbiretest.getZoneAttaque();
+                    Rectangle attackZone = sbiretest.get(i).getZoneAttaque();
                     shapeRenderer.rect(attackZone.x, attackZone.y, attackZone.width, attackZone.height);
                 }
+
             }
             // Hitboxes des projectiles
             shapeRenderer.setColor(1, 0, 1, 1); // Violet/Purple
@@ -1193,11 +1187,17 @@ public class GameScreen implements Screen {
     }
 
     // Libérer les ressources des sbires
-    if (niveau != null && niveau.getSbires() != null) {
-        for (Sbire sbire : niveau.getSbires()) {
-            if (sbire != null) {
-                sbire.dispose();
-            }
+    // if (niveau != null && niveau.getSbires() != null) {
+    //     for (Sbire sbire : niveau.getSbires()) {
+    //         if (sbire != null) {
+    //             sbire.dispose();
+    //         }
+    //     }
+    // }
+
+    for ( int i = 0; i < sbiretest.size(); i++) {
+        if (sbiretest.get(i) != null) {
+            sbiretest.get(i).dispose();
         }
     }
     }
@@ -1319,77 +1319,65 @@ public class GameScreen implements Screen {
         return direction;
     }
 
-<<<<<<< HEAD
-    public AttackManager getAttackMana() {
-        return this.attackManager;
-    }
-
-    // dans attaque manager ajouter:
-
-    // dans le game screen
-    // public AttackManager getAttackMana() {
-    //     return this.attackManager;
-    // }
-=======
     private void gererCollisionsEntite(
-    Entite entite,
-    float oldX, float oldY,
-    Array<Rectangle> mursHitboxes,
-    Array<Rectangle> porteHitboxes,
-    float hitboxX, float hitboxY,
-    int[][] map, int TILE_SIZE){
-        Rectangle hitbox = entite.getHitbox();
-        int xp, yp;
+        Entite entite,
+        float oldX, float oldY,
+        Array<Rectangle> mursHitboxes,
+        Array<Rectangle> porteHitboxes,
+        float hitboxX, float hitboxY,
+        int[][] map, int TILE_SIZE){
+            Rectangle hitbox = entite.getHitbox();
+            int xp, yp;
 
-        // Test mur en X
-        hitbox.setPosition(entite.getPositionX() + hitboxX, oldY + hitboxY);
-        for (int i = 0; i < mursHitboxes.size; i++) {
-            if (hitbox.overlaps(mursHitboxes.get(i))) {
-                System.out.println("Collision avec un mur en X");
-                entite.setPositionX(oldX);
-                hitbox.setPosition(entite.getPositionX() + hitboxX, entite.getPositionY() + hitboxY);
-                break;
-            }
-        }
-
-        // Test porte en X
-        hitbox.setPosition(entite.getPositionX() + hitboxX, entite.getPositionY() + hitboxY);
-        for (int i = 0; i < porteHitboxes.size; i++) {
-            if (hitbox.overlaps(porteHitboxes.get(i))) {
-                entite.setPositionX(oldX);
-                hitbox.setPosition(oldY + hitboxX, oldY + hitboxY);
-                xp = (int) Math.floor(porteHitboxes.get(i).x / TILE_SIZE);
-                yp = (int) Math.floor(porteHitboxes.get(i).y / TILE_SIZE);
-                if (entite instanceof Personnage) {
-                    map[map.length - 1 - yp][xp] = 30;
+            // Test mur en X
+            hitbox.setPosition(entite.getPositionX() + hitboxX, oldY + hitboxY);
+            for (int i = 0; i < mursHitboxes.size; i++) {
+                if (hitbox.overlaps(mursHitboxes.get(i))) {
+                    System.out.println("Collision avec un mur en X");
+                    entite.setPositionX(oldX);
+                    hitbox.setPosition(entite.getPositionX() + hitboxX, entite.getPositionY() + hitboxY);
+                    break;
                 }
-                break;
             }
-        }
 
-        // Test mur en Y
-        hitbox.setPosition(entite.getPositionX() + hitboxX, entite.getPositionY() + hitboxY);
-        for (int i = 0; i < mursHitboxes.size; i++) {
-            if (hitbox.overlaps(mursHitboxes.get(i))) {
-                entite.setPositionY(oldY);
-                hitbox.setPosition(entite.getPositionX() + hitboxX, entite.getPositionY() + hitboxY);
-                break;
-            }
-        }
-
-        // Test porte en Y
-        for (int i = 0; i < porteHitboxes.size; i++) {
-            if (hitbox.overlaps(porteHitboxes.get(i))) {
-                entite.setPositionY(oldY);
-                hitbox.setPosition(entite.getPositionX() + hitboxX, entite.getPositionY() + hitboxY);
-                xp = (int) Math.floor(porteHitboxes.get(i).x / TILE_SIZE);
-                yp = (int) Math.floor(porteHitboxes.get(i).y / TILE_SIZE);
-                if (entite instanceof Personnage) {
-                    map[map.length - 1 - yp][xp] = 20;
+            // Test porte en X
+            hitbox.setPosition(entite.getPositionX() + hitboxX, entite.getPositionY() + hitboxY);
+            for (int i = 0; i < porteHitboxes.size; i++) {
+                if (hitbox.overlaps(porteHitboxes.get(i))) {
+                    entite.setPositionX(oldX);
+                    hitbox.setPosition(oldY + hitboxX, oldY + hitboxY);
+                    xp = (int) Math.floor(porteHitboxes.get(i).x / TILE_SIZE);
+                    yp = (int) Math.floor(porteHitboxes.get(i).y / TILE_SIZE);
+                    if (entite instanceof Personnage) {
+                        map[map.length - 1 - yp][xp] = 30;
+                    }
+                    break;
                 }
-                break;
             }
-        }
+
+            // Test mur en Y
+            hitbox.setPosition(entite.getPositionX() + hitboxX, entite.getPositionY() + hitboxY);
+            for (int i = 0; i < mursHitboxes.size; i++) {
+                if (hitbox.overlaps(mursHitboxes.get(i))) {
+                    entite.setPositionY(oldY);
+                    hitbox.setPosition(entite.getPositionX() + hitboxX, entite.getPositionY() + hitboxY);
+                    break;
+                }
+            }
+
+            // Test porte en Y
+            for (int i = 0; i < porteHitboxes.size; i++) {
+                if (hitbox.overlaps(porteHitboxes.get(i))) {
+                    entite.setPositionY(oldY);
+                    hitbox.setPosition(entite.getPositionX() + hitboxX, entite.getPositionY() + hitboxY);
+                    xp = (int) Math.floor(porteHitboxes.get(i).x / TILE_SIZE);
+                    yp = (int) Math.floor(porteHitboxes.get(i).y / TILE_SIZE);
+                    if (entite instanceof Personnage) {
+                        map[map.length - 1 - yp][xp] = 20;
+                    }
+                    break;
+                }
+            }
     }
 
     public boolean voisinNotMur(int[][] map, int i, int j) {
@@ -1409,5 +1397,21 @@ public class GameScreen implements Screen {
         }
         return true;
     }
->>>>>>> origin/main
+
+    private boolean isEntityOnScreen(Entite entite, float margin) {
+        // Récupérer les dimensions de l'écran
+        float screenLeft = camera.position.x - camera.viewportWidth / 2 - margin;
+        float screenRight = camera.position.x + camera.viewportWidth / 2 + margin;
+        float screenBottom = camera.position.y - camera.viewportHeight / 2 - margin;
+        float screenTop = camera.position.y + camera.viewportHeight / 2 + margin;
+        
+        // Récupérer la hitbox de l'entité
+        Rectangle hitbox = entite.getHitbox();
+        
+        // Vérifier si la hitbox intersecte avec l'écran
+        return hitbox.x + hitbox.width >= screenLeft && 
+            hitbox.x <= screenRight && 
+            hitbox.y + hitbox.height >= screenBottom && 
+            hitbox.y <= screenTop;
+    }
 }

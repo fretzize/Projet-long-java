@@ -786,4 +786,14 @@ public class Sbire implements Entite{
         // Mettre à jour la zone d'attaque
         zoneAttaque.set(attackX, attackY, zoneAttaque.width, zoneAttaque.height);
     }
+
+	@Override
+	public void setPositionX(float x) {
+		this.positionX = x;
+	}
+
+	@Override
+	public void setPositionY(float y) {
+		this.positionY = y;
+	}
 }
