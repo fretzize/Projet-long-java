@@ -23,7 +23,7 @@ public class AttackManager {
     // Références
     private final Entite personnage;
     private final AnimationHandler animationHandler;
-    private final ArmeMelee armeMelee;
+    private  ArmeMelee armeMelee;
     private final Main game;
     private com.badlogic.gdx.audio.Sound attackSound;
     
@@ -179,6 +179,10 @@ public class AttackManager {
      */
     public ArmeMelee getArmeMelee() {
         return armeMelee;
+    }
+
+    public void setArme(String nom, int nombre, int range) {
+        this.armeMelee = new ArmeMelee(nom, nombre, range, range, nombre, nom, range);
     }
     
     /**

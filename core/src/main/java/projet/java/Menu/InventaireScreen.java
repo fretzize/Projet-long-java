@@ -16,6 +16,7 @@ import projet.java.Inventaire.Grille;
 import projet.java.Inventaire.Inventaire;
 import projet.java.Inventaire.Item;
 import projet.java.Menu.GameScreen;
+import projet.java.combat.AttackManager;
 import projet.java.Main;
 
 public class InventaireScreen implements Screen {
@@ -31,11 +32,11 @@ public class InventaireScreen implements Screen {
     private Personnage personnage;
     private AttackManager attackmanager;
 
-    public InventaireScreen(final Main game, GameScreen gameScreen, Personnage personnage, AttackManager attackManager) {
+    public InventaireScreen(final Main game, GameScreen gameScreen, Personnage personnage) {
         this.game = game;
         this.gameScreen = gameScreen; 
         this.personnage = personnage;
-        this.attackmanager = attackManager;
+        
         
         // Initialiser les rectangles pour chaque option
         optionBounds = new Rectangle[menuOptions.length];
@@ -155,9 +156,9 @@ public class InventaireScreen implements Screen {
                                 grille.removeItem(i, j);
                                 nombre_element_grille --;
                             }
-                            if (item.getType() == Item.ItemType.ARME) {
-                                attackmanager.getAttackMana().setArme(item.getNom(), item.getNombre(), item.getRange());
-                            }
+                            // if (item.getType() == Item.ItemType.ARME) {
+                            //     attackmanager.getAttackMana().setArme(item.getNom(), item.getNombre(), item.getRange());
+                            // }
                             // personnage.setArme(null);
                         } else {
                             Color previousColor = game.batch.getColor().cpy();

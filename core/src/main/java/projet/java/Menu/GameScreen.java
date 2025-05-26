@@ -1224,10 +1224,12 @@ public class GameScreen implements Screen {
         return direction;
     }
 
-    // dans attaque maanger ajouter:
-    // public void setArme(String nom, int nombre, int range) {
-    //     this.armeMelee = new ArmeMelee(nom, nombre, range, range, nombre, nom, range);
-    // }
+    public AttackManager getAttackMana() {
+        return this.attackManager;
+    }
+
+    // dans attaque manager ajouter:
+
     // dans le game screen
     // public AttackManager getAttackMana() {
     //     return this.attackManager;

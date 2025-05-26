@@ -148,7 +148,7 @@ public class Main extends Game {
         
         // Appliquer le volume à la musique du jeu
         if (gameMusic != null) {
-            gameMusic.setVolume(gameSoundVolume);
+            gameMusic.setVolume(gameSoundVolume/1.5f);
         }
     }
     @Override
