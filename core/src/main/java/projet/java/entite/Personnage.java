@@ -2,25 +2,33 @@ package projet.java.entite;
 
 
 import com.badlogic.gdx.ApplicationAdapter;
+import com.badlogic.gdx.Game;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.math.Vector2;
 import projet.java.Main;
 
 import java.util.Timer;
 import projet.java.Inventaire.Inventaire;
+import projet.java.animation.AnimationHandler;
+import projet.java.combat.AttackManager;
+
 import java.util.TimerTask;
 
 
 public class Personnage extends ApplicationAdapter implements Entite {
 
     // caractéristique du personnage
+    private Main game;
     private int vie;
     private int bouclier;
     private int mana;
     private String nom;
     private Texture skin;
+    private Vector2 vecteurDirection;
     private float positionX;
     private float positionY;
     // private Vector2 position; // = new Vector2(0f, 0f);
@@ -29,11 +37,17 @@ public class Personnage extends ApplicationAdapter implements Entite {
     private int bouclier_max;
     private Arme arme;
     private Inventaire inventaire = new Inventaire();
+    private AnimationHandler animationHandler;
+    private AttackManager attackManager;
+    private float attackCooldown;
 
     // etat bouclier et dash personnage
     private boolean etatbouclier = false;
     private boolean dashOk = true;
 
+    // largeur et hauteur du skin du personnage
+    private float largeur_skin;
+    private float hauteur_skin;
 
     //timer pour savoir tous les combiens de temps il peut utiliser son dash, cooldown
     
@@ -147,6 +161,8 @@ public class Personnage extends ApplicationAdapter implements Entite {
     public void changePositionY(float y){
         this.positionY += y;
         this.hitbox.setPosition(this.positionX, this.positionY);
+
+
     }
 
     public void setPositionX(float x){
@@ -158,13 +174,29 @@ public class Personnage extends ApplicationAdapter implements Entite {
         this.hitbox.setPosition(this.positionX, this.positionY);
     }
 
-    public Personnage(Texture skin,Rectangle hitbox) {//}, Vector2 position) {
+    /**
+     * Obtenir la direction du personnage.
+     * @return la direction en degrés du personnage
+     */
+    public float getDirection() {
+        return vecteurDirection.angleDeg();
+    }
+
+    public Personnage(Main game, Texture skin,Rectangle hitbox) {//}, Vector2 position) {
+
         this.nom = "mathisvaillant";
+        this.game = game;
         this.vie = 5;
         //this.mana = mana;
-        // this.skin = skin;
         //this.mana_max = mana;
+        this.attackCooldown = 0.5f;
         this.vie_max = 5;
+        this.vecteurDirection = new Vector2();
+        this.animationHandler = new AnimationHandler();
+        this.largeur_skin = animationHandler.getCurrentFrame().getRegionWidth();
+        this.hauteur_skin = animationHandler.getCurrentFrame().getRegionHeight();
+        this.attackManager = new AttackManager(game, this, animationHandler, attackCooldown);
+
         this.bouclier = 5;
         this.bouclier_max = 5;
         this.positionY = 250;
@@ -173,8 +205,6 @@ public class Personnage extends ApplicationAdapter implements Entite {
         this.vie_max = 5;
         this.bouclier_max = 5;
     }
-    
-
 
     //texture 
 
@@ -247,32 +277,37 @@ public class Personnage extends ApplicationAdapter implements Entite {
 
         
     }
-    
+
     @Override
     public void draw_entite(Main game) {
-        float largeur_ecran = 2000;//game.viewport.getWorldWidth();
-        float hauteur_ecran = 2000;//game.viewport.getWorldHeight();
-        // game.batch.begin();
-        // for (int i = 0; i < this.vie; i++) {
-        //     game.batch.draw(coeur_plein, i*largeur_coeur +10, hauteur_ecran - hauteur_coeur);
-        // }
-        // for (int i = 0; i < this.bouclier; i++) {
-        //     game.batch.draw(bouclierIntact, i*largeur_bouclier +10, hauteur_ecran - hauteur_bouclier - 1 - hauteur_coeur);
-        // }
+        ;
+    }
 
-        // if (dashOk) {
-        //     game.batch.draw(dash, largeur_dash, hauteur_dash);
-        // } else {
-        //     game.batch.draw(dash_gris, largeur_dash, hauteur_dash);
-        // }
+    /**
+     * Dessine le personnage principal à l'écran.
+     * @param game Le jeu qui le dessine
+     * @param echelle Multiplicateur de la taille du personnage
+     */
+    public void draw_entite(Main game, float echelle) {
+        // Dessiner le joueur avec l'animation actuelle
+        TextureRegion currentFrame = animationHandler.getCurrentFrame();
 
-        // game.batch.draw(skin, this.getPositionX(), this.getPositionY());
+        // Préserver le ratio d'aspect
+        float scaledHeight = hauteur_skin * echelle;
+        float scaledWidth = largeur_skin * echelle;
 
+        game.batch.draw(currentFrame, positionX, positionY, scaledWidth, scaledHeight);
+    }
 
-        
+    public void updateAttack(float delta, Vector2 mouseDirection) {
 
-        // game.batch.end();
+        boolean isMovingUp = Gdx.input.isKeyPressed(game.toucheHaut) || Gdx.input.isKeyPressed(Input.Keys.UP);
+        boolean isMovingDown = Gdx.input.isKeyPressed(game.toucheBas) || Gdx.input.isKeyPressed(Input.Keys.DOWN);
+        boolean isMovingLeft = Gdx.input.isKeyPressed(game.toucheGauche) || Gdx.input.isKeyPressed(Input.Keys.LEFT);
+        boolean isMovingRight = Gdx.input.isKeyPressed(game.toucheDroite) || Gdx.input.isKeyPressed(Input.Keys.RIGHT);
 
+        attackManager.update(delta,mouseDirection);
+        animationHandler.update(delta, isMovingUp, isMovingDown, isMovingLeft, isMovingRight, false);
     }
 
     
@@ -297,6 +332,8 @@ public class Personnage extends ApplicationAdapter implements Entite {
             this.bouclier = 0;
             perteVie(degatsRestants); // Appliquer le reste des dégâts à la vie
         }
+
+
     }
 
     // Méthode pour enlever des points de vies et afficher "Game over" lorsque le personnage meurt
@@ -395,7 +432,9 @@ public class Personnage extends ApplicationAdapter implements Entite {
     // }
 
    
-
+    public boolean isAttacking() {
+        return attackManager.isAttacking();
+    }
     
     @Override
     public void dispose_entite(Main game) {

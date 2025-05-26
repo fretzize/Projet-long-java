@@ -176,7 +176,7 @@ public class Projectile {
 
 
     //affichage de l'entité
-    public void draw(Main game,float scaledWidth,float scaledHeight){
-        game.batch.draw(texture,this.position.x,this.position.y,scaledWidth,scaledHeight);
+    public void draw(Main game, float echelle){
+        game.batch.draw(texture,this.position.x, this.position.y, hitbox.getWidth() * echelle, hitbox.getHeight() * echelle);
     }
 }

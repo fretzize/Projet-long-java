@@ -160,6 +160,7 @@ coeur_plein.png
 dash.png
 dash2.png
 dash_gris.png
+degatmobsound.mp3
 doorv.png
 epee1.png
 epee2.png
@@ -201,4 +202,5 @@ menumusic.mp3
 police.otf
 potion_de_vie.png
 sword_swing.mp3.mp3
+swordattacksound.mp3
 wall.png

@@ -12,11 +12,13 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.math.MathUtils;
 
 import projet.java.Menu.MenuScreen;
+import projet.java.animation.AnimationHandler;
 
 /** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
 public class Main extends Game {
 
     public SpriteBatch batch;
+    public AnimationHandler animationHandler;
     public FitViewport viewport;
     public BitmapFont font;
     public Music menuMusic; // Musique de fond
@@ -102,6 +104,7 @@ public class Main extends Game {
         batch = new SpriteBatch();
         viewport = new FitViewport(1920, 1080);
         font = new BitmapFont();
+        animationHandler = new AnimationHandler();
 
         menuMusic = Gdx.audio.newMusic(Gdx.files.internal("menumusic.mp3"));
         menuMusic.setLooping(true);

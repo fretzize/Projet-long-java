@@ -86,8 +86,6 @@ public class GameScreen implements Screen {
     private Texture mapTexture;
     private Texture skin;
     private Rectangle playerHitbox ;
-    //private float playerX = 250;
-    //private float playerY = 250;
     private float hitboxX = 22;
     private float hitboxY = 18;
     private float playerSpeed = 100; // Vitesse normale en pixels par seconde
@@ -133,19 +131,19 @@ public class GameScreen implements Screen {
     private Texture arme3;
 
     // largeur et longueur
-
     float largeur_coeur;
     float hauteur_coeur;
     float largeur_bouclier;
     float hauteur_bouclier;
     float largeur_skin;
     float hauteur_skin;
-
     float cameraHalfWidth;
     float cameraHalfHeight;
 
     private float scalePlayer = 1.0f; // Facteur d'échelle pour le personnage
     private float scaleSbire = 1.0f;
+    private float scaleProjectiles = 1.0f;
+
     // etat bouclier et dash personnage
     private boolean etatbouclier = false;
     private boolean dashOk = true;
@@ -197,7 +195,7 @@ public class GameScreen implements Screen {
         camera = new OrthographicCamera();
         camera.setToOrtho(false, 320, 180);
         playerHitbox = new Rectangle(250+hitboxX, 250+hitboxY, 10, 10);
-        this.personnage1 = new Personnage(skin,playerHitbox);
+        this.personnage1 = new Personnage(game, skin, playerHitbox);
     }
 
     //TEST SBIRE
@@ -316,12 +314,6 @@ public class GameScreen implements Screen {
         barre_pleine = new Texture("barres_pleine.png");
         barre_vide = new Texture("barres_vide.png");
 
-        // Initialiser le gestionnaire d'animations
-        animationHandler = new AnimationHandler();
-        
-        // Initialiser le gestionnaire d'attaques avec un cooldown de 3 secondes
-        attackManager = new AttackManager(game, personnage1, animationHandler, 0.5f);
-        attackManager.getArmeMelee().setNiveau(niveau);
         if (timer != null) {
             timer.cancel();
         }
@@ -371,20 +363,10 @@ public class GameScreen implements Screen {
         boolean isMovingDown = Gdx.input.isKeyPressed(game.toucheBas) || Gdx.input.isKeyPressed(Input.Keys.DOWN);
         boolean isMovingLeft = Gdx.input.isKeyPressed(game.toucheGauche) || Gdx.input.isKeyPressed(Input.Keys.LEFT);
         boolean isMovingRight = Gdx.input.isKeyPressed(game.toucheDroite) || Gdx.input.isKeyPressed(Input.Keys.RIGHT);
-        
 
         Vector2 mouseDirection = getMouseDirection();
 
-        // Mettre à jour le système d'attaque et récupérer l'état d'attaque
-        boolean isAttacking = attackManager.update(delta,mouseDirection);
-        
-        // Ne mettre à jour l'animation en fonction du mouvement que si on n'est pas en train d'attaquer
-        if (!isAttacking && !animationHandler.isAttacking()) {
-            animationHandler.update(delta, isMovingUp, isMovingDown, isMovingLeft, isMovingRight, false);
-        } else {
-            // Juste mettre à jour le timer d'animation sans changer la direction
-            animationHandler.updateTimerOnly(delta);
-        }
+        personnage1.updateAttack(delta, mouseDirection);
         
         // Mémoriser l'état de mouvement pour le dash
         wasMovingUp = isMovingUp;
@@ -460,7 +442,7 @@ public class GameScreen implements Screen {
         float currentSpeed;
         if (isDashing) {
             currentSpeed = speed; // La vitesse de dash reste inchangée
-        } else if (attackManager.isAttacking()) {
+        } else if (personnage1.isAttacking()) {
             // Réduire la vitesse pendant l'attaque
             currentSpeed = playerSpeed * attackSpeedModifier;
         } else {
@@ -473,7 +455,7 @@ public class GameScreen implements Screen {
         int xp=0;
         int yp=0;
 
-        // Déplacement du joueur
+
         if (Gdx.input.isKeyPressed(game.toucheHaut) || Gdx.input.isKeyPressed(Input.Keys.UP)) {
             //playerY += currentSpeed * avance;
             personnage1.changePositionY(currentSpeed * avance);
@@ -490,7 +472,15 @@ public class GameScreen implements Screen {
             //playerY -= currentSpeed * avance;
             personnage1.changePositionY(-currentSpeed * avance);
         }
-        
+
+        // Normaliser le vecteur
+        /*vecteurDirection.nor();
+        vecteurDirection.scl(avance * this.speed);
+
+        personnage1.changePositionX(MathUtils.cosDeg(vecteurDirection.angleDeg()) * vecteurDirection.len());
+        personnage1.changePositionY(MathUtils.sinDeg(vecteurDirection.angleDeg()) * vecteurDirection.len());
+         */
+
         //test mur en X
         playerHitbox.setPosition(personnage1.getPositionX()+hitboxX, oldY+hitboxY);
         for (int i = 0; i < mursHitboxes.size; i++) {
@@ -677,22 +667,10 @@ public class GameScreen implements Screen {
                 }
             }
         }
-
-
-
-        // Dessiner le joueur avec l'animation actuelle
-        TextureRegion currentFrame = animationHandler.getCurrentFrame();
-        float originalWidth = currentFrame.getRegionWidth();
-        float originalHeight = currentFrame.getRegionHeight();
-    
-        // Préserver le ratio d'aspect
-        float aspectRatio = originalWidth / originalHeight;
-        float scaledHeight = hauteur_skin * scalePlayer;
-        float scaledWidth = scaledHeight * aspectRatio;
         
         //Dessiner les projectiles
         for (Projectile projectile : projectiles) {
-            projectile.draw(game, scaledWidth / 2, scaledHeight / 2);
+            projectile.draw(game, scaleProjectiles);
         }
 
         // Dessiner les sbires
@@ -761,8 +739,9 @@ public class GameScreen implements Screen {
         }
     
         // Dessiner le joueur
-        game.batch.draw(currentFrame, personnage1.getPositionX(), personnage1.getPositionY(), scaledWidth, scaledHeight);
-        
+        //game.batch.draw(currentFrame, personnage1.getPositionX(), personnage1.getPositionY(), scaledWidth, scaledHeight);
+        personnage1.draw_entite(game, scalePlayer);
+
         // Restaurer la couleur originale
         game.batch.setColor(originalColor);
         
@@ -770,36 +749,8 @@ public class GameScreen implements Screen {
         // afficher le dash selon la direction
         if (Gdx.input.isKeyPressed(game.toucheDash)) {
             if (dash_afficher) {
-                if ((Gdx.input.isKeyPressed(game.toucheHaut) && Gdx.input.isKeyPressed(game.toucheDroite)) ||
-                        (Gdx.input.isKeyPressed(Input.Keys.RIGHT) && Gdx.input.isKeyPressed(Input.Keys.UP))) {
-                    game.batch.draw(dash, personnage1.getPositionX(), personnage1.getPositionY(), largeur_dash, hauteur_dash, largeur_dash, hauteur_dash, 1,
-                            1, 45);
-                } else if ((Gdx.input.isKeyPressed(game.toucheHaut) && Gdx.input.isKeyPressed(game.toucheGauche)) ||
-                        (Gdx.input.isKeyPressed(Input.Keys.LEFT) && Gdx.input.isKeyPressed(Input.Keys.UP))) {
-                    game.batch.draw(dash, personnage1.getPositionX(), personnage1.getPositionY(), largeur_dash, hauteur_dash, largeur_dash, hauteur_dash, 1,
-                            1, -45);
-                } else if ((Gdx.input.isKeyPressed(game.toucheBas) && Gdx.input.isKeyPressed(game.toucheDroite)) ||
-                        (Gdx.input.isKeyPressed(Input.Keys.DOWN) && Gdx.input.isKeyPressed(Input.Keys.RIGHT))) {
-                    game.batch.draw(dash, personnage1.getPositionX(), personnage1.getPositionY(), largeur_dash, hauteur_dash, largeur_dash, hauteur_dash, 1,
-                            1, 135);
-                } else if ((Gdx.input.isKeyPressed(game.toucheBas) && Gdx.input.isKeyPressed(game.toucheGauche)) ||
-                        (Gdx.input.isKeyPressed(Input.Keys.DOWN) && Gdx.input.isKeyPressed(Input.Keys.LEFT))) {
-                    game.batch.draw(dash, personnage1.getPositionX(), personnage1.getPositionY(), largeur_dash, hauteur_dash, largeur_dash, hauteur_dash, 1,
-                            1, -135);
-                } else if (Gdx.input.isKeyPressed(game.toucheHaut) || Gdx.input.isKeyPressed(Input.Keys.UP)) {
-                    game.batch.draw(dash, personnage1.getPositionX(), personnage1.getPositionY(), largeur_dash, hauteur_dash, largeur_dash, hauteur_dash, 1,
-                            1, 90);
-                } else if (Gdx.input.isKeyPressed(game.toucheGauche) || Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
-                    game.batch.draw(dash, personnage1.getPositionX(), personnage1.getPositionY(), largeur_dash, hauteur_dash, largeur_dash, hauteur_dash, 1,
-                            1, 0);
-                } else if (Gdx.input.isKeyPressed(game.toucheBas) || Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
-                    game.batch.draw(dash, personnage1.getPositionX(), personnage1.getPositionY(), largeur_dash, hauteur_dash, largeur_dash, hauteur_dash, 1,
-                            1, -90);
-                } else if (Gdx.input.isKeyPressed(game.toucheDroite) || Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
-                    game.batch.draw(dash, personnage1.getPositionX(), personnage1.getPositionY(), largeur_dash, hauteur_dash, largeur_dash, hauteur_dash, 1,
-                            1, 180);
-                }
-                dash_afficher = false;
+                game.batch.draw(dash, personnage1.getPositionX(), personnage1.getPositionY(), largeur_dash, hauteur_dash, largeur_dash, hauteur_dash, 1,
+                        1, personnage1.getDirection());
             }
         }
         // cooldown
@@ -896,7 +847,7 @@ public class GameScreen implements Screen {
             }
             
             // Hitbox de l'attaque si active
-            if (attackManager.isAttacking()) {
+            if (personnage1.isAttacking()) {
                 shapeRenderer.setColor(0, 0, 1, 1);  // Bleu
                 Rectangle attackZone = attackManager.getArmeMelee().getZoneAttaque();
                 shapeRenderer.rect(attackZone.x, attackZone.y, attackZone.width, attackZone.height);
