@@ -844,7 +844,7 @@ public class Map {
 
    public void placerCoffresDansChambres() {
     for (Chambre chambre : this.chambres) {
-        boolean coffrePlace = chambre.placerCoffreAvecProbabilite(1);
+        boolean coffrePlace = chambre.placerCoffreAvecProbabilite(0.6);
         if (coffrePlace) {
             int[][] grille = chambre.getGrille();
             int[] initial = chambre.getInitial();
