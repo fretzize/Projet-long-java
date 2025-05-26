@@ -136,7 +136,7 @@ public class ComportementBoss implements ComportementSbire {
         // Attaque corps à corps puissante quand proche de la cible
         if (sbire.getDistanceCible() <= sbire.getPorteeCaC()) {
             // Inflige des dégâts massifs
-            sbire.getCible().prendreDegat(sbire.getDegats() * 5); // 5 fois les dégâts normaux
+            sbire.getCible().prendreDegat(sbire.getDegats() * 4); // 4 fois les dégâts normaux
             // Force le changement de phase
             tempsPhase = phaseCharge;
             enCharge = false;

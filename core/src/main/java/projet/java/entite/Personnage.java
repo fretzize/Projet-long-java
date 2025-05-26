@@ -181,11 +181,11 @@ public class Personnage extends ApplicationAdapter implements Entite {
 
     public Personnage(Texture skin,Rectangle hitbox) {//}, Vector2 position) {
         this.nom = "mathisvaillant";
-        this.vie = 5;
+        this.vie = 10;
         //this.mana = mana;
         // this.skin = skin;
         //this.mana_max = mana;
-        this.vie_max = 5;
+        this.vie_max = 10;
         this.bouclier = 5;
         this.bouclier_max = 5;
         this.positionY = 250;

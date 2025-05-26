@@ -353,22 +353,7 @@ public class GameScreen implements Screen {
         );
         sbiretest.add(sbireBoss); // Ajouter le boss à la liste des sbires
 
-//        Sbire sbiretemp;
-//        System.out.println("map = " + carteR.getCoordspawnX()*16 + " " + carteR.getCoordspawnX()*16);
-//        sbiretemp = new Sbire(
-//                300, 0, 3,            // vie, bouclier, mana
-//                carteR.getCoordspawnX()*16,  carteR.getCoordspawnX()*16,           // positionX, positionY
-//                25,                 // vitesseDeplacement (peut être augmenté si le sbire est trop lent)
-//                300, 3,             // vitesseProjectile, cooldown
-//                new Rectangle(carteR.getCoordspawnX()*16+7, carteR.getCoordspawnX()*16, 15, 15),  // hitbox plus grande et correctement positionnée
-//                1500, 30,           // porteeProjectile, porteeCaC (augmentée pour faciliter l'attaque)
-//                0, 0,              // degats (projectile), degatsCaC (augmenté de 0 à 15)
-//                personnage1,
-//                new ComportementMelee(),
-//                new Texture(Gdx.files.internal("coeur_plein.png")),
-//                new Texture("Hercule_haut.png")
-//        );
-//        sbiretest.add(sbiretemp);
+
         for (int i = 0; i < sbiretest.size(); i++) {
             niveau.ajouterSbire(sbiretest.get(i));
         }
@@ -434,7 +419,7 @@ public class GameScreen implements Screen {
         arme1 = new Texture("epee1.png");
         // arme2 = new Texture("epee2.png");
         // arme3 = new Texture("epee3.png");
-        Potion potionvie = new Potion(3);
+        Potion potionvie = new Potion(10);
         Texture potion = potionvie.getImage(1);
         Potion potion_vit = new Potion(60);
         Texture potion_vitesse = potion_vit.getImage(2);
@@ -1025,19 +1010,19 @@ public class GameScreen implements Screen {
         //game.batch.draw(barre_vide, x, y, barWidth, barHeight);
         //game.batch.draw(barre_pleine, x, y, barWidth * progress, barHeight);
 
-        for (int i = 0; i < personnage1.getVie(); i++) {
+        for (int i = 0; i <= personnage1.getVie(); i++) {
             // Réduire la taille des icônes de vie pour qu'elles soient proportionnées
             float iconSize = Math.min(hauteur_skin, 16); // Maximum 16 pixels
             game.batch.draw(coeur_plein, 
-                            camera.position.x - cameraHalfWidth + 5 + (i * (iconSize + 2)), 
-                            camera.position.y + cameraHalfHeight - iconSize - 5, 
+                            camera.position.x - cameraHalfWidth  + (i * (iconSize + 2)), 
+                            camera.position.y + cameraHalfHeight - iconSize , 
                             iconSize, iconSize);
         }
         for (int i = 0; i < personnage1.getBouclier(); i++) {
             float iconSize = Math.min(hauteur_skin, 16); // Maximum 16 pixels
             game.batch.draw(bouclierIntact, 
-                            camera.position.x - cameraHalfWidth + 5 + (i * (iconSize + 2)), 
-                            camera.position.y + cameraHalfHeight - iconSize*2 - 7, 
+                            camera.position.x - cameraHalfWidth  + (i * (iconSize + 2)), 
+                            camera.position.y + cameraHalfHeight - iconSize*2, 
                             iconSize, iconSize);
         }
 
