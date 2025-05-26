@@ -194,7 +194,7 @@ public class AttackManager {
     }
 
     public void setArme(String nom, int nombre, int range) {
-        this.armeMelee = new ArmeMelee(nom, nombre, range, range, nombre, nom, range);
+        this.armeMelee = new ArmeMelee(nom, nombre, range, range, nombre, "epee1.png", range);
     }
     
     /**
@@ -222,4 +222,5 @@ public class AttackManager {
             armeMelee.setNiveau(niveau);
         }
     }
+
 }
