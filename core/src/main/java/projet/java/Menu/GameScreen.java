@@ -50,22 +50,6 @@ import projet.java.entite.Niveau;
 import projet.java.entite.Sbire;
 import projet.java.entite.Projectile;
 
-
-
-
-/** // METHODE POUR GERER LES COLLISIONS (PERSO OU SBIRE)
- * Gère les collisions pour un personnage donné (joueur ou sbire).
- * @param entite L'entité à déplacer (doit avoir get/setPositionX/Y et getHitbox)
- * @param oldX Ancienne position X
- * @param oldY Ancienne position Y
- * @param mursHitboxes Liste des hitboxes des murs
- * @param porteHitboxes Liste des hitboxes des portes
- * @param hitboxX Décalage X de la hitbox
- * @param hitboxY Décalage Y de la hitbox
- * @param map La map de jeu (pour modification éventuelle)
- * @param TILE_SIZE Taille d'une tuile
- */
-
 public class GameScreen implements Screen {
     final Main game;
 
