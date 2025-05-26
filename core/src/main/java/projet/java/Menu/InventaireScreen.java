@@ -29,11 +29,13 @@ public class InventaireScreen implements Screen {
     private final String[] menuOptions = { "Reprendre" };
     private Rectangle[] optionBounds;
     private Personnage personnage;
+    private AttackManager attackmanager;
 
-    public InventaireScreen(final Main game, GameScreen gameScreen, Personnage personnage) {
+    public InventaireScreen(final Main game, GameScreen gameScreen, Personnage personnage, AttackManager attackManager) {
         this.game = game;
         this.gameScreen = gameScreen; 
         this.personnage = personnage;
+        this.attackmanager = attackManager;
         
         // Initialiser les rectangles pour chaque option
         optionBounds = new Rectangle[menuOptions.length];
@@ -154,7 +156,7 @@ public class InventaireScreen implements Screen {
                                 nombre_element_grille --;
                             }
                             if (item.getType() == Item.ItemType.ARME) {
-                                
+                                attackmanager.getAttackMana().setArme(item.getNom(), item.getNombre(), item.getRange());
                             }
                             // personnage.setArme(null);
                         } else {

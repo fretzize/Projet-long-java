@@ -12,6 +12,8 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
 import java.util.ArrayList;
 import java.util.List;
+
+import projet.java.entite.ArmeMelee;
 import projet.java.entite.ComportementBoss;
 import projet.java.entite.ComportementMelee;
 import projet.java.entite.Entite;
@@ -875,4 +877,13 @@ public class GameScreen implements Screen {
         }
 
     }
+
+    // dans attaque maanger ajouter:
+    // public void setArme(String nom, int nombre, int range) {
+    //     this.armeMelee = new ArmeMelee(nom, nombre, range, range, nombre, nom, range);
+    // }
+    // dans le game screen
+    // public AttackManager getAttackMana() {
+    //     return this.attackManager;
+    // }
 }
