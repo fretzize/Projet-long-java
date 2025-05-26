@@ -1,10 +1,12 @@
 package projet.java.entite;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 
@@ -62,6 +64,11 @@ public class Sbire implements Entite{
     private BossAnimationHandler bossAnimationHandler;
     private boolean isBoss = false;
 
+
+    private ArrayList<Leurre> leurres;
+    private static final float DUREE_LEURRE = 3.0f; // Durée de vie des leurres en secondes
+
+
     // Direction de déplacement pour l'animation
     private Vector2 lastMovementDirection = new Vector2(0, -1); // Direction par défaut: vers le bas
 
@@ -89,6 +96,7 @@ public class Sbire implements Entite{
         this.comportement = comportement;
         this.projectileTexture = projectileTexture;
         this.sbireTexture = sbireTexture;
+        this.leurres = new ArrayList<>();
 
         // Récupérer une référence au jeu principal
         this.game = ((Main)Gdx.app.getApplicationListener());
@@ -124,6 +132,9 @@ public class Sbire implements Entite{
         return this.porteeProjectile;
     }
 
+    public float getPorteeCaC() {
+        return this.porteeCaC;
+    }
     public float getVitesseProjectile() {
         return this.vitesseProjectile;
     }
@@ -205,6 +216,8 @@ public class Sbire implements Entite{
         this.bouclier = 0;
         this.mana = 0;
     }
+
+
 
 
     public void update(float delta, List<Projectile> projectiles) {
@@ -497,95 +510,36 @@ public class Sbire implements Entite{
 
 
     //affichage de l'entité
-    public void draw(Main game,float scaledWidth,float scaledHeight){
-        game.batch.draw(sbireTexture,this.positionX,this.positionY,scaledWidth,scaledHeight);
+    public void draw(Main game, float scaledWidth, float scaledHeight) {
+        // Dessine d'abord les leurres
+        for (int i = leurres.size() - 1; i >= 0; i--) {
+            Leurre leurre = leurres.get(i);
+            if (!leurre.update(Gdx.graphics.getDeltaTime())) {
+                leurres.remove(i);
+            } else {
+                leurre.draw(game, scaledWidth, scaledHeight);
+            }
+        }
+        
+        // Dessine ensuite le sbire
+        game.batch.draw(sbireTexture, 
+            this.positionX - scaledWidth/2,
+            this.positionY - scaledHeight/2,
+            scaledWidth,
+            scaledHeight);
     }
 
-
-    //USELESS
-
-    @Override
-    public void create_entite() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'create_entite'");
-    }
-
-    @Override
-    public void input_entite(float avance) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'input_entite'");
-    }
-
-    @Override
-    public void draw_entite(Main game) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'draw_entite'");
-    }
-
-    @Override
-    public void dispose_entite(Main game) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'dispose_entite'");
-    }
-
-    @Override
-    public void setHaut(int haut) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setHaut'");
-    }
-
-    @Override
-    public void setBas(int bas) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setBas'");
-    }
-
-    @Override
-    public void setDroite(int droite) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setDroite'");
-    }
-
-    @Override
-    public void setGauche(int gauche) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setGauche'");
-    }
-
-    @Override
-    public void setDash(int dash) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setDash'");
-    }
-
-    @Override
-    public int getHaut() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getHaut'");
-    }
-
-    @Override
-    public int getBas() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getBas'");
-    }
-
-    @Override
-    public int getDroite() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getDroite'");
-    }
-
-    @Override
-    public int getGauche() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getGauche'");
-    }
-
-    @Override
-    public int getDash() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getDash'");
+    //Méthodes pour gérer les leurres
+    public void creerLeurres(int nombreLeurres, float distanceLeurre, float centreX, float centreY) {
+        leurres.clear();
+        
+        for (int i = 0; i < nombreLeurres; i++) {
+            float angle = i * (360f/nombreLeurres) * MathUtils.degreesToRadians;
+            float leurreX = centreX + MathUtils.cos(angle) * distanceLeurre;
+            float leurreY = centreY + MathUtils.sin(angle) * distanceLeurre;
+            
+            leurres.add(new Leurre(leurreX, leurreY, this.sbireTexture, DUREE_LEURRE));
+        }
     }
 
     // Ajouter ces méthodes à la classe Sbire
@@ -680,4 +634,91 @@ public class Sbire implements Entite{
     public boolean isBoss() {
         return this.isBoss;
     }
+    //USELESS
+
+    @Override
+    public void create_entite() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'create_entite'");
+    }
+
+    @Override
+    public void input_entite(float avance) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'input_entite'");
+    }
+
+    @Override
+    public void draw_entite(Main game) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'draw_entite'");
+    }
+
+    @Override
+    public void dispose_entite(Main game) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'dispose_entite'");
+    }
+
+    @Override
+    public void setHaut(int haut) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'setHaut'");
+    }
+
+    @Override
+    public void setBas(int bas) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'setBas'");
+    }
+
+    @Override
+    public void setDroite(int droite) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'setDroite'");
+    }
+
+    @Override
+    public void setGauche(int gauche) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'setGauche'");
+    }
+
+    @Override
+    public void setDash(int dash) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'setDash'");
+    }
+
+    @Override
+    public int getHaut() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getHaut'");
+    }
+
+    @Override
+    public int getBas() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getBas'");
+    }
+
+    @Override
+    public int getDroite() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getDroite'");
+    }
+
+    @Override
+    public int getGauche() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getGauche'");
+    }
+
+    @Override
+    public int getDash() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getDash'");
+    }
+
+
 }

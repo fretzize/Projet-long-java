@@ -295,7 +295,7 @@ public class GameScreen implements Screen {
             20, 300, 3,       // vitesseDeplacement, vitesseProjectile, cooldown
             bossHitbox,
             1500, 100,        // porteeProjectile, porteeCaC 
-            1, 5,             // degats (projectile réduit de 3 à 1), degatsCaC (réduit de 10 à 5)
+            0, 0,             // degats (projectile réduit de 3 à 1), degatsCaC (réduit de 10 à 5)
             personnage1, 
             new ComportementBoss(), // Important: utiliser ComportementBoss pour que isBoss=true
             new Texture(Gdx.files.internal("coeur_plein.png")),
@@ -304,7 +304,7 @@ public class GameScreen implements Screen {
         niveau.ajouterSbire(sbireBoss);
         projectiles = new ArrayList<>();
         // TEST SBIRE
-        sbireTest = new Sbire(3,3,3,300, 300,20,300,3,new Rectangle(0,0, 2,4), 1500,1, 1,0, personnage1, new ComportementDistanceMax(),new Texture(Gdx.files.internal("coeur_plein.png")),new Texture("Hercule_haut.png"));
+        //sbireTest = new Sbire(3,3,3,300, 300,20,300,3,new Rectangle(0,0, 2,4), 1500,1, 1,0, personnage1, new ComportementDistanceMax(),new Texture(Gdx.files.internal("coeur_plein.png")),new Texture("Hercule_haut.png"));
         //Gestion projectiles du sbire
         projectiles = new ArrayList<>();
         //
