@@ -323,7 +323,7 @@ public class Sbire implements Entite{
             hitboxProjectile);
 
         //DEBUG
-        System.out.println(projectile.getHitbox().getWidth() + " " + projectile.getHitbox().getHeight());
+        //System.out.println(projectile.getHitbox().getWidth() + " " + projectile.getHitbox().getHeight());
     
         projectiles.add(projectile);
     }

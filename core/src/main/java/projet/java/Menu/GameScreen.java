@@ -35,10 +35,6 @@ import projet.java.Inventaire.Inventaire;
 import projet.java.Inventaire.Coffre;
 import projet.java.Inventaire.Item.ItemType;
 
-import java.util.TimerTask;
-import java.util.ArrayList;
-import java.util.Timer;
-
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.utils.ScreenUtils;
 
@@ -109,10 +105,7 @@ public class GameScreen implements Screen {
     private boolean isDashing = false; // Pour savoir si on est en train de dasher
     private OrthographicCamera camera;
     private Personnage personnage1; // = new Personnage(4, 2, 3, "mathis", skin);
-    private Texture dash_texture;
-    private TextureRegion dash;
-    private float largeur_dash;
-    private float hauteur_dash;
+
     private Texture coeur_plein;
     private Texture bouclierIntact;
 
@@ -580,7 +573,7 @@ public class GameScreen implements Screen {
                 currentDashTime = 0f;
                 dashOk = false;
                 dash_afficher = true;
-                tempsDash = 0;
+                tempsDash = 0;  
             }
         }
 
@@ -617,6 +610,7 @@ public class GameScreen implements Screen {
             //playerY -= currentSpeed * avance;
             personnage1.changePositionY(-currentSpeed * avance);
         }
+        
         
         // Mise à jour de la hitbox du joueur
         gererCollisionsEntite(
@@ -779,6 +773,11 @@ public class GameScreen implements Screen {
             }
         }
         camera.update();
+        // Mettre à jour le gestionnaire de boules de feu
+        if (fireballManager != null) {
+            fireballManager.update(Gdx.graphics.getDeltaTime());
+        }
+
         for (Coffre coffre : coffres) {
             if (!coffre.estOuvert() && coffre.getHitbox().overlaps(personnage1.getHitbox())) {
                 coffre.setOuvert(true);
@@ -1014,42 +1013,6 @@ public class GameScreen implements Screen {
         // Dessiner les boules de feu avant le personnage
         if (fireballManager != null) {
             fireballManager.render(game.batch);
-        }
-
-        // afficher le dash selon la direction
-        if (Gdx.input.isKeyPressed(game.toucheDash)) {
-            if (dash_afficher) {
-                if ((Gdx.input.isKeyPressed(game.toucheHaut) && Gdx.input.isKeyPressed(game.toucheDroite)) ||
-                        (Gdx.input.isKeyPressed(Input.Keys.RIGHT) && Gdx.input.isKeyPressed(Input.Keys.UP))) {
-                    game.batch.draw(dash, personnage1.getPositionX(), personnage1.getPositionY(), largeur_dash, hauteur_dash, largeur_dash, hauteur_dash, 1,
-                            1, 45);
-                } else if ((Gdx.input.isKeyPressed(game.toucheHaut) && Gdx.input.isKeyPressed(game.toucheGauche)) ||
-                        (Gdx.input.isKeyPressed(Input.Keys.LEFT) && Gdx.input.isKeyPressed(Input.Keys.UP))) {
-                    game.batch.draw(dash, personnage1.getPositionX(), personnage1.getPositionY(), largeur_dash, hauteur_dash, largeur_dash, hauteur_dash, 1,
-                            1, -45);
-                } else if ((Gdx.input.isKeyPressed(game.toucheBas) && Gdx.input.isKeyPressed(game.toucheDroite)) ||
-                        (Gdx.input.isKeyPressed(Input.Keys.DOWN) && Gdx.input.isKeyPressed(Input.Keys.RIGHT))) {
-                    game.batch.draw(dash, personnage1.getPositionX(), personnage1.getPositionY(), largeur_dash, hauteur_dash, largeur_dash, hauteur_dash, 1,
-                            1, 135);
-                } else if ((Gdx.input.isKeyPressed(game.toucheBas) && Gdx.input.isKeyPressed(game.toucheGauche)) ||
-                        (Gdx.input.isKeyPressed(Input.Keys.DOWN) && Gdx.input.isKeyPressed(Input.Keys.LEFT))) {
-                    game.batch.draw(dash, personnage1.getPositionX(), personnage1.getPositionY(), largeur_dash, hauteur_dash, largeur_dash, hauteur_dash, 1,
-                            1, -135);
-                } else if (Gdx.input.isKeyPressed(game.toucheHaut) || Gdx.input.isKeyPressed(Input.Keys.UP)) {
-                    game.batch.draw(dash, personnage1.getPositionX(), personnage1.getPositionY(), largeur_dash, hauteur_dash, largeur_dash, hauteur_dash, 1,
-                            1, 90);
-                } else if (Gdx.input.isKeyPressed(game.toucheGauche) || Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
-                    game.batch.draw(dash, personnage1.getPositionX(), personnage1.getPositionY(), largeur_dash, hauteur_dash, largeur_dash, hauteur_dash, 1,
-                            1, 0);
-                } else if (Gdx.input.isKeyPressed(game.toucheBas) || Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
-                    game.batch.draw(dash, personnage1.getPositionX(), personnage1.getPositionY(), largeur_dash, hauteur_dash, largeur_dash, hauteur_dash, 1,
-                            1, -90);
-                } else if (Gdx.input.isKeyPressed(game.toucheDroite) || Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
-                    game.batch.draw(dash, personnage1.getPositionX(), personnage1.getPositionY(), largeur_dash, hauteur_dash, largeur_dash, hauteur_dash, 1,
-                            1, 180);
-                }
-                dash_afficher = false;
-            }
         }
         // cooldown
 
@@ -1404,7 +1367,7 @@ public class GameScreen implements Screen {
             hitbox.setPosition(entite.getPositionX() + hitboxX, oldY + hitboxY);
             for (int i = 0; i < mursHitboxes.size; i++) {
                 if (hitbox.overlaps(mursHitboxes.get(i))) {
-                    System.out.println("Collision avec un mur en X");
+                    //System.out.println("Collision avec un mur en X");
                     entite.setPositionX(oldX);
                     hitbox.setPosition(entite.getPositionX() + hitboxX, entite.getPositionY() + hitboxY);
                     break;

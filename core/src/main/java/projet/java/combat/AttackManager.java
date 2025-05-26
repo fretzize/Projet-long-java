@@ -140,7 +140,7 @@ public class AttackManager {
             // Jouer le son d'attaque avec le volume réduit
             if (attackSound != null) {
                 // Utiliser le modificateur de volume (0.3f = 30% du volume normal)
-                attackSound.play(game.getSoundVolume() * ATTACK_SOUND_VOLUME_MODIFIER);
+                attackSound.play(game.getSoundVolume() * 0.3f);
             }
         } catch (Exception e) {
             System.err.println("Erreur lors de l'attaque: " + e.getMessage());

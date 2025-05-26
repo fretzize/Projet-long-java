@@ -49,7 +49,7 @@ public class GameDebugger {
         this.logEntries = new LinkedList<>();
         
         // Log initial
-        log("Débuggeur initialisé", LogType.INFO);
+        //log("Débuggeur initialisé", LogType.INFO);
     }
     
     public void update(float delta) {

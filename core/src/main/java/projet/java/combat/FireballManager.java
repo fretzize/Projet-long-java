@@ -23,7 +23,7 @@ public class FireballManager {
     private float cooldown = 1.0f; // 1 seconde entre chaque boule de feu
     private boolean canCast = true;
     private float timeSinceLastCast = 0f;
-    private float projectileSpeed = 300f; // Vitesse de la boule de feu
+    private float projectileSpeed = 200f; // Vitesse de la boule de feu
     private int damage = 20; // Dégâts de la boule de feu
     private float range = 500f; // Portée de la boule de feu
     
