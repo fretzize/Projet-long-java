@@ -179,6 +179,14 @@ public class GameDebugger {
             }
         }
         
+
+        // Hitbox des projectiles
+        //shapeRenderer.setColor(Color.PURPLE);
+        //for (var projectile : niveau.getProjectiles()) {
+        //    Rectangle projectileHitbox = projectile.getHitbox();
+        //    shapeRenderer.rect(projectileHitbox.x, projectileHitbox.y, projectileHitbox.width, projectileHitbox.height);
+        //}
+
         // Hitbox de l'attaque si active
         if (attackManager.isAttacking()) {
             shapeRenderer.setColor(Color.BLUE);
@@ -190,7 +198,7 @@ public class GameDebugger {
         
         // Dessiner les zones d'attaque des sbires
         shapeRenderer.begin(ShapeType.Line);
-        shapeRenderer.setColor(new Color(1, 0.5f, 0, 0.5f)); // Orange semi-transparent
+        shapeRenderer.setColor(new Color(1, 0, 0, 0.7f)); // Rouge plus vif et visible
         
         for (Sbire sbire : niveau.getSbires()) {
             if (sbire.enVie()) {
@@ -216,6 +224,18 @@ public class GameDebugger {
                             centerX + (float)Math.cos(angle2) * portee,
                             centerY + (float)Math.sin(angle2) * portee
                         );
+                    }
+                    
+                    // Ajouter une ligne du sbire au joueur pour visualiser la direction d'attaque
+                    if (sbire.getCible() != null) {
+                        shapeRenderer.setColor(Color.YELLOW);
+                        shapeRenderer.line(
+                            centerX,
+                            centerY,
+                            personnage.getPositionX() + 5,
+                            personnage.getPositionY() + 5
+                        );
+                        shapeRenderer.setColor(new Color(1, 0, 0, 0.7f));
                     }
                 } catch (Exception e) {
                     // Ignorer l'erreur

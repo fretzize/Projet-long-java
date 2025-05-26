@@ -19,6 +19,7 @@ import projet.java.entite.ComportementBoss;
 import projet.java.entite.ComportementDistanceMax;
 import projet.java.entite.ComportementMelee;
 import projet.java.entite.Entite;
+import projet.java.entite.Leurre;
 import projet.java.entite.Personnage;
 import projet.java.entite.Projectile;
 import projet.java.entite.Sbire;
@@ -299,7 +300,7 @@ public class GameScreen implements Screen {
             personnage1, 
             new ComportementBoss(), // Important: utiliser ComportementBoss pour que isBoss=true
             new Texture(Gdx.files.internal("coeur_plein.png")),
-            null              // La texture du sbire n'est plus utilisée directement
+            new Texture("Orc1/orc3_front_idle_1.png")              // La texture du sbire n'est plus utilisée directement
         );
         niveau.ajouterSbire(sbireBoss);
         projectiles = new ArrayList<>();
@@ -723,17 +724,29 @@ public class GameScreen implements Screen {
                 float sbireAspectRatio = (float)currentFrame2.getRegionWidth() / (float)currentFrame2.getRegionHeight();
                 
                 // Définir des tailles différentes selon le type de sbire
-                float sbireScaledHeight;
+                float sbireScaledHeight = hauteur_skin * scalePlayer;
+                // Calculer la largeur en fonction du ratio d'aspect pour éviter l'étirement
+                float sbireScaledWidth = sbireScaledHeight * sbireAspectRatio;
                 if (sbire.isBoss()) {
                     // Le boss est 50% plus grand que les sbires normaux
                     sbireScaledHeight = hauteur_skin * scalePlayer * 1.5f;
+                    sbireScaledWidth = sbireScaledHeight * sbireAspectRatio;
+
+                    if (sbire.getLeurres() != null && sbire.getLeurres().size() > 0) {
+                        // Parcourir la liste à l'envers pour pouvoir supprimer sans problème
+                        for (int i = sbire.getLeurres().size() - 1; i >= 0; i--) {
+                            Leurre leurre = sbire.getLeurres().get(i);
+                            // Mettre à jour le leurre et vérifier s'il doit être supprimé
+                            if (!leurre.update(Gdx.graphics.getDeltaTime())) {
+                                sbire.getLeurres().remove(i);
+                            } else {
+                                // Dessiner le leurre uniquement s'il est encore actif
+                                leurre.draw(game, sbireScaledWidth, sbireScaledHeight);
+                            }
+                        }
+                    }
                 } else {
-                    // Taille normale pour les sbires standards
-                    sbireScaledHeight = hauteur_skin * scalePlayer;
                 }
-                
-                // Calculer la largeur en fonction du ratio d'aspect pour éviter l'étirement
-                float sbireScaledWidth = sbireScaledHeight * sbireAspectRatio;
                 
                 // Sauvegarder la couleur originale du batch
                 Color originalColor = new Color(game.batch.getColor());
@@ -746,10 +759,16 @@ public class GameScreen implements Screen {
                 }
                 
                 // Dessiner le sbire avec les dimensions adaptées
+                Rectangle hitbox = sbire.getHitbox();
+                
+                // Calculer la position pour centrer le sprite sur la hitbox
+                float spriteX = hitbox.x - (sbireScaledWidth - hitbox.width) / 2;
+                float spriteY = hitbox.y - (sbireScaledHeight - hitbox.height) / 2;
+                
                 game.batch.draw(
                     currentFrame2,
-                    sbire.getPositionX(),
-                    sbire.getPositionY(),
+                    spriteX,
+                    spriteY,
                     sbireScaledWidth,
                     sbireScaledHeight
                 );
@@ -850,6 +869,8 @@ public class GameScreen implements Screen {
                             iconSize, iconSize);
         }
 
+        // À la fin de la méthode draw(), après game.batch.end():
+
         // À la fin de la méthode draw(), avant game.batch.end():
         // Dessiner une minimap simplifiée
         float minimapSize = 40;
@@ -897,6 +918,7 @@ public class GameScreen implements Screen {
         game.batch.setColor(1, 1, 1, 1);
         game.batch.end();
 
+
         // === DESSIN DES HITBOXES ===
         if (debugger != null && debugger.isShowingHitboxes()) {
             // Configuration du shape renderer
@@ -923,6 +945,13 @@ public class GameScreen implements Screen {
                 shapeRenderer.rect(attackZone.x, attackZone.y, attackZone.width, attackZone.height);
             }
             
+            // Hitbox de l'attaque du sbire boss
+            if (sbireBoss.isAttacking) {
+                shapeRenderer.setColor(1, 0.5f, 0, 1); // Orange
+                Rectangle attackZone = sbireBoss.getZoneAttaque();
+                shapeRenderer.rect(attackZone.x, attackZone.y, attackZone.width, attackZone.height);
+            }
+
             shapeRenderer.end();
         }
     }

@@ -63,10 +63,11 @@ public class Sbire implements Entite{
     private SbireAnimationHandler animationHandler;
     private BossAnimationHandler bossAnimationHandler;
     private boolean isBoss = false;
+    public boolean isAttacking = false;
 
 
     private ArrayList<Leurre> leurres;
-    private static final float DUREE_LEURRE = 3.0f; // Durée de vie des leurres en secondes
+    private static final float DUREE_LEURRE = 5.0f; // Durée de vie des leurres en secondes
 
 
     // Direction de déplacement pour l'animation
@@ -279,7 +280,7 @@ public class Sbire implements Entite{
         float dy = sbireY - cibleY;
         float distance = (float) Math.sqrt(dx * dx + dy * dy);
         
-        System.out.println("Distance: " + distance + ", Portée: " + porteeCaC);
+        //System.out.println("Distance: " + distance + ", Portée: " + porteeCaC);
         return distance <= porteeCaC;
     }
 
@@ -354,6 +355,7 @@ public class Sbire implements Entite{
             mourir();
         }
     }
+
 
     // Méthode modifiée pour que l'effet d'impact apparaisse dans la bonne direction
     public void appliquerKnockback(Vector2 directionKnockback, float forceKnockback) {
@@ -437,7 +439,6 @@ public class Sbire implements Entite{
         
         // Calculer la direction de mouvement pour l'animation
         Vector2 movementDir = null;
-        boolean isAttacking = false;
         
         // Si le sbire est en knockback, utiliser cette direction pour l'animation
         if (isKnockedBack && knockbackVelocity.len() > 0.5f) {
@@ -720,5 +721,13 @@ public class Sbire implements Entite{
         throw new UnsupportedOperationException("Unimplemented method 'getDash'");
     }
 
+    public ArrayList<Leurre> getLeurres() {
+        return this.leurres;
+    }
 
+
+    public Rectangle getZoneAttaque() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getZoneAttaque'");
+    }
 }

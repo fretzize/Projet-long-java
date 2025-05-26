@@ -21,7 +21,7 @@ public class Leurre {
 
     public boolean update(float deltaTime) {
         tempsEcoule += deltaTime;
-        alpha = 1.0f - (tempsEcoule / dureeVie); // Diminue progressivement l'opacité
+        alpha = 1.0f - (tempsEcoule / (1*dureeVie)); // Diminue progressivement l'opacité
         return tempsEcoule < dureeVie;
     }
 

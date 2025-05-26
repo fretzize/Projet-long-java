@@ -10,7 +10,10 @@ public class ComportementBoss implements ComportementSbire {
     private int phaseActuelle = 0;
     private float dureePhaseTir = 3f; // Durée de la phase de tir en secondes
     private float phaseCharge = 2f; // Durée de la charge
-    private float phaseTeleport = 3f; // Durée après téléportation
+    private float phaseTeleport = 3f; // Durée après téléportatio
+    private float phaseChasing = 5f; // Durée de la phase de poursuite
+    private float phaseCooldown = 4f; // Durée de la phase de cooldown
+
     private boolean enCharge = false;
     private Vector2 directionCharge = new Vector2();
 
@@ -26,19 +29,38 @@ public class ComportementBoss implements ComportementSbire {
 
         // Change de phase toutes les X secondes
         switch (phaseActuelle) {
-            case 0: // Phase de tir en cercle
+
+            case 0: // Phase de poursuite
+                executerPhaseChasing(sbire, deltaTime);
+                if (tempsPhase >= phaseChasing)
+                    changerPhase();
+                break;
+
+            case 1: // Phase de tir en cercle
                 executerPhaseTirCercle(sbire, deltaTime, projectiles);
                 if (tempsPhase >= dureePhaseTir)
                     changerPhase();
                 break;
 
-            case 1: // Phase de charge
+            case 2: // Phase de poursuite après tir
+                executerPhaseChasing(sbire, deltaTime);
+                if (tempsPhase >= phaseCooldown)
+                    changerPhase();
+                break;
+
+            case 3: // Phase de charge
                 executerPhaseCharge(sbire, deltaTime, projectiles);
                 if (tempsPhase >= phaseCharge)
                     changerPhase();
                 break;
 
-            case 2: // Phase de téléportation et tir
+            case 4 : // Phase de cooldown après charge
+                executerPhaseCooldown(sbire, deltaTime);
+                if (tempsPhase >= phaseCooldown)
+                    changerPhase();
+                break;
+
+            case 5: // Phase de téléportation et tir
                 executerPhaseTeleport(sbire, deltaTime, projectiles);
                 if (tempsPhase >= phaseTeleport)
                     changerPhase();
@@ -46,7 +68,26 @@ public class ComportementBoss implements ComportementSbire {
         }
     }
 
+    private void executerPhaseChasing(Sbire sbire, float deltaTime) {
+        // Phase de poursuite
+        sbire.deplacerVersCible(deltaTime); // Déplacement vers la cible
+
+        if (tempsPhase >= phaseChasing)
+            changerPhase();
+    }
+
+
+    private void executerPhaseCooldown(Sbire sbire, float deltaTime) {
+        // Phase de cooldown - le sbire reste immobile
+
+        // Pas de tir pendant cette phase
+        if (tempsPhase >= phaseCooldown)
+            changerPhase();
+    }
+
     private void executerPhaseTirCercle(Sbire sbire, float deltaTime, List<Projectile> projectiles) {
+
+
         // Tir en cercle - 8 projectiles dans différentes directions
         if (tempsPhase % 0.5f < deltaTime) { // Tir toutes les 0.5 secondes
             for (int i = 0; i < 8; i++) {
@@ -79,6 +120,8 @@ public class ComportementBoss implements ComportementSbire {
     }
 
     private void executerPhaseCharge(Sbire sbire, float deltaTime, List<Projectile> projectiles) {
+
+
         if (!enCharge) {
             // Début de la charge - calcul de la direction vers le joueur
             directionCharge.set(sbire.getCible().getPositionX() - sbire.getPositionX(),
@@ -87,7 +130,7 @@ public class ComportementBoss implements ComportementSbire {
         }
 
         // Charge à grande vitesse
-        sbire.deplacer(deltaTime * 7, directionCharge); // Vitesse triplée pendant la charge
+        sbire.deplacer(deltaTime * 11, directionCharge); // Vitesse triplée pendant la charge
 
         // Attaque corps à corps puissante quand proche de la cible
         if (sbire.getDistanceCible() <= sbire.getPorteeCaC()) {
@@ -123,7 +166,7 @@ public class ComportementBoss implements ComportementSbire {
     // Changer la phase actuelle du boss
     private void changerPhase() {
         tempsPhase = 0;
-        phaseActuelle = (phaseActuelle + 1) % 3;
+        phaseActuelle = (phaseActuelle + 1) % 6;
         enCharge = false;
     }
 }
