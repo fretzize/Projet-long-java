@@ -1,6 +1,6 @@
 package projet.java.Menu;
 
-import java.util.ArrayList;
+import java.util.*;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -30,9 +30,8 @@ import projet.java.Menu.InventaireScreen;
 import projet.java.Inventaire.Item;
 import projet.java.Inventaire.Inventaire;
 import projet.java.Inventaire.Item.ItemType;
-import java.util.TimerTask;
-import java.util.ArrayList;
-import java.util.Timer;
+
+//import java.util.ArrayList;
 
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.utils.ScreenUtils;
@@ -48,6 +47,8 @@ import projet.java.entite.ComportementMelee;
 import projet.java.entite.Niveau;
 import projet.java.entite.Sbire;
 import projet.java.entite.Projectile;
+
+import static com.badlogic.gdx.math.MathUtils.random;
 
 public class GameScreen implements Screen {
     final Main game;
@@ -174,7 +175,7 @@ public class GameScreen implements Screen {
     // sbire melee test
     Niveau niveau;
 
-    private Sbire sbiretest;
+    private ArrayList<Sbire> sbiretest = new ArrayList<>();
     private ArrayList<Projectile> projectiles;
     
     // Ajouter comme attribut de classe
@@ -269,21 +270,35 @@ public class GameScreen implements Screen {
                 damageEffectTime = 0;
             }
         });
-        
-        sbiretest = new Sbire(
-            300, 0, 3,            // vie, bouclier, mana
-            300, 300,           // positionX, positionY
-            25,                 // vitesseDeplacement (peut être augmenté si le sbire est trop lent)
-            300, 3,             // vitesseProjectile, cooldown
-            new Rectangle(300, 300, 32, 32),  // hitbox plus grande et correctement positionnée
-            1500, 30,           // porteeProjectile, porteeCaC (augmentée pour faciliter l'attaque)
-            1, 1,              // degats (projectile), degatsCaC (augmenté de 0 à 15)
-            personnage1,         
-            new ComportementMelee(),
-            new Texture(Gdx.files.internal("coeur_plein.png")),
-            new Texture("Hercule_haut.png")
-        );
-        niveau.ajouterSbire(sbiretest);
+        int compteur = 0 ;
+        for (int i = 0; i < map.length; i++) {
+            for (int j = 0; j < map[0].length; j++) {
+                Random rand  = new Random();
+                if ((map[i][j] == 1 || map[i][j] ==101 || map[i][j] == 102 || map[i][j] ==103 || map[i][j] == 104 || map[i][j] ==105 || map[i][j] == 106
+                        || map[i][j] ==107 || map[i][j] == 108 || map[i][j] ==109 || map[i][j] == 110 ) && rand.nextFloat() < 0.009) {
+                    Sbire sbiretemp;
+                    sbiretemp = new Sbire(
+                            300, 0, 3,            // vie, bouclier, mana
+                            i * TILE_SIZE, j * TILE_SIZE,           // positionX, positionY
+                            25,                 // vitesseDeplacement (peut être augmenté si le sbire est trop lent)
+                            300, 3,             // vitesseProjectile, cooldown
+                            new Rectangle(300, 300, 32, 32),  // hitbox plus grande et correctement positionnée
+                            1500, 30,           // porteeProjectile, porteeCaC (augmentée pour faciliter l'attaque)
+                            0, 0,              // degats (projectile), degatsCaC (augmenté de 0 à 15)
+                            personnage1,
+                            new ComportementMelee(),
+                            new Texture(Gdx.files.internal("coeur_plein.png")),
+                            new Texture("Hercule_haut.png")
+                    );
+                    sbiretest.add(sbiretemp);
+                    compteur++;
+                }
+            }
+        }
+        for (int i = 0; i < sbiretest.size(); i++) {
+            niveau.ajouterSbire(sbiretest.get(i));
+        }
+
         projectiles = new ArrayList<>();
         // TEST SBIRE
         sbireTest = new Sbire(3,3,3,300, 300,20,300,3,new Rectangle(0,0, 2,4), 1500,1, 1,0, personnage1, new ComportementDistanceMax(),new Texture(Gdx.files.internal("coeur_plein.png")),new Texture("Hercule_haut.png"));
@@ -583,9 +598,13 @@ public class GameScreen implements Screen {
         //personnage1.setPositionY(playerY);
         
         // Mettre à jour le sbire avec la position correcte du joueur SEULEMENT s'il est en vie
-        if (sbiretest != null && sbiretest.enVie()) {
-            sbiretest.agir(Gdx.graphics.getDeltaTime(), projectiles);
+        for (int i = 0 ; i < sbiretest.size() ; i++) {
+            if (sbiretest.get(i) != null && sbiretest.get(i).enVie()) {
+                sbiretest.get(i).agir(Gdx.graphics.getDeltaTime(), projectiles);
+            }
         }
+
+
         
         // Calculer les dimensions effectives de la vue caméra
         cameraHalfWidth = camera.viewportWidth / 2;
@@ -599,7 +618,7 @@ public class GameScreen implements Screen {
         camera.position.x = MathUtils.clamp(camera.position.x, cameraHalfWidth, mapWidthPixels - cameraHalfWidth);
         camera.position.y = MathUtils.clamp(camera.position.y, cameraHalfHeight, mapHeightPixels - cameraHalfHeight);
         
-        sbireTest.agir(Gdx.graphics.getDeltaTime(), projectiles);
+        //sbireTest.agir(Gdx.graphics.getDeltaTime(), projectiles);
 
         // Mise à jour et gestion des projectiles (parcours la liste à l'envers pour éviter les problèmes de suppression)
         for (int i = projectiles.size() - 1; i >= 0; i--) {
