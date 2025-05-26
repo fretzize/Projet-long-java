@@ -389,6 +389,8 @@ public class Map {
 
                 } else if (coord[i][j]==4) {
                     System.out.print("  ");
+                } else if (coord[i][j]==500) {  // Nouveau : affichage des coffres
+                    System.out.print("C ");
                 }
                 else {
                     System.out.print(this.coord[i][j] == 1 ? "  " : "# ");
@@ -400,6 +402,8 @@ public class Map {
         for  (int i = 0; i < this.taille[0]+1; i++) {
             System.out.print("--");
         }
+
+        
     }
 
     public void afficherMapTest() {
@@ -837,4 +841,31 @@ public class Map {
             }
         }
    }
+
+   public void placerCoffresDansChambres() {
+    for (Chambre chambre : this.chambres) {
+        boolean coffrePlace = chambre.placerCoffreAvecProbabilite(0.6);
+        if (coffrePlace) {
+            int[][] grille = chambre.getGrille();
+            int[] initial = chambre.getInitial();
+            for (int i = 0; i < grille.length; i++) {
+                for (int j = 0; j < grille[0].length; j++) {
+                    if (grille[i][j] == 500) {
+                        coord[initial[0] + i][initial[1] + j] = 500;
+                    }
+                }
+            }
+        }
+    }
+}
+
+    public int compterCoffres() {
+        int compteur = 0;
+        for (int i = 0; i < coord.length; i++) {
+            for (int j = 0; j < coord[0].length; j++) {
+                if (coord[i][j] == 500) compteur++;
+            }
+        }
+        return compteur;
+    }
 }

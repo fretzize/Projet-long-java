@@ -14,7 +14,10 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
+import java.util.ArrayList;
+import java.util.List;
 
+import projet.java.entite.ArmeMelee;
 import projet.java.entite.ComportementBoss;
 import projet.java.entite.ComportementDistanceMax;
 import projet.java.entite.ComportementMelee;
@@ -26,10 +29,12 @@ import projet.java.entite.Sbire;
 import projet.java.Main;
 import projet.java.Map.Chambre;
 import projet.java.Map.Map;
+import projet.java.Inventaire.DatabaseItem;
 import projet.java.Inventaire.Inventaire;
 import projet.java.Menu.InventaireScreen;
 import projet.java.Inventaire.Item;
 import projet.java.Inventaire.Inventaire;
+import projet.java.Inventaire.Coffre;
 import projet.java.Inventaire.Item.ItemType;
 import java.util.TimerTask;
 import java.util.ArrayList;
@@ -37,6 +42,7 @@ import java.util.Timer;
 
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.utils.ScreenUtils;
+
 import com.badlogic.gdx.math.MathUtils;
 import projet.java.Menu.GameOverScreen;
 import projet.java.Inventaire.Potion;
@@ -71,6 +77,8 @@ public class GameScreen implements Screen {
     Texture solTexture12;
     Texture murTexture;
     Texture murTexture2;
+    Texture coffreTexture;
+    Texture coffreTextureouvert;
     Texture porteH;
     Texture porteV;
     Texture porteHOpen;
@@ -91,7 +99,7 @@ public class GameScreen implements Screen {
     //private float playerY = 250;
     private float hitboxX = 22;
     private float hitboxY = 18;
-    private float playerSpeed = 100; // Vitesse normale en pixels par seconde
+    private float playerSpeed; // Vitesse normale en pixels par seconde
     private float speed = 500; // Vitesse du dash réduite (était 10000)
     private float dashDuration = 0.08f; // Durée du dash en secondes pour maintenir la même distance
     private float currentDashTime = 0f; // Pour suivre la durée du dash en cours
@@ -130,8 +138,8 @@ public class GameScreen implements Screen {
     // texture pour essayer inventaire
 
     private Texture arme1;
-    private Texture arme2;
-    private Texture arme3;
+    // private Texture arme2;
+    // private Texture arme3;
 
     // largeur et longueur
 
@@ -193,6 +201,20 @@ public class GameScreen implements Screen {
     // Ajouter cette variable avec les autres attributs de la classe
     private boolean gameInitialized = false;
 
+    private float tempsAcceleration = 0;
+    private float tempsMaxAcceleration = 10f;
+
+
+    // creation de la liste de coffre present sur la liste
+
+    private List<Coffre> coffres = new ArrayList<>();
+
+    Texture itemcoffre;
+    float tempsitem = 2;
+    float tempscoffre = 0;
+    
+   
+
     public GameScreen(final Main game) {
         this.game = game;
         camera = new OrthographicCamera();
@@ -235,10 +257,12 @@ public class GameScreen implements Screen {
         carte.placerChambresGrille();
         carte.corridor_creator();
         carte.creuser_couloir();
+        carte.placerCoffresDansChambres();
+        System.out.println(carte.compterCoffres());
         shapeRenderer = new ShapeRenderer();
         Map carteReduite = carte.reducteur();
         carteReduite.rotation90Trigo();
-        //carteReduite.afficherMap();
+        // carteReduite.afficherMap();
         carteReduite.coupureCoord();
         carteReduite.creation_vide();
         //carteReduite.afficherMap();
@@ -267,7 +291,8 @@ public class GameScreen implements Screen {
         solTexture12 = new Texture(Gdx.files.internal("map/Tile_95.png"));
         porteHOpen = new Texture(Gdx.files.internal("map/Door_OPEN_H.png"));
         porteVOpen = new Texture(Gdx.files.internal("map/Door_OPEN_V.png"));
-
+        coffreTexture = new Texture(Gdx.files.internal("Chest1.png"));
+        coffreTextureouvert = new Texture(Gdx.files.internal("Chest3.png"));
         mapTexture = new Texture(Gdx.files.internal("map.png")); // Créez une image "map.png"
         skin = new Texture(Gdx.files.internal("image_heracles_normal.png")); // Créez une image "player.png"
         largeur_skin = skin.getWidth();
@@ -364,21 +389,38 @@ public class GameScreen implements Screen {
         // Initialiser le débogueur après la création du personnage, niveau et attackManager
         debugger = new GameDebugger(personnage1, niveau, attackManager);
         arme1 = new Texture("epee1.png");
-        arme2 = new Texture("epee2.png");
-        arme3 = new Texture("epee3.png");
+        // arme2 = new Texture("epee2.png");
+        // arme3 = new Texture("epee3.png");
         Potion potionvie = new Potion(3);
-        Texture potion = potionvie.getImage();
+        Texture potion = potionvie.getImage(1);
+        Potion potion_vit = new Potion(60);
+        Texture potion_vitesse = potion_vit.getImage(2);
+        DatabaseItem database = new DatabaseItem();
+        List<Item> data = database.getData();
 
-        Item Arme1 = new Item("arme1", arme1, Item.ItemType.ARME, 3);
-        Item Arme2 = new Item("arme2", arme2, Item.ItemType.ARME, 2);
-        Item Arme3 = new Item("arme3", arme3, Item.ItemType.ARME, 3);
-        Item Potion = new Item("potion", potion, Item.ItemType.POTION, potionvie.getVie());
-
+        Item Arme1 = data.get(2);
+        // Item Arme2 = new Item("arme2", arme2, Item.ItemType.ARME, 2);
+        // Item Arme3 = new Item("arme3", arme3, Item.ItemType.ARME, 3);
+        Item Potion = new Item("potion", potion, Item.ItemType.POTION, potionvie.getVie(), 0);
+        Item Potion_Vitesse = new Item("potion", potion_vitesse, Item.ItemType.POTIONVITESSE, potion_vit.getVie(), 0);
+        for (int y = 0; y < map.length; y++) {
+            for (int x = 0; x < map[0].length; x++) {
+                if (map[y][x] == 500) {
+                    Rectangle hitbox = new Rectangle(x * TILE_SIZE, (map.length - 1 - y) * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                    Item itemAlea = new DatabaseItem().getItemAlea(); // ou un item défini
+                    Coffre coffre = new Coffre(x, y, itemAlea, hitbox, coffreTexture);
+                    coffre.setPositionX(x * TILE_SIZE);
+                    coffre.setPositionY((map.length - 1 - y) * TILE_SIZE);
+                    coffres.add(coffre);
+                }
+            }
+        }
         if (une_fois == 1) {
             personnage1.getInventaire().addItem(Arme1);
-            personnage1.getInventaire().addItem(Arme2);
-            personnage1.getInventaire().addItem(Arme3);
+            // personnage1.getInventaire().addItem(Arme2);
+            // personnage1.getInventaire().addItem(Arme3);
             personnage1.getInventaire().addItem(Potion);
+            personnage1.getInventaire().addItem(Potion_Vitesse);
             une_fois ++;
         }
 
@@ -387,6 +429,8 @@ public class GameScreen implements Screen {
     @Override
     public void render(float delta) {
         input(delta);
+
+        playerSpeed = personnage1.getVitesse();
         boolean isMovingUp = Gdx.input.isKeyPressed(game.toucheHaut) || Gdx.input.isKeyPressed(Input.Keys.UP);
         boolean isMovingDown = Gdx.input.isKeyPressed(game.toucheBas) || Gdx.input.isKeyPressed(Input.Keys.DOWN);
         boolean isMovingLeft = Gdx.input.isKeyPressed(game.toucheGauche) || Gdx.input.isKeyPressed(Input.Keys.LEFT);
@@ -438,6 +482,16 @@ public class GameScreen implements Screen {
         if (tempsDash > dashCooldown) {
             dashOk = true;
         }
+
+        if (personnage1.getAcceleration()) {
+            tempsAcceleration += delta;
+        }
+        if (tempsAcceleration > tempsMaxAcceleration) {
+            personnage1.setAcceleration(false);
+            personnage1.setVitesse(personnage1.getVitesseBase());
+            tempsAcceleration = 0;
+        }
+
     }
 
     private void input(float avance) {
@@ -585,6 +639,12 @@ public class GameScreen implements Screen {
             }
         }
 
+        if (tempsitem > tempscoffre) {
+                tempscoffre += avance;
+            } else {
+                tempscoffre = 0;
+        }
+
     }
 
     private void logic() {
@@ -638,6 +698,18 @@ public class GameScreen implements Screen {
             }
         }
         camera.update();
+        for (Coffre coffre : coffres) {
+            if (!coffre.estOuvert() && coffre.getHitbox().overlaps(personnage1.getHitbox())) {
+                coffre.setOuvert(true);
+                coffre.setvientouvrir(true);
+                coffre.setTexture(coffreTextureouvert);
+                Item item = coffre.estOuvert() ? coffre.getDatabase().getItemAlea() : null;
+                if (item != null) {
+                    personnage1.getInventaire().addItem(item);
+                    itemcoffre = item.getIcone();
+                }
+            }
+        }
     }
 
     private void draw() {
@@ -677,6 +749,24 @@ public class GameScreen implements Screen {
                     game.batch.draw(texture, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
                     if (texture == murTexture) {
                         mursHitboxes.add(new Rectangle(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE));
+                    }
+                }
+            }
+        }
+
+        
+        for (Coffre coffre : coffres) {
+            if (!coffre.estOuvert()) {
+                game.batch.draw(solTexture, coffre.getHitbox().x, coffre.getHitbox().y, TILE_SIZE, TILE_SIZE);
+                game.batch.draw(coffre.getTexture(), coffre.getHitbox().x, coffre.getHitbox().y, TILE_SIZE, TILE_SIZE);
+            } else {
+                game.batch.draw(solTexture, coffre.getHitbox().x, coffre.getHitbox().y, TILE_SIZE, TILE_SIZE);
+                game.batch.draw(coffre.getTexture(), coffre.getHitbox().x, coffre.getHitbox().y, TILE_SIZE, TILE_SIZE); 
+                if (coffre.vientouvrir()) {
+                    if ((tempsitem > tempscoffre)) {
+                        game.batch.draw(itemcoffre, coffre.getHitbox().x, coffre.getHitbox().y, TILE_SIZE, TILE_SIZE);
+                    } else {
+                        coffre.setvientouvrir(false);
                     }
                 }
             }
@@ -879,13 +969,19 @@ public class GameScreen implements Screen {
                     game.batch.setColor(0.9f, 0.6f, 0.2f, 1); // Orange
                 } else if (map[mapY][mapX] == 4) { // Vide
                     continue;
+                } else if (map[mapY][mapX] == 500) {
+                    game.batch.setColor(1f, 0.843f, 0f, 1f); // Or
                 } else { // Sol
                     game.batch.setColor(0.7f, 0.7f, 0.7f, 1); // Gris clair
                 }
                 
                 float tileX = minimapX + mapX * TILE_SIZE * scale;
                 float tileY = minimapY + (map.length - 1 - mapY) * TILE_SIZE * scale;
-                game.batch.draw(solTexture, tileX, tileY, TILE_SIZE * scale, TILE_SIZE * scale);
+                if (map[mapY][mapX] == 500) {
+                    game.batch.draw(solTexture, tileX, tileY, TILE_SIZE * scale*4, TILE_SIZE * scale*4);
+                } else {
+                    game.batch.draw(solTexture, tileX, tileY, TILE_SIZE * scale, TILE_SIZE * scale);
+                }
             }
         }
 
@@ -975,6 +1071,7 @@ public class GameScreen implements Screen {
     Hercule_gauche.dispose();
     Hercule_droite.dispose();
     game.gameMusic.dispose();
+    coffreTexture.dispose();
 
     if (barre_vide != null) barre_vide.dispose();
     if (barre_pleine != null) barre_pleine.dispose();
@@ -1101,6 +1198,8 @@ public class GameScreen implements Screen {
             return solTexture12;
         } else if (value == 200) {
             return murTexture2;
+        } else if (value == 500) {
+            return coffreTexture;
         }else if (value == 20) {
             return porteHOpen;
         }else if (value == 30) {
@@ -1124,4 +1223,13 @@ public class GameScreen implements Screen {
         
         return direction;
     }
+
+    // dans attaque maanger ajouter:
+    // public void setArme(String nom, int nombre, int range) {
+    //     this.armeMelee = new ArmeMelee(nom, nombre, range, range, nombre, nom, range);
+    // }
+    // dans le game screen
+    // public AttackManager getAttackMana() {
+    //     return this.attackManager;
+    // }
 }

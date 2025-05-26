@@ -29,11 +29,13 @@ public class InventaireScreen implements Screen {
     private final String[] menuOptions = { "Reprendre" };
     private Rectangle[] optionBounds;
     private Personnage personnage;
+    private AttackManager attackmanager;
 
-    public InventaireScreen(final Main game, GameScreen gameScreen, Personnage personnage) {
+    public InventaireScreen(final Main game, GameScreen gameScreen, Personnage personnage, AttackManager attackManager) {
         this.game = game;
         this.gameScreen = gameScreen; 
         this.personnage = personnage;
+        this.attackmanager = attackManager;
         
         // Initialiser les rectangles pour chaque option
         optionBounds = new Rectangle[menuOptions.length];
@@ -47,7 +49,7 @@ public class InventaireScreen implements Screen {
     Inventaire inventaire;
     int place_item_ligne = ligne_grille-1;
     int place_item_colonne = 0;
-    int taille_cote_case = 10;
+    int taille_cote_case = 25;
     int nombre_element_grille = 0;
 
     @Override
@@ -144,6 +146,17 @@ public class InventaireScreen implements Screen {
                                 personnage.getInventaire().removeItem(item);
                                 grille.removeItem(i, j);
                                 nombre_element_grille --;
+                            }
+                            if (item.getType() == Item.ItemType.POTIONVITESSE) {
+                                personnage.setVitesse(personnage.getVitesse() + item.getNombre());
+                                personnage.setAcceleration(true);
+                                // System.out.println(personnage.getVie());
+                                personnage.getInventaire().removeItem(item);
+                                grille.removeItem(i, j);
+                                nombre_element_grille --;
+                            }
+                            if (item.getType() == Item.ItemType.ARME) {
+                                attackmanager.getAttackMana().setArme(item.getNom(), item.getNombre(), item.getRange());
                             }
                             // personnage.setArme(null);
                         } else {
