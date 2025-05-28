@@ -32,10 +32,11 @@ public class InventaireScreen implements Screen {
     private Personnage personnage;
     private AttackManager attackmanager;
 
-    public InventaireScreen(final Main game, GameScreen gameScreen, Personnage personnage) {
+    public InventaireScreen(final Main game, GameScreen gameScreen, Personnage personnage, AttackManager attackManager) {
         this.game = game;
         this.gameScreen = gameScreen; 
         this.personnage = personnage;
+        this.attackmanager = attackManager;
         
         
         // Initialiser les rectangles pour chaque option
@@ -156,9 +157,12 @@ public class InventaireScreen implements Screen {
                                 grille.removeItem(i, j);
                                 nombre_element_grille --;
                             }
-                            // if (item.getType() == Item.ItemType.ARME) {
-                            //     attackmanager.getAttackMana().setArme(item.getNom(), item.getNombre(), item.getRange());
-                            // }
+                            if (item.getType() == Item.ItemType.ARME) {
+                                // attackmanager.getAttackMana().setArme(item.getNom(), item.getNombre(), item.getRange());
+                                attackmanager.getArmeMelee().setDegat(item.getNombre());
+                                attackmanager.getArmeMelee().setRange(item.getRange());
+                                // personnage.setArme(item.getNom(), item.getNombre(), item.getRange(), gameScreen.getNiveau());
+                            }
                             // personnage.setArme(null);
                         } else {
                             Color previousColor = game.batch.getColor().cpy();

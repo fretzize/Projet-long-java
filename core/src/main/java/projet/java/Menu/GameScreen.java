@@ -41,6 +41,7 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.math.MathUtils;
 
 import projet.java.Menu.GameOverScreen;
+import projet.java.Menu.VictoireScreen;
 import projet.java.Inventaire.Potion;
 
 
@@ -222,6 +223,13 @@ public class GameScreen implements Screen {
         this.personnage1 = new Personnage(skin,playerHitbox);
     }
 
+    ArmeMelee armeMelee;
+    // et dans le show armeMelee = attackManager.getArme()
+    // et dans le render attackManager.setArme(armeMelee)
+    // et dans le game screen
+    // public void setArme(String nom, int nombre, int range) {
+    //     this.armeMelee = new ArmeMelee(nom, nombre, range, range, nombre, nom, range);
+    // }
     //TEST SBIRE
 
     private Sbire sbireBoss;
@@ -313,16 +321,18 @@ public class GameScreen implements Screen {
         for (int i = 0; i < map.length; i++) {
             for (int j = 0; j < map[0].length; j++) {
                 Random rand  = new Random();
-                if ((map[i][j] == 1 || map[i][j] ==101 || map[i][j] == 102 || map[i][j] ==103 || map[i][j] == 104 || map[i][j] ==105 || map[i][j] == 106
+                if ((map[i][j] == 100 || map[i][j] ==101 || map[i][j] == 102 || map[i][j] ==103 || map[i][j] == 104 || map[i][j] ==105 || map[i][j] == 106
                         || map[i][j] ==107 || map[i][j] == 108 || map[i][j] ==109 || map[i][j] == 110 ) && rand.nextFloat() < 0.006 && voisinNotMur(map,i,j)) {
                     Sbire sbiretemp;
                     System.out.println("map = " + map[i][j]);
+                    int posX = j * TILE_SIZE;
+                    int posY = (map.length - 1 - i) * TILE_SIZE;
                     sbiretemp = new Sbire(
                             300, 0, 3,            // vie, bouclier, mana
-                            i * TILE_SIZE , j* TILE_SIZE ,           // positionX, positionY
+                            posX , posY ,           // positionX, positionY
                             25,                 // vitesseDeplacement (peut être augmenté si le sbire est trop lent)
                             300, 3,             // vitesseProjectile, cooldown
-                            new Rectangle(i * TILE_SIZE+1, j * TILE_SIZE, 30, 30),  // hitbox plus grande et correctement positionnée
+                            new Rectangle(posX+1, posY, 30, 30),  // hitbox plus grande et correctement positionnée
                             1500, 30,           // porteeProjectile, porteeCaC (augmentée pour faciliter l'attaque)
                             0, 0,              // degats (projectile), degatsCaC (augmenté de 0 à 15)
                             personnage1,
@@ -406,7 +416,8 @@ public class GameScreen implements Screen {
         
         // Créer le gestionnaire d'attaques avec le niveau
         attackManager = new AttackManager(game, personnage1, animationHandler, 0.4f, niveau);
-        
+        // armeMelee = attackManager.getArme();
+        // personnage1.setArme(armeMelee.getNom(), armeMelee.getDegats(), armeMelee.getPortee(), niveau);
         // Initialiser FireballManager après avoir créé le niveau
         fireballManager = new FireballManager(game, personnage1, niveau);
         
@@ -472,7 +483,8 @@ public class GameScreen implements Screen {
     @Override
     public void render(float delta) {
         input(delta);
-
+        // this.armeMelee = personnage1.getArme();
+        // attackManager.setArme(armeMelee.getNom(), armeMelee.getDegats(), armeMelee.getPortee());
         playerSpeed = personnage1.getVitesse();
         boolean isMovingUp = Gdx.input.isKeyPressed(game.toucheHaut) || Gdx.input.isKeyPressed(Input.Keys.UP);
         boolean isMovingDown = Gdx.input.isKeyPressed(game.toucheBas) || Gdx.input.isKeyPressed(Input.Keys.DOWN);
@@ -535,6 +547,23 @@ public class GameScreen implements Screen {
             tempsAcceleration = 0;
         }
 
+        if (sbiretest.size() == 0) {
+            game.setScreen(new VictoireScreen(game));
+        }
+
+        if (projectiles.size() != 0) {
+            for (Iterator<Projectile> iterator = projectiles.iterator(); iterator.hasNext();) {
+                Projectile projectile = iterator.next();
+                Rectangle hitbox = projectile.getHitbox();
+                for (int k = 0; k < mursHitboxes.size; k++) {
+                    if (hitbox.overlaps(mursHitboxes.get(k))) {
+                        System.out.println("Collision avec un mur en X");
+                        iterator.remove();
+                        break;
+                    }
+                }
+            }
+        } 
     }
 
     private void input(float avance) {
@@ -562,7 +591,7 @@ public class GameScreen implements Screen {
         }
         // Gestion de l'inventaire
         if (Gdx.input.isKeyJustPressed(game.toucheInventaire)) {
-            game.setScreen(new InventaireScreen(game, this, personnage1));
+            game.setScreen(new InventaireScreen(game, this, personnage1, attackManager));
             return; // Sortir de la méthode pour éviter de traiter d'autres entrées
         }
 
@@ -731,6 +760,8 @@ public class GameScreen implements Screen {
                 }
 
                 
+            } else {
+                sbiretest.remove(sbiretest.get(i));
             }
         }
 
@@ -1157,7 +1188,22 @@ public class GameScreen implements Screen {
             for (Projectile projectile : projectiles) {
                 Rectangle hitbox = projectile.getHitbox();
                 shapeRenderer.rect(hitbox.x, hitbox.y, hitbox.width, hitbox.height);
-                
+                // for (int i = 0; i < mursHitboxes.size; i++) {
+                //     if (hitbox.overlaps(mursHitboxes.get(i))) {
+                //         //System.out.println("Collision avec un mur en X");
+                //         projectiles.remove(i);
+                //         break;
+                //     }
+                // }
+
+                // for (int i = 0; i < mursHitboxes.size; i++) {
+                //     if (hitbox.overlaps(mursHitboxes.get(i))) {
+                //         projectiles.remove(i);
+                //         break;
+                //     }
+                // }
+
+            
                 // Dessiner une ligne indiquant la direction du projectile
                 Vector2 vitesse = projectile.getVitesse();
                 if (vitesse != null && vitesse.len() > 0) {
@@ -1414,6 +1460,40 @@ public class GameScreen implements Screen {
             }
     }
 
+    // private void gererCollisionsProjectiles(
+    //     Projectile projectile,
+    //     float oldX, float oldY,
+    //     Array<Rectangle> mursHitboxes,
+    //     Array<Rectangle> porteHitboxes,
+    //     float hitboxX, float hitboxY,
+    //     int[][] map, int TILE_SIZE){
+    //         Rectangle hitbox = projectile.getHitbox();
+    //         int xp, yp;
+
+    //         // Test mur en X
+    //         hitbox.setPosition(projectile.getPosition().x + hitboxX, oldY + hitboxY);
+    //         for (int i = 0; i < mursHitboxes.size; i++) {
+    //             if (hitbox.overlaps(mursHitboxes.get(i))) {
+    //                 //System.out.println("Collision avec un mur en X");
+    //                 projectile.setPositionX(oldX);
+    //                 System.out.println("detexte");;
+    //                 hitbox.setPosition(projectile.getPosition().x + hitboxX, projectile.getPosition().y + hitboxY);
+    //                 break;
+    //             }
+    //         }
+
+
+    //         // Test mur en Y
+    //         hitbox.setPosition(projectile.getPosition().x + hitboxX, projectile.getPosition().y + hitboxY);
+    //         for (int i = 0; i < mursHitboxes.size; i++) {
+    //             if (hitbox.overlaps(mursHitboxes.get(i))) {
+    //                 projectile.setPositionY(oldY);
+    //                 hitbox.setPosition(projectile.getPosition().x + hitboxX, projectile.getPosition().y + hitboxY);
+    //                 break;
+    //             }
+    //         }
+    // }
+
     public boolean voisinNotMur(int[][] map, int i, int j) {
         int[] dx = {-1, 1, 0, 0};
         int[] dy = {0, 0, -1, 1};
@@ -1448,4 +1528,14 @@ public class GameScreen implements Screen {
             hitbox.y + hitbox.height >= screenBottom && 
             hitbox.y <= screenTop;
     }
+
+    public void setArme(String nom, int nombre, int range) {
+        this.armeMelee = new ArmeMelee(nom, nombre, range, range, nombre, "epee1.png", range);
+        this.armeMelee.setNiveau(this.niveau);
+    }
+
+    public Niveau getNiveau() {
+        return this.niveau;
+    }
+
 }

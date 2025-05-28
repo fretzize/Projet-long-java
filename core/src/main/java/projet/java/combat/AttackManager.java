@@ -193,8 +193,8 @@ public class AttackManager {
         return armeMelee;
     }
 
-    public void setArme(String nom, int nombre, int range) {
-        this.armeMelee = new ArmeMelee(nom, nombre, range, range, nombre, "epee1.png", range);
+    public void setArme(String nom, int nombre, float range) {
+        this.armeMelee = new ArmeMelee(nom, nombre, nombre, range, nombre, "epee1.png", range);
     }
     
     /**
@@ -221,6 +221,10 @@ public class AttackManager {
         if (armeMelee != null) {
             armeMelee.setNiveau(niveau);
         }
+    }
+
+    public ArmeMelee getArme() {
+        return this.armeMelee;
     }
 
 }

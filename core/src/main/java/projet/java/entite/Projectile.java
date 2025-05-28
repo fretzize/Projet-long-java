@@ -145,6 +145,13 @@ public class Projectile {
         return position;
     }
     
+    public void setPositionX(float x) {
+        this.position.x = x;
+    }
+
+    public void setPositionY(float y) {
+        this.position.y = y;
+    }
     /**
      * Renvoie le vecteur vitesse du projectile.
      * Utile pour calculer la direction de l'impact.

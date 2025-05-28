@@ -231,4 +231,12 @@ public class ArmeMelee extends ArmeBase {
         // shapeRenderer.rect(zoneAttaque.x, zoneAttaque.y, zoneAttaque.width, zoneAttaque.height);
         // shapeRenderer.end();
     }
+
+    public void setDegat(int degat) {
+        this.degats = degat;
+    }
+
+    public void setRange(float range) {
+        this.portee = range;
+    }
 }

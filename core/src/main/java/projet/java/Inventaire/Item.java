@@ -6,13 +6,13 @@ public class Item {
     private Texture icone;
     private ItemType type;
     private int nombre; // ça va être ici les degats de l'arme et le nombre de vie que recupere le joueur
-    private int range; // pour les armes la distance d'action
+    private float range; // pour les armes la distance d'action
 
     public enum ItemType {
         ARME, POTION, POTIONVITESSE
     }
 
-    public Item(String nom, Texture icone, ItemType type, int nombre, int range) {
+    public Item(String nom, Texture icone, ItemType type, int nombre, float range) {
         this.nom = nom;
         this.icone = icone;
         this.type = type;
@@ -24,7 +24,7 @@ public class Item {
     public Texture getIcone() { return icone; }
     public ItemType getType() { return type; }
     public int getNombre() {return nombre; }
-    public int getRange() {return range; }
+    public float getRange() {return range; }
 
      public void dispose() {
         if (icone != null) {

@@ -20,11 +20,12 @@ public class DatabaseItem {
     
     
 
-    Item Arme1 = new Item("arme1", arme1, Item.ItemType.ARME, 3, 35);
-    Item Arme2 = new Item("arme2", arme2, Item.ItemType.ARME, 2, 35);
-    Item Arme3 = new Item("arme3", arme3, Item.ItemType.ARME, 3, 35);
+    Item Arme1 = new Item("arme1", arme1, Item.ItemType.ARME, 20, 150f);
+    Item Arme2 = new Item("arme2", arme2, Item.ItemType.ARME, 100, 300f);
+    Item Arme3 = new Item("arme3", arme3, Item.ItemType.ARME, 100, 300f);
     Item Potion1 = new Item("potion_vie", potion_vie, Item.ItemType.POTION, 3, 0);
     Item Potion2 = new Item("potion_vitesse", potion_vitesse, Item.ItemType.POTIONVITESSE, 60, 0);
+
 
     public DatabaseItem() {
         database.add(Arme1);

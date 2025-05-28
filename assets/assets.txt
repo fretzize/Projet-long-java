@@ -1,3 +1,7 @@
+Chest1.png
+Chest2.png
+Chest3.png
+Chest4.png
 FB001.png
 FB002.png
 FB003.png
@@ -74,6 +78,7 @@ Impact_4.png
 Impact_5.png
 Impact_6.png
 Korcy.ttf
+OST.mp3
 Orc1/orc1_back_idle_1.png
 Orc1/orc1_back_idle_2.png
 Orc1/orc1_back_idle_3.png
@@ -236,6 +241,7 @@ Orc1/orc3_right_run_attack_7.png
 Orc1/orc3_right_run_attack_8.png
 barres_pleine.png
 barres_vide.png
+bomba.png
 bouclier.png
 case_inventaire.png
 clean-crispy-ui.atlas
@@ -245,6 +251,7 @@ coeur_plein.png
 dash.png
 dash2.png
 dash_gris.png
+degatmobsound.mp3
 doorv.png
 epee1.png
 epee2.png
@@ -286,5 +293,7 @@ menubackground.png
 menumusic.mp3
 police.otf
 potion_de_vie.png
+potion_de_vitesse.png
 sword_swing.mp3.mp3
+swordattacksound.mp3
 wall.png

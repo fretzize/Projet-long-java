@@ -34,7 +34,7 @@ public class Personnage extends ApplicationAdapter implements Entite {
     private boolean etatbouclier = false;
     private boolean dashOk = true;
 
-
+    private ArmeMelee armeMelee;
     //timer pour savoir tous les combiens de temps il peut utiliser son dash, cooldown
     
     Timer timer;
@@ -60,6 +60,7 @@ public class Personnage extends ApplicationAdapter implements Entite {
     private int touche_gauche = 29;
     private int touche_dash = 62;
 
+    private Niveau niveau;
     @Override
     public void setHaut(int haut) {
         this.touche_haut = haut;
@@ -440,5 +441,18 @@ public class Personnage extends ApplicationAdapter implements Entite {
     // Ajouter cette méthode pour définir le listener
     public void setDamageListener(DamageListener listener) {
         this.damageListener = listener;
+    }
+
+    public void setArme(String nom, int nombre, float range, Niveau niveau) {
+        this.armeMelee = new ArmeMelee(nom, nombre, nombre, range, nombre, "epee1.png", range);
+        this.niveau = niveau;
+    }
+
+    public ArmeMelee getArme() {
+        return this.armeMelee;
+    }
+
+    public Niveau getNiveau() {
+        return this.niveau;
     }
 }
