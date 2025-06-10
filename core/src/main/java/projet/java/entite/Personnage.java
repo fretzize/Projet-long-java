@@ -46,8 +46,8 @@ public class Personnage extends ApplicationAdapter implements Entite {
     private Rectangle hitbox; // Hitbox du personnage
     boolean prendre_des_degats = false;
     boolean gameOver =false;
-    private int vitesse  = 80;
-    private int vitesse_de_base = 80;
+    private int vitesse  = 110;
+    private int vitesse_de_base = 110;
     private boolean estAcceleration =false; //dit si le personnage est en train d'accélérer, si il a pris une potion d'acceleration
 
     // draw(Texture texture, float x, float y, float originX, float originY, float width, float height, float scaleX, float scaleY, float rotation)
@@ -119,6 +119,9 @@ public class Personnage extends ApplicationAdapter implements Entite {
         this.vitesse = vitesse;
     }
 
+    public void setBouclier(int bouclier) {
+        this.bouclier = bouclier;
+    }
     public boolean getAcceleration() {
         return this.estAcceleration;
     }
@@ -147,6 +150,10 @@ public class Personnage extends ApplicationAdapter implements Entite {
     public int getBouclier(){
         return this.bouclier;
     }
+
+    public int getBouclierMax() {
+        return this.bouclier_max;
+    }
     
     @Override
     public float getPositionX(){
@@ -159,6 +166,9 @@ public class Personnage extends ApplicationAdapter implements Entite {
     }
     public Inventaire getInventaire(){
             return this.inventaire;
+    }
+    public void setInventaire(Inventaire inventaire) {
+        this.inventaire = inventaire;
     }
 
     public void changePositionX(float x){

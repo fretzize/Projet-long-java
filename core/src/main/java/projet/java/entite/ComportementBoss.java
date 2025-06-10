@@ -10,7 +10,7 @@ public class ComportementBoss implements ComportementSbire {
     private int phaseActuelle = 0;
     private float dureePhaseTir = 3f; // Durée de la phase de tir en secondes
     private float phaseCharge = 2f; // Durée de la charge
-    private float phaseTeleport = 3f; // Durée après téléportatio
+    private float phaseTeleport = 5f; // Durée après téléportatio 3f
     private float phaseChasing = 5f; // Durée de la phase de poursuite
     private float phaseCooldown = 4f; // Durée de la phase de cooldown
 
@@ -73,8 +73,9 @@ public class ComportementBoss implements ComportementSbire {
         sbire.deplacerVersCible(deltaTime); // Déplacement vers la cible
         sbire.update(deltaTime, projectiles); // Met à jour la position et l'état du sbire
         
-        if (tempsPhase >= phaseChasing)
-            changerPhase();
+        // if (tempsPhase >= phaseChasing) {
+        //     changerPhase();
+        // }
     }
 
 
@@ -82,8 +83,9 @@ public class ComportementBoss implements ComportementSbire {
         // Phase de cooldown - le sbire reste immobile
 
         // Pas de tir pendant cette phase
-        if (tempsPhase >= phaseCooldown)
-            changerPhase();
+        // if (tempsPhase >= phaseCooldown) {
+        //     changerPhase();
+        // }   
     }
 
     private void executerPhaseTirCercle(Sbire sbire, float deltaTime, List<Projectile> projectiles) {

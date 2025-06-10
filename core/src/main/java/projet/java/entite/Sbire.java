@@ -244,7 +244,7 @@ public class Sbire implements Entite{
                 }
             }
             if (cible != null && peutAttaquer()) {
-                if(estAPorteeCaC()){
+                if(estAPorteeCaC()) {
                     attaquerMelee();
                     tempsDepuisDernierTir = 0;
                 }
@@ -301,30 +301,38 @@ public class Sbire implements Entite{
 
     public void tirerSurCible(List<Projectile> projectiles) {
         Vector2 positionCible = new Vector2(this.cible.getPositionX(), this.cible.getPositionY());  // récupère la position du personnage
-    
+        Vector2 playerPosition = new Vector2(this.getPositionX() + 22, // Décalage hitbox
+                this.getPositionY() + 18  // Décalage hitbox
+            );
 
         // Calcule la direction normalisée du projectile (du sbire vers la cible)
-        Vector2 direction = new Vector2(positionCible).sub(new Vector2(this.positionX, this.positionY)).nor();
-    
+        // Vector2 direction = new Vector2(positionCible).sub(new Vector2(this.positionX, this.positionY)).nor();
+        
+        Vector2 direction = new Vector2(
+            positionCible.x - playerPosition.x,
+            positionCible.y - playerPosition.y
+        );
+
+        // Normaliser la direction (la transformer en vecteur unitaire)
+        if (direction.len2() > 0) { // Éviter division par zéro
+            direction.nor();
+        } else {
+            direction.set(0, 1); // Direction par défaut si le vecteur est nul
+        }
+
+        // playerPosition.add(direction.cpy().scl(20));
+
         Vector2 vitesseVecteur = direction.scl(vitesseProjectile);
 
         float hitboxWidth = 15;
         float hitboxHeight = 15;
 
-        Rectangle hitboxProjectile = new Rectangle(positionX - hitboxWidth/2, positionY - hitboxHeight/2, hitboxWidth, hitboxHeight);
-        Projectile projectile = new Projectile(
-            positionX,
-            positionY,
-            vitesseVecteur.x,
-            vitesseVecteur.y,
-            projectileTexture,
-            degats,
-            porteeProjectile,
-            hitboxProjectile);
+        Rectangle hitboxProjectile = new Rectangle(playerPosition.x - hitboxWidth/2, playerPosition.y - hitboxHeight/2, hitboxWidth, hitboxHeight);
+        Projectile projectile = new Projectile(playerPosition.x, playerPosition.y, vitesseVecteur.x, vitesseVecteur.y, projectileTexture, degats, porteeProjectile, hitboxProjectile);
 
         //DEBUG
         //System.out.println(projectile.getHitbox().getWidth() + " " + projectile.getHitbox().getHeight());
-    
+        
         projectiles.add(projectile);
     }
 
@@ -334,7 +342,7 @@ public class Sbire implements Entite{
             // Vérifier si la zone d'attaque intersecte avec la hitbox du joueur
             if (estAPorteeCaC()) {
                 // Appliquer les dégâts
-                cible.prendreDegat(degatsCaC);
+                this.getCible().prendreDegat(degatsCaC);
                 
                 // Ajouter des logs pour débugger
                 System.out.println("Sbire attaque! Dégâts infligés: " + degatsCaC);
@@ -761,30 +769,63 @@ public class Sbire implements Entite{
     public void updateZoneAttaque(){
         if (cible == null) return;
 
-        // Calculer le centre du sbire
         float sbireX = this.positionX + this.hitbox.width / 2;
         float sbireY = this.positionY + this.hitbox.height / 2;
         
         // Calculer la direction vers le joueur
         float dirX = cible.getPositionX() - sbireX;
         float dirY = cible.getPositionY() - sbireY;
+        Vector2 position = new Vector2(this.getPositionX()+22, this.getPositionY()+18);
+        Vector2 direction = new Vector2(dirX, dirY);
+        Vector2 hitboxSize = new Vector2(10, 10);
+
+        // Calcule les dimensions de la zone d'attaque
+        // portee = 45 f pour le debut plus grand que celui du joueur
+
+        float portee = 45f;
+        float zoneWidth = portee;
+        float zoneHeight = portee / 1.5f; 
         
-        // Normaliser la direction
-        float length = (float) Math.sqrt(dirX * dirX + dirY * dirY);
-        if (length > 0) {
-            dirX /= length;
-            dirY /= length;
+        // Ajuster les dimensions selon la direction pour une meilleure jouabilité
+        if (Math.abs(direction.y) > Math.abs(direction.x)) {
+            // Attaque verticale (haut/bas)
+            float temp = zoneWidth;
+            zoneWidth = zoneHeight;
+            zoneHeight = temp;
         }
         
-
+        // Position du centre de la hitbox du personnage
+        Vector2 hitboxCenter = new Vector2(
+            position.x + hitboxSize.x / 2 ,
+            position.y + hitboxSize.y / 2 
+        );
         
-        // Position de la zone d'attaque (devant le sbire dans la direction du joueur)
-        float attackDistance = hitbox.width / 2; // Distance depuis le centre du sbire
-        float attackX = sbireX + dirX * attackDistance - zoneAttaque.width / 2;
-        float attackY = sbireY + dirY * attackDistance - zoneAttaque.height / 2;
+        // Normaliser la direction pour avoir un vecteur unitaire
+        Vector2 normalizedDir = new Vector2(direction).nor();
         
-        // Mettre à jour la zone d'attaque
-        zoneAttaque.set(attackX, attackY, zoneAttaque.width, zoneAttaque.height);
+        // Calculer où placer la hitbox d'attaque pour qu'elle soit adjacente à la hitbox du joueur
+        float offsetX = (hitboxSize.x / 2) * Math.abs(normalizedDir.x);
+        float offsetY = (hitboxSize.y / 2) * Math.abs(normalizedDir.y);
+        
+        // Position du point d'attaque (bord de la hitbox du joueur dans la direction de l'attaque)
+        Vector2 attackPoint = new Vector2(hitboxCenter);
+        attackPoint.x += normalizedDir.x * offsetX;
+        attackPoint.y += normalizedDir.y * offsetY;
+        
+        // Positionner la zone d'attaque à partir de ce point
+        Vector2 centerZone = new Vector2(attackPoint).add(
+            normalizedDir.x * zoneWidth / 2,
+            normalizedDir.y * zoneHeight / 2
+        );
+        
+        // Définir la zone d'attaque comme un rectangle
+        zoneAttaque.set(
+            centerZone.x - zoneWidth / 2,
+            centerZone.y - zoneHeight / 2,
+            zoneWidth,
+            zoneHeight
+        );
+        
     }
 
 	@Override

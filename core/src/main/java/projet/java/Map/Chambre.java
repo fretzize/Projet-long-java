@@ -10,6 +10,7 @@ public class Chambre {
     private int[] initial;
     private int[] taille;
     private int[] spawn;
+    private boolean chambreboss;
 
     public Chambre(int numero,int[] initial,int[] taille) {
         this.numero = numero;
@@ -21,6 +22,15 @@ public class Chambre {
                 this.grille[i][j] = 0;
             }
         }
+        this.chambreboss = false;
+    }
+
+    public boolean estChambreBoss() {
+        return chambreboss;
+    }
+
+    public void setChambreBoss(boolean estboss) {
+        this.chambreboss = estboss;
     }
     public Chambre(int numero,int[] initial,int[] taille, int[][] grille) {
         this.numero = numero;
@@ -289,6 +299,11 @@ public class Chambre {
             this.setSpawn(centre[0], centre[1]);
 
         }
+        if (spawn == 2) {
+            System.out.println("spawn2 " + centre[0] + " " + centre[1] );
+
+            this.setSpawn(centre[0], centre[1]);
+        }
         for (int i = 0; i < this.taille[0]; i++) {
             for (int j = 0; j < this.taille[1]; j++) {
                 int dist = (int) Math.sqrt(Math.pow(i-centre[0],2)+Math.pow(j-centre[1],2));
@@ -308,7 +323,7 @@ public class Chambre {
         }
     }
 
-    public void createur_chambre(boolean spawn) {
+    public void createur_chambre(boolean spawn, boolean boss) {
         Random rand = new Random();
         double alea = rand.nextDouble();
         if (alea < 0.15 || spawn) {
@@ -316,6 +331,11 @@ public class Chambre {
                 System.out.println("spawn1");
                 this.specialRonde(1);
 
+            }
+            else if (boss) {
+                System.out.println("boss");
+                this.specialRonde(2);
+                
             }
             else {
                 this.specialRonde(0);
@@ -325,6 +345,15 @@ public class Chambre {
             this.multimarcheurAleatoire(5);
             this.faciliteurDeCouloir();
             this.multiSmoother(2);
+        }
+        
+        if (boss) {
+            int[] centre = new int[2];
+            centre[0] = (int) Math.ceil(this.taille[0]*0.5);
+            centre[1] = (int) Math.ceil(this.taille[1]*0.5);
+            this.setSpawn(centre[0], centre[1]);
+            grille[centre[0]][centre[1]] = 450;
+            grille[centre[0]][centre[1]+1] = 450;
         }
     }
 
@@ -384,7 +413,7 @@ public class Chambre {
 
         int[] emplacement = sols.get(rand.nextInt(sols.size()));
         grille[emplacement[0]][emplacement[1]] = 500; // valeur dédiée aux coffres
-
+        
         return true;
     }
 

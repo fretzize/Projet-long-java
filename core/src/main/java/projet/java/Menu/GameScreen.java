@@ -14,6 +14,7 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
+import java.lang.Math;
 
 import projet.java.entite.ArmeMelee;
 import projet.java.entite.ComportementBoss;
@@ -27,6 +28,7 @@ import projet.java.entite.Sbire;
 import projet.java.Main;
 import projet.java.Map.Chambre;
 import projet.java.Map.Map;
+import projet.java.Map.Portail;
 import projet.java.Inventaire.DatabaseItem;
 import projet.java.Inventaire.Inventaire;
 import projet.java.Menu.InventaireScreen;
@@ -62,7 +64,8 @@ public class GameScreen implements Screen {
     //tout ce qui est utile à la map :
     private ShapeRenderer shapeRenderer;
     Array<Rectangle> mursHitboxes ;
-    Array<Rectangle> porteHitboxes ;
+    ArrayList<Rectangle> porteHitboxes ;
+    ArrayList<Rectangle> liste_porte_boss;
     Texture solTexture;
     Texture solTexture2;
     Texture solTexture3;
@@ -78,12 +81,17 @@ public class GameScreen implements Screen {
     Texture murTexture;
     Texture murTexture2;
     Texture coffreTexture;
+    Texture spawnBoss;
     Texture coffreTextureouvert;
     Texture porteH;
     Texture porteV;
     Texture porteHOpen;
     Texture porteVOpen;
     Texture videTexture;
+    Texture portebossHopen;
+    Texture portebossVopen;
+    Texture portebossH;
+    Texture portebossV;
     int nombreDeChambres = 6;
     int[] tailleChambre = {70, 70};
     Map carte = new Map(nombreDeChambres, tailleChambre);
@@ -91,7 +99,7 @@ public class GameScreen implements Screen {
     int[][] mapCollision;
     final int TILE_SIZE = 16;
     final float CAMERA_SPEED = 600f;
-
+    private Portail portail;
     private Texture mapTexture;
     private Texture skin;
     private Rectangle playerHitbox ;
@@ -135,6 +143,7 @@ public class GameScreen implements Screen {
     // texture pour essayer inventaire
 
     private Texture arme1;
+    private Texture hache;
     // private Texture arme2;
     // private Texture arme3;
 
@@ -214,13 +223,24 @@ public class GameScreen implements Screen {
 
     // Ajouter cette variable avec les autres attributs
     private FireballManager fireballManager;
+    private double pourcentage_mob;
+    // teture portail
 
-    public GameScreen(final Main game) {
+    private Texture texture_portail;
+    // pour savoir si le combat de boss commence
+    private boolean combatBoss = false;
+    private boolean fincombatboss = false;
+    private Rectangle bossHitbox;
+
+    public GameScreen(final Main game, double pourcentage, Inventaire inventaire) {
         this.game = game;
         camera = new OrthographicCamera();
         camera.setToOrtho(false, 320, 180);
         playerHitbox = new Rectangle(250+hitboxX, 250+hitboxY, 10, 10);
         this.personnage1 = new Personnage(skin,playerHitbox);
+        this.personnage1.setInventaire(inventaire);
+        pourcentage_mob = pourcentage;
+        this.personnage1.setBouclier(this.personnage1.getBouclierMax());
     }
 
     ArmeMelee armeMelee;
@@ -233,8 +253,12 @@ public class GameScreen implements Screen {
     //TEST SBIRE
 
     private Sbire sbireBoss;
-    
+    private Chambre salleBoss;
+    int bossX;
+    int bossY;
     int une_fois = 1;
+    boolean tableau_plein = true;
+    int nombre_porte_boss;
     @Override
     public void show() {
         // Si le jeu a déjà été initialisé, ne pas recréer les éléments
@@ -260,11 +284,13 @@ public class GameScreen implements Screen {
 
         // Le reste du code d'initialisation reste inchangé
         mursHitboxes = new Array<>();
-        porteHitboxes = new Array<>();
+        porteHitboxes = new ArrayList<>();
+        liste_porte_boss = new ArrayList<>();
         carte.placerChambresGrille();
         carte.corridor_creator();
         carte.creuser_couloir();
         carte.placerCoffresDansChambres();
+        carte.placerSpawnBoss();
         System.out.println(carte.compterCoffres());
         shapeRenderer = new ShapeRenderer();
         Map carteReduite = carte.reducteur();
@@ -298,8 +324,13 @@ public class GameScreen implements Screen {
         solTexture12 = new Texture(Gdx.files.internal("map/Tile_95.png"));
         porteHOpen = new Texture(Gdx.files.internal("map/Door_OPEN_H.png"));
         porteVOpen = new Texture(Gdx.files.internal("map/Door_OPEN_V.png"));
+        portebossHopen = new Texture(Gdx.files.internal("map/Door_OPEN_boss_H.png"));
+        portebossVopen = new Texture(Gdx.files.internal("map/Door_OPEN_boss_V.png"));
+        portebossH = new Texture(Gdx.files.internal("map/1_boss.png"));
+        portebossV = new Texture(Gdx.files.internal("map/2_boss.png"));
         coffreTexture = new Texture(Gdx.files.internal("Chest1.png"));
         coffreTextureouvert = new Texture(Gdx.files.internal("Chest3.png"));
+        spawnBoss = new Texture("map/doorH.png");
         mapTexture = new Texture(Gdx.files.internal("map.png")); // Créez une image "map.png"
         skin = new Texture(Gdx.files.internal("image_heracles_normal.png")); // Créez une image "player.png"
         largeur_skin = skin.getWidth();
@@ -322,7 +353,7 @@ public class GameScreen implements Screen {
             for (int j = 0; j < map[0].length; j++) {
                 Random rand  = new Random();
                 if ((map[i][j] == 100 || map[i][j] ==101 || map[i][j] == 102 || map[i][j] ==103 || map[i][j] == 104 || map[i][j] ==105 || map[i][j] == 106
-                        || map[i][j] ==107 || map[i][j] == 108 || map[i][j] ==109 || map[i][j] == 110 ) && rand.nextFloat() < 0.006 && voisinNotMur(map,i,j)) {
+                        || map[i][j] ==107 || map[i][j] == 108 || map[i][j] ==109 || map[i][j] == 110 ) && rand.nextFloat() < pourcentage_mob && voisinNotMur(map,i,j)) {
                     Sbire sbiretemp;
                     System.out.println("map = " + map[i][j]);
                     int posX = j * TILE_SIZE;
@@ -334,7 +365,7 @@ public class GameScreen implements Screen {
                             300, 3,             // vitesseProjectile, cooldown
                             new Rectangle(posX+1, posY, 30, 30),  // hitbox plus grande et correctement positionnée
                             1500, 30,           // porteeProjectile, porteeCaC (augmentée pour faciliter l'attaque)
-                            0, 0,              // degats (projectile), degatsCaC (augmenté de 0 à 15)
+                            1, 1,              // degats (projectile), degatsCaC (augmenté de 0 à 15)
                             personnage1,
                             new ComportementMelee(),
                             new Texture(Gdx.files.internal("bomba.png")),
@@ -346,11 +377,32 @@ public class GameScreen implements Screen {
             }
         }
 
+        for (int y = 0; y < map.length; y++) {
+            for (int x = 0; x < map[0].length; x++) {
+                if (map[y][x] == 500) {
+                    Rectangle hitbox = new Rectangle(x * TILE_SIZE, (map.length - 1 - y) * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                    Item itemAlea = new DatabaseItem().getItemAlea(); // ou un item défini
+                    Coffre coffre = new Coffre(x, y, itemAlea, hitbox, coffreTexture);
+                    coffre.setPositionX(x * TILE_SIZE);
+                    coffre.setPositionY((map.length - 1 - y) * TILE_SIZE);
+                    coffres.add(coffre);
+                }
+
+                if (map[y][x] == 450) {
+                    bossX = x * TILE_SIZE;
+                    bossY = (map.length - 1 - y) * TILE_SIZE;
+                }
+            }
+        }
+
+        // bossX = carte.getChBossX()*TILE_SIZE;
+        // bossY = (carte.getChBossY())*TILE_SIZE;
+        
         // Créer le boss avec une hitbox plus grande et le ComportementBoss
-        Rectangle bossHitbox = new Rectangle(300, 300, 48, 48); // Hitbox plus grande pour le boss
+        bossHitbox = new Rectangle(bossX, bossY, 48, 48); // Hitbox plus grande pour le boss
         sbireBoss = new Sbire(
             400, 50, 5,       // vie, bouclier, mana (plus élevés que le sbire normal)
-            300, 300,         // positionX, positionY
+            bossX, bossY,         // positionX, positionY
             45, 300, 1.5f,       // vitesseDeplacement, vitesseProjectile, cooldown
             bossHitbox,
             1500, 100,        // porteeProjectile, porteeCaC 
@@ -419,7 +471,7 @@ public class GameScreen implements Screen {
         // armeMelee = attackManager.getArme();
         // personnage1.setArme(armeMelee.getNom(), armeMelee.getDegats(), armeMelee.getPortee(), niveau);
         // Initialiser FireballManager après avoir créé le niveau
-        fireballManager = new FireballManager(game, personnage1, niveau);
+        fireballManager = new FireballManager(game, personnage1, niveau, mursHitboxes);
         
         if (timer != null) {
             timer.cancel();
@@ -443,6 +495,7 @@ public class GameScreen implements Screen {
         // Initialiser le débogueur après la création du personnage, niveau et attackManager
         debugger = new GameDebugger(personnage1, niveau, attackManager);
         arme1 = new Texture("epee1.png");
+        hache = new Texture("HERCULEpng/HERCULEpng/hache.png");
         // arme2 = new Texture("epee2.png");
         // arme3 = new Texture("epee3.png");
         Potion potionvie = new Potion(3);
@@ -453,24 +506,15 @@ public class GameScreen implements Screen {
         List<Item> data = database.getData();
 
         Item Arme1 = data.get(2);
+        Item Hache = data.get(3);
         // Item Arme2 = new Item("arme2", arme2, Item.ItemType.ARME, 2);
         // Item Arme3 = new Item("arme3", arme3, Item.ItemType.ARME, 3);
         Item Potion = new Item("potion", potion, Item.ItemType.POTION, potionvie.getVie(), 0);
-        Item Potion_Vitesse = new Item("potion", potion_vitesse, Item.ItemType.POTIONVITESSE, potion_vit.getVie(), 0);
-        for (int y = 0; y < map.length; y++) {
-            for (int x = 0; x < map[0].length; x++) {
-                if (map[y][x] == 500) {
-                    Rectangle hitbox = new Rectangle(x * TILE_SIZE, (map.length - 1 - y) * TILE_SIZE, TILE_SIZE, TILE_SIZE);
-                    Item itemAlea = new DatabaseItem().getItemAlea(); // ou un item défini
-                    Coffre coffre = new Coffre(x, y, itemAlea, hitbox, coffreTexture);
-                    coffre.setPositionX(x * TILE_SIZE);
-                    coffre.setPositionY((map.length - 1 - y) * TILE_SIZE);
-                    coffres.add(coffre);
-                }
-            }
-        }
+        Item Potion_Vitesse = new Item("potion vitesse", potion_vitesse, Item.ItemType.POTIONVITESSE, potion_vit.getVie(), 0);
+        
         if (une_fois == 1) {
             personnage1.getInventaire().addItem(Arme1);
+            personnage1.getInventaire().addItem(Hache);
             // personnage1.getInventaire().addItem(Arme2);
             // personnage1.getInventaire().addItem(Arme3);
             personnage1.getInventaire().addItem(Potion);
@@ -478,6 +522,10 @@ public class GameScreen implements Screen {
             une_fois ++;
         }
 
+        texture_portail = new Texture("portail.png");
+        portail = new Portail(300, 300, texture_portail);
+        nombre_porte_boss = carte.getnombrechambreBoss();
+        
     }
 
     @Override
@@ -490,7 +538,6 @@ public class GameScreen implements Screen {
         boolean isMovingDown = Gdx.input.isKeyPressed(game.toucheBas) || Gdx.input.isKeyPressed(Input.Keys.DOWN);
         boolean isMovingLeft = Gdx.input.isKeyPressed(game.toucheGauche) || Gdx.input.isKeyPressed(Input.Keys.LEFT);
         boolean isMovingRight = Gdx.input.isKeyPressed(game.toucheDroite) || Gdx.input.isKeyPressed(Input.Keys.RIGHT);
-        
 
         Vector2 mouseDirection = getMouseDirection();
 
@@ -548,7 +595,19 @@ public class GameScreen implements Screen {
         }
 
         if (sbiretest.size() == 0) {
-            game.setScreen(new VictoireScreen(game));
+            portail.portailOK(true);
+            portail.setX(bossX);
+            portail.setY(bossY);
+            // game.setScreen(new VictoireScreen(game));
+        }
+
+        if (portail.getHitbox().overlaps(personnage1.getHitbox()) && portail.afficherPortail()) {
+            // game.setScreen(new VictoireScreen(game));
+            if (pourcentage_mob != 0.01) {
+                game.setScreen(new GameScreen(game, pourcentage_mob + 0.002, personnage1.getInventaire()));
+            } else {
+                game.setScreen(new VictoireScreen(game));
+            }
         }
 
         if (projectiles.size() != 0) {
@@ -563,7 +622,7 @@ public class GameScreen implements Screen {
                     }
                 }
             }
-        } 
+        }
     }
 
     private void input(float avance) {
@@ -621,30 +680,38 @@ public class GameScreen implements Screen {
         float oldY = personnage1.getPositionY();
         int xp=0;
         int yp=0;
-
+        int deplacement = 1;
         // Déplacement du joueur
         if (Gdx.input.isKeyPressed(game.toucheHaut) || Gdx.input.isKeyPressed(Input.Keys.UP)) {
             //playerY += currentSpeed * avance;
-            personnage1.changePositionY(currentSpeed * avance);
-        }
+            personnage1.changePositionY(currentSpeed * avance / deplacement);
+            deplacement ++;
+            // System.out.println(deplacement);
+        } 
         if (Gdx.input.isKeyPressed(game.toucheGauche) || Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
             //playerX -= currentSpeed * avance;
-            personnage1.changePositionX(-currentSpeed * avance);
-        }
+            personnage1.changePositionX(-currentSpeed * avance / deplacement);
+            deplacement ++;
+            // System.out.println(deplacement);
+        } 
         if (Gdx.input.isKeyPressed(game.toucheDroite) || Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
             //playerX += currentSpeed * avance;
-            personnage1.changePositionX(currentSpeed * avance);
-        }
+            personnage1.changePositionX(currentSpeed * avance / deplacement);
+            deplacement ++;
+            // System.out.println(deplacement);
+        } 
         if (Gdx.input.isKeyPressed(game.toucheBas) || Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
             //playerY -= currentSpeed * avance;
-            personnage1.changePositionY(-currentSpeed * avance);
+            personnage1.changePositionY(-currentSpeed * avance / deplacement);
+            deplacement ++;
+            // System.out.println(deplacement);
         }
         
         
         // Mise à jour de la hitbox du joueur
         gererCollisionsEntite(
             personnage1, oldX, oldY,
-            mursHitboxes, porteHitboxes,
+            mursHitboxes, porteHitboxes, liste_porte_boss,
             hitboxX, hitboxY,
             map, TILE_SIZE
         );
@@ -752,7 +819,7 @@ public class GameScreen implements Screen {
                     sbiretest.get(i).agir(Gdx.graphics.getDeltaTime(), projectiles);
                     gererCollisionsEntite(
                         sbiretest.get(i), oldX, oldY,
-                        mursHitboxes, porteHitboxes,
+                        mursHitboxes, porteHitboxes, liste_porte_boss,
                         hitboxX, hitboxY,
                         map, TILE_SIZE);
                 } else {
@@ -764,8 +831,9 @@ public class GameScreen implements Screen {
                 sbiretest.remove(sbiretest.get(i));
             }
         }
+        
 
-        // if (sbiretest != null && sbiretest.enVie()) {
+        //draw if (sbiretest != null && sbiretest.enVie()) {
         //     sbiretest.agir(Gdx.graphics.getDeltaTime(), projectiles);
         // }
 
@@ -821,6 +889,24 @@ public class GameScreen implements Screen {
                 }
             }
         }
+
+        // if (!bossChamberLocked && sbireBoss.enVie()) {
+        //     if (salleBoss.contient(personnage1.getPositionX(), personnage1.getPositionY(), TILE_SIZE, map.length)) {
+        //         salleBoss.fermerPortes(map);
+        //         bossChamberLocked = true;
+        //     }
+        // }
+
+        // if (bossChamberLocked && !sbireBoss.enVie()) {
+        //     salleBoss.ouvrirPortes(map);
+        //     bossChamberLocked = false;
+
+        //     portail.setX(sbireBoss.getPositionX());
+        //     portail.setY(sbireBoss.getPositionY());
+        //     portail.portailOK(true);
+        // }
+
+        
     }
 
     private void draw() {
@@ -866,6 +952,8 @@ public class GameScreen implements Screen {
         }
 
         
+
+        
         for (Coffre coffre : coffres) {
             if (!coffre.estOuvert()) {
                 game.batch.draw(solTexture, coffre.getHitbox().x, coffre.getHitbox().y, TILE_SIZE, TILE_SIZE);
@@ -904,6 +992,47 @@ public class GameScreen implements Screen {
                 }
             }
         }
+
+
+        if ((porteHitboxes.size() != 0) && (tableau_plein)) {
+            int indice = 0;
+            Rectangle porte0 = porteHitboxes.get(0);
+            float dist_min = Math.abs(bossX - porte0.x) + Math.abs(bossY - porte0.y);
+            int pos = 0;
+            while (liste_porte_boss.size() != nombre_porte_boss) {
+                for (int i = 0; i < porteHitboxes.size(); i++) {
+                    Rectangle porte = porteHitboxes.get(i);
+                    float dist = Math.abs(bossX - porte.x) + Math.abs(bossY - porte.y);
+                    if ((dist < dist_min) && (!liste_porte_boss.contains(porte))) {
+                        dist_min = dist;
+                        porte0 = porte;
+                        pos = i;
+                    }
+                }
+                if (!liste_porte_boss.contains(porte0)) {
+                    liste_porte_boss.add(porte0);
+                    porte0 = porteHitboxes.get(0);
+                    dist_min = Math.abs(bossX - porte0.x) + Math.abs(bossY - porte0.y);
+                    pos = 0;
+                } else {
+                    indice ++;
+                    porte0 = porteHitboxes.get(indice);
+                    dist_min = Math.abs(bossX - porte0.x) + Math.abs(bossY - porte0.y);
+                    pos = indice;
+                }
+                
+                // porteHitboxes.remove(porte0);
+            }
+            tableau_plein = false;
+        }
+        // System.out.println(liste_porte_boss.size());
+        // System.out.println(bossX);
+        // System.out.println(bossY);
+
+
+
+
+
         //porte
         for (int y = startY; y <= endY; y++) {
             int mapY = map.length - 1 - y;
@@ -913,8 +1042,20 @@ public class GameScreen implements Screen {
                 if (x < 0 || x >= map[0].length) continue;
                 Texture texture = getTextureForTile(map[mapY][x]);
                 if (texture == porteH || texture == porteV || texture == porteHOpen || texture == porteVOpen) {
-                    game.batch.draw(texture, x * TILE_SIZE, y * TILE_SIZE);
-
+                    if (porteboss(liste_porte_boss, x, y)) {
+                        if (texture == porteH) {
+                            game.batch.draw(portebossH, x * TILE_SIZE, y * TILE_SIZE);
+                        } else if(texture == porteV) {
+                            game.batch.draw(portebossV, x * TILE_SIZE, y * TILE_SIZE);
+                        } else if (texture == porteHOpen) {
+                            game.batch.draw(portebossHopen, x * TILE_SIZE, y * TILE_SIZE);
+                        } else if (texture == porteVOpen) {
+                            game.batch.draw(portebossVopen, x * TILE_SIZE, y * TILE_SIZE);
+                        }
+                    } else {
+                        game.batch.draw(texture, x * TILE_SIZE, y * TILE_SIZE);
+                    }
+                    
                 }
             }
         }
@@ -947,8 +1088,8 @@ public class GameScreen implements Screen {
             // Dessiner le projectile en centrant le sprite sur la hitbox
             projectile.draw(
                 game,
-                projWidth, 
-                projHeight,
+                projWidth/2, 
+                projHeight/2,
                 centerX - projWidth / 2,  // Ajuster la position X pour centrer
                 centerY - projHeight / 2   // Ajuster la position Y pour centrer
             );
@@ -1038,6 +1179,10 @@ public class GameScreen implements Screen {
         // Dessiner le joueur
         game.batch.draw(currentFrame, personnage1.getPositionX(), personnage1.getPositionY(), scaledWidth, scaledHeight);
         
+        //dessiner le portail
+         if (portail.afficherPortail()) {
+            game.batch.draw(texture_portail, portail.getX(), portail.getY(),  TILE_SIZE , TILE_SIZE*2);
+        }
         // Restaurer la couleur originale
         game.batch.setColor(originalColor);
         
@@ -1103,6 +1248,12 @@ public class GameScreen implements Screen {
                     continue;
                 } else if (map[mapY][mapX] == 500) {
                     game.batch.setColor(1f, 0.843f, 0f, 1f); // Or
+                } else if (map[mapY][mapX] == 450 && !portail.afficherPortail()) {
+                    game.batch.setColor(1, 1, 1, 1); // blanc
+                } else if (map[mapY][mapX] == 450 && portail.afficherPortail()) {
+                    game.batch.setColor(1, 0, 0, 1); // RougeColor(1f, 1f, 1f, 1f);
+                } else if (map[mapY][mapX] == 400) {
+                    game.batch.setColor(1f, 0.834f, 0f, 1f); 
                 } else { // Sol
                     game.batch.setColor(0.7f, 0.7f, 0.7f, 1); // Gris clair
                 }
@@ -1110,6 +1261,8 @@ public class GameScreen implements Screen {
                 float tileX = minimapX + mapX * TILE_SIZE * scale;
                 float tileY = minimapY + (map.length - 1 - mapY) * TILE_SIZE * scale;
                 if (map[mapY][mapX] == 500) {
+                    game.batch.draw(solTexture, tileX, tileY, TILE_SIZE * scale*4, TILE_SIZE * scale*4);
+                } else if (map[mapY][mapX] == 450) {
                     game.batch.draw(solTexture, tileX, tileY, TILE_SIZE * scale*4, TILE_SIZE * scale*4);
                 } else {
                     game.batch.draw(solTexture, tileX, tileY, TILE_SIZE * scale, TILE_SIZE * scale);
@@ -1217,6 +1370,10 @@ public class GameScreen implements Screen {
                 }
             }
             shapeRenderer.end();
+        }
+
+        if (!sbireBoss.enVie()) {
+            combatBoss = false;
         }
     }
 
@@ -1375,6 +1532,8 @@ public class GameScreen implements Screen {
             return murTexture2;
         } else if (value == 500) {
             return coffreTexture;
+        } else if (value == 450) {
+            return spawnBoss;
         }else if (value == 20) {
             return porteHOpen;
         }else if (value == 30) {
@@ -1403,7 +1562,8 @@ public class GameScreen implements Screen {
         Entite entite,
         float oldX, float oldY,
         Array<Rectangle> mursHitboxes,
-        Array<Rectangle> porteHitboxes,
+        ArrayList<Rectangle> porteHitboxes,
+        ArrayList<Rectangle> liste_porte_boss,
         float hitboxX, float hitboxY,
         int[][] map, int TILE_SIZE){
             Rectangle hitbox = entite.getHitbox();
@@ -1415,50 +1575,117 @@ public class GameScreen implements Screen {
                 if (hitbox.overlaps(mursHitboxes.get(i))) {
                     //System.out.println("Collision avec un mur en X");
                     entite.setPositionX(oldX);
-                    hitbox.setPosition(entite.getPositionX() + hitboxX, entite.getPositionY() + hitboxY);
+                    hitbox.setPosition(oldX + hitboxX, entite.getPositionY() + hitboxY);
                     break;
                 }
             }
 
             // Test porte en X
-            hitbox.setPosition(entite.getPositionX() + hitboxX, entite.getPositionY() + hitboxY);
-            for (int i = 0; i < porteHitboxes.size; i++) {
+            hitbox.setPosition(entite.getPositionX() + hitboxX, oldY + hitboxY);
+            for (int i = 0; i < porteHitboxes.size(); i++) {
                 if (hitbox.overlaps(porteHitboxes.get(i))) {
                     entite.setPositionX(oldX);
-                    hitbox.setPosition(oldY + hitboxX, oldY + hitboxY);
+                    hitbox.setPosition(oldX + hitboxX, entite.getPositionY() + hitboxY);
                     xp = (int) Math.floor(porteHitboxes.get(i).x / TILE_SIZE);
                     yp = (int) Math.floor(porteHitboxes.get(i).y / TILE_SIZE);
                     if (entite instanceof Personnage) {
-                        map[map.length - 1 - yp][xp] = 30;
+                        if (!combatBoss) {
+                            map[map.length - 1 - yp][xp] = 30;
+                        }
+                    }
+                    if (liste_porte_boss.contains(porteHitboxes.get(i))) {
+                        if (fincombatboss) {
+                            entite.setPositionX(oldX);
+                        } else {
+                            if (contientpersonnagesalleboss(personnage1.getPositionX(), personnage1.getPositionY())) {
+                                combatBoss = true;
+                                fincombatboss = true;
+                                entite.setPositionX(oldX+16);
+                            }
+                        }
+                        
                     }
                     break;
+                }
+            }
+
+            //Porte boss en X
+            
+            hitbox.setPosition(entite.getPositionX() + hitboxX, oldY + hitboxY);
+            for (int i = 0; i < liste_porte_boss.size(); i++) {
+                if (combatBoss) {
+                    if (hitbox.overlaps(liste_porte_boss.get(i))) {
+                        xp = (int) Math.floor(liste_porte_boss.get(i).x / TILE_SIZE);
+                        yp = (int) Math.floor(liste_porte_boss.get(i).y / TILE_SIZE);
+                        entite.setPositionX(oldX);
+                        hitbox.setPosition(oldX + hitboxX, entite.getPositionY() + hitboxY);
+                        if (entite instanceof Personnage) {
+                            map[map.length - 1 - yp][xp] = 2;
+                        }
+                        break;
+                    }
                 }
             }
 
             // Test mur en Y
-            hitbox.setPosition(entite.getPositionX() + hitboxX, entite.getPositionY() + hitboxY);
+            hitbox.setPosition(oldX + hitboxX, entite.getPositionY() + hitboxY);
             for (int i = 0; i < mursHitboxes.size; i++) {
                 if (hitbox.overlaps(mursHitboxes.get(i))) {
                     entite.setPositionY(oldY);
-                    hitbox.setPosition(entite.getPositionX() + hitboxX, entite.getPositionY() + hitboxY);
+                    hitbox.setPosition(entite.getPositionX() + hitboxX, oldY + hitboxY);
                     break;
                 }
             }
 
+
             // Test porte en Y
-            for (int i = 0; i < porteHitboxes.size; i++) {
+            hitbox.setPosition(oldX + hitboxX, entite.getPositionY() + hitboxY);
+            for (int i = 0; i < porteHitboxes.size(); i++) {
                 if (hitbox.overlaps(porteHitboxes.get(i))) {
                     entite.setPositionY(oldY);
-                    hitbox.setPosition(entite.getPositionX() + hitboxX, entite.getPositionY() + hitboxY);
+                    hitbox.setPosition(entite.getPositionX() + hitboxX, oldY + hitboxY);
                     xp = (int) Math.floor(porteHitboxes.get(i).x / TILE_SIZE);
                     yp = (int) Math.floor(porteHitboxes.get(i).y / TILE_SIZE);
                     if (entite instanceof Personnage) {
-                        map[map.length - 1 - yp][xp] = 20;
+                        if (!combatBoss) {
+                            map[map.length - 1 - yp][xp] = 20;
+                        }
+                    }
+                    if (liste_porte_boss.contains(porteHitboxes.get(i))) {
+                        if (fincombatboss) {
+                            entite.setPositionY(oldY);
+                        } else {
+                            if (contientpersonnagesalleboss(personnage1.getPositionX(), personnage1.getPositionY())) {
+                                combatBoss = true;
+                                // fincombatboss = true;
+                                entite.setPositionY(oldY+16);
+                            }
+                            
+                        }// il faut faire un test si le personnage va à droite ou à gauche
                     }
                     break;
                 }
             }
+
+            // porte boss en Y
+            hitbox.setPosition(oldX + hitboxX, entite.getPositionY() + hitboxY);
+            for (int i = 0; i < liste_porte_boss.size(); i++) {
+                if (combatBoss) {
+                    if (hitbox.overlaps(liste_porte_boss.get(i))) {
+                        xp = (int) Math.floor(liste_porte_boss.get(i).x / TILE_SIZE);
+                        yp = (int) Math.floor(liste_porte_boss.get(i).y / TILE_SIZE);
+                        entite.setPositionY(oldY);
+                        hitbox.setPosition(entite.getPositionX() + hitboxX, oldY + hitboxY);
+                        if (entite instanceof Personnage) {
+                            map[map.length - 1 - yp][xp] = 3;
+                        }
+                        break;
+                    }
+                }
+            }
+                
     }
+    
 
     // private void gererCollisionsProjectiles(
     //     Projectile projectile,
@@ -1537,5 +1764,43 @@ public class GameScreen implements Screen {
     public Niveau getNiveau() {
         return this.niveau;
     }
+
+    public boolean porteboss(ArrayList<Rectangle> liste_porte_boss, int x, int y) {
+        for (int i = 0; i < liste_porte_boss.size(); i++) {
+            Rectangle porte = liste_porte_boss.get(i);
+            if (( x*TILE_SIZE-10 < porte.x)&&(porte.x < x*TILE_SIZE+10) && (porte.y < y*TILE_SIZE + 10) && (porte.y > y*TILE_SIZE-10)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    // public Chambre getSalleLaPlusLoinDuJoueur() {
+    //     Chambre plusLoin = null;
+    //     float maxDist = -1;
+
+    //     Vector2 posJoueur = new Vector2(personnage1.getPositionX(), personnage1.getPositionY());
+
+    //     for (Chambre chambre : carte.getChambres()) {
+    //         Vector2 centreChambre = new Vector2(carte.getChBossX() * TILE_SIZE, (map.length - 1 - carte.getChBossX()) * TILE_SIZE);
+    //         float dist = posJoueur.dst(centreChambre);
+
+    //         if (dist > maxDist) {
+    //             maxDist = dist;
+    //             plusLoin = chambre;
+    //         }
+    //     }
+
+    //     return plusLoin;
+    // }
+
+    public boolean contientpersonnagesalleboss(float x, float y) {
+        if ((bossX + tailleChambre[0]*TILE_SIZE / 2 - TILE_SIZE*3 > x) && (bossX - tailleChambre[0]*TILE_SIZE / 2 + TILE_SIZE*3 < x) && (bossY + tailleChambre[1]*TILE_SIZE / 2 - TILE_SIZE*3 > y) && (bossY - tailleChambre[1]*TILE_SIZE / 2 + TILE_SIZE*3 < y)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+
 
 }

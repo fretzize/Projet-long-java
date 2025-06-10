@@ -170,6 +170,13 @@ public class InventaireScreen implements Screen {
                             // j'applique un filtre gris pour cette texture seulement
                             game.batch.setColor(Color.GRAY);
                             game.batch.draw(texture, taille_cote_case + screenWidth/2 - taillecase*ligne_grille + taillecase/2+  j* taillecase, taille_cote_case + taillecase +i * taillecase, taillecase - 2*taille_cote_case, taillecase-2*taille_cote_case);
+                            // game.batch.draw(texture, taille_cote_case + screenWidth/2 - taillecase*ligne_grille + taillecase/2+  j* taillecase, taille_cote_case + taillecase +i * taillecase, taillecase - 2*taille_cote_case, taillecase-2*taille_cote_case);
+                            // je veux afficher les caracteristiques de l'arme quand je mets la souris dessus
+                            String caracteristique = item.getNom();
+                            float caracteristique_titre = game.font.draw(game.batch, title, 0, 0).width;
+                            float caracteristique_titreX =  screenWidth/2 - taillecase*ligne_grille + taillecase/2+  j* taillecase;
+                            float caracteristique_titreY = taillecase * 3/2 +i * taillecase;
+                            game.font.draw(game.batch, caracteristique, caracteristique_titreX, caracteristique_titreY);
                             //game.batch.draw(caisse_inventaire, screenWidth/2 - taillecase*ligne_grille + taillecase/2+  j* taillecase, taillecase +i * taillecase, taillecase, taillecase);
 
                             // je restaure ensuite la couleur d'origine
@@ -191,7 +198,7 @@ public class InventaireScreen implements Screen {
             selectedIndex = 1;
         } else if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
             handleMenuSelection();
-        } else if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
+        } else if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE) || (Gdx.input.isKeyJustPressed(game.toucheInventaire))) {
             // Revenir directement au jeu avec Échap
             game.setScreen(gameScreen);
             dispose();

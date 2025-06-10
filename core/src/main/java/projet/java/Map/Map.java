@@ -12,6 +12,11 @@ public class Map {
     private int nbChambre;
     private boolean[][] couloir;
     private int[] coordspawn;
+    private int[] coordChBoss;
+    private Chambre salleBoss;
+    private int nombre_porte_boss;
+    private boolean couloirboss = true;
+    // int position_boss = 3;
 
     public Map(int nb_chambre, int[] taille_chambre) {
         // Créer les chambres
@@ -22,18 +27,36 @@ public class Map {
         int[] initial = {0, 0};
         int[] coordSpawn = {0, 0};
         boolean spawn = true;
+        boolean boss = false;
         for (int i = 0; i < nbChambre; i++) {
             // Initialisation correcte des chambres
 
+            if (i == nbChambre -1) {
+                boss = true;
+            }
             Chambre chambre = new Chambre(i, initial.clone(), taille_chambre.clone());
-            chambre.createur_chambre(spawn);
-            this.chambres[i] = chambre; // Stocke la chambre dans le tableau
+            chambre.createur_chambre(spawn, boss);
+            
             if (spawn){
                 this.coordspawn = chambre.getSpawn();
             }
+            
             if (i == 0){
                 spawn = false;
             }
+            if (boss) {
+                // this.coordChBoss = chambre.getSpawn();
+                // this.coordChBoss[0] = this.coordChBoss[0] + initial[0];
+                // this.coordChBoss[1] = this.coordChBoss[0] + initial[1];
+                chambre.setChambreBoss(true);
+                this.salleBoss = chambre;
+                boss = false;
+                // coord[initial[0] + i][initial[1] + j] = 450;
+            }
+
+            
+
+            this.chambres[i] = chambre; // Stocke la chambre dans le tableau
         }
 
         // Créer la map
@@ -45,11 +68,21 @@ public class Map {
                 this.coord[i][j] = 0;
             }
         }
+        int[] coordChBoss = {0, 0};
+        this.coordChBoss = coordChBoss;
+        this.nombre_porte_boss = 0;
     }
+
+    
+    public int getnombrechambreBoss()  {
+        return this.nombre_porte_boss;
+    }
+
     public void setSpawn(int x, int y) {
         coordspawn[0] = x;
         coordspawn[1] = y;
     }
+
     public Map(int[] taille, int[][] coord,int[][] mini_coord, int[] spawn) {
         this.taille = taille;
         this.coord = coord;
@@ -99,6 +132,20 @@ public class Map {
     public int getCoordspawnY() {
         return coordspawn[1];
     }
+
+    public int getChBossX() {
+        return coordChBoss[0];
+    }
+
+    public int getChBossY() {
+        return coordChBoss[1];
+    }
+
+    public Chambre getSalleBoss() {
+        return this.salleBoss;
+    }
+
+
     public void corridor_creator() {
         this.couloir = new boolean[nbChambre][nbChambre];
         Random rand = new Random();
@@ -213,11 +260,19 @@ public class Map {
                                 // Calculer le centre de la chambre i
                                 x_i = a * tailleInitChambres[0] + tailleInitChambres[0] / 2;
                                 y_i = b * tailleInitChambres[1] + tailleInitChambres[1] / 2;
+                                if (i == nbChambre - 1) {
+                                    coordChBoss[0] = x_i;
+                                    coordChBoss[1] = y_i;
+                                }
                             }
                             else if (mini_coord[a][b] == j + 1) {
                                 // Calculer le centre de la chambre j
                                 x_j = a * tailleInitChambres[0] + tailleInitChambres[0] / 2;
                                 y_j = b * tailleInitChambres[1] + tailleInitChambres[1] / 2;
+                                if (j == nbChambre - 1) {
+                                    coordChBoss[0] = x_j;
+                                    coordChBoss[1] = y_j;
+                                }
                             }
                         }
                     }
@@ -233,84 +288,175 @@ public class Map {
                     int currentX = x_i;
                     int compteur_porte = 0;
 
-                    while (currentX != x_j) {
-                        if (currentX < x_j) {
-                            currentX++;
-                        } else {
-                            currentX--;
-                        }
-
-                        // Vérifier que nous sommes dans les limites de la grille
-                        if (currentX >= 0 && currentX < taille[0] && y_i >= 0 && y_i < taille[1]) {
-                            // Si on rencontre un mur (0) et qu'on n'a pas encore créé de porte
-                            if (coord[currentX][y_i] == 0 && compteur_porte == 0) {
-                                // Marquer comme porte horizontale (2)
-                                coord[currentX][y_i] = 2;
-                                compteur_porte++;
-
-                                // S'assurer que les cases adjacentes sont des murs
-                                if (y_i > 0) coord[currentX][y_i-1] = 0;
-                                if (y_i+1 < taille[1]) coord[currentX][y_i+1] = 0;
+                    if ((i != nbChambre-1) && (j != nbChambre -1)) {
+                        while (currentX != x_j) {
+                            if (currentX < x_j) {
+                                currentX++;
+                            } else {
+                                currentX--;
                             }
-                            // Si on rencontre un mur (0) et qu'on a déjà créé une porte
-                            // (on est dans un autre mur, probablement de la deuxième chambre)
-                            else if (coord[currentX][y_i] == 0 && compteur_porte > 0) {
-                                // Marquer comme porte horizontale (2)
-                                coord[currentX][y_i] = 2;
-                                compteur_porte++;
 
-                                // S'assurer que les cases adjacentes sont des murs
-                                if (y_i > 0) coord[currentX][y_i-1] = 0;
-                                if (y_i+1 < taille[1]) coord[currentX][y_i+1] = 0;
-                            }
-                            // Si ce n'est pas un mur ou si on a déjà créé deux portes
-                            else {
-                                // Marquer comme sol (1) pour le couloir
-                                coord[currentX][y_i] = 1;
-                            }
-                        }
-                    }
+                            // Vérifier que nous sommes dans les limites de la grille
+                            if (currentX >= 0 && currentX < taille[0] && y_i >= 0 && y_i < taille[1]) {
+                                // Si on rencontre un mur (0) et qu'on n'a pas encore créé de porte
+                                if (coord[currentX][y_i] == 0 && compteur_porte == 0) {
+                                    // Marquer comme porte horizontale (2)
+                                    coord[currentX][y_i] = 2;
+                                    compteur_porte++;
+                                    if ((i==nbChambre-1) || (j==nbChambre-1)) {
+                                        nombre_porte_boss ++;
+                                    }
 
-                    // Étape 2: Tracer verticalement
-                    int currentY = y_i;
-                    compteur_porte = 0; // Réinitialiser le compteur pour la partie verticale
+                                    // S'assurer que les cases adjacentes sont des murs
+                                    if (y_i > 0) coord[currentX][y_i-1] = 0;
+                                    if (y_i+1 < taille[1]) coord[currentX][y_i+1] = 0;
+                                }
+                                // Si on rencontre un mur (0) et qu'on a déjà créé une porte
+                                // (on est dans un autre mur, probablement de la deuxième chambre)
+                                else if (coord[currentX][y_i] == 0 && compteur_porte > 0) {
+                                    // Marquer comme porte horizontale (2)
+                                    coord[currentX][y_i] = 2;
+                                    compteur_porte++;
 
-                    while (currentY != y_j) {
-                        if (currentY < y_j) {
-                            currentY++;
-                        } else {
-                            currentY--;
-                        }
-
-                        // Vérifier que nous sommes dans les limites de la grille
-                        if (x_j >= 0 && x_j < taille[0] && currentY >= 0 && currentY < taille[1]) {
-                            // Si on rencontre un mur (0) et qu'on n'a pas encore créé de porte
-                            if (coord[x_j][currentY] == 0 && compteur_porte == 0) {
-                                // Marquer comme porte verticale (3)
-                                coord[x_j][currentY] = 3;
-                                compteur_porte++;
-
-                                // S'assurer que les cases adjacentes sont des murs
-                                if (x_j > 0) coord[x_j-1][currentY] = 0;
-                                if (x_j+1 < taille[0]) coord[x_j+1][currentY] = 0;
-                            }
-                            // Si on rencontre un mur (0) et qu'on a déjà créé une porte
-                            else if (coord[x_j][currentY] == 0 && compteur_porte > 0) {
-                                // Marquer comme porte verticale (3)
-                                coord[x_j][currentY] = 3;
-                                compteur_porte++;
-
-                                // S'assurer que les cases adjacentes sont des murs
-                                if (x_j > 0) coord[x_j-1][currentY] = 0;
-                                if (x_j+1 < taille[0]) coord[x_j+1][currentY] = 0;
-                            }
-                            // Si ce n'est pas un mur ou si on a déjà créé deux portes
-                            else {
-                                // Marquer comme sol (1) pour le couloir
-                                coord[x_j][currentY] = 1;
+                                    // S'assurer que les cases adjacentes sont des murs
+                                    if (y_i > 0) coord[currentX][y_i-1] = 0;
+                                    if (y_i+1 < taille[1]) coord[currentX][y_i+1] = 0;
+                                }
+                                // Si ce n'est pas un mur ou si on a déjà créé deux portes
+                                else {
+                                    // Marquer comme sol (1) pour le couloir
+                                    coord[currentX][y_i] = 1;
+                                }
                             }
                         }
-                    }
+
+                        // Étape 2: Tracer verticalement
+                        int currentY = y_i;
+                        compteur_porte = 0; // Réinitialiser le compteur pour la partie verticale
+
+                        while (currentY != y_j) {
+                            if (currentY < y_j) {
+                                currentY++;
+                            } else {
+                                currentY--;
+                            }
+
+                            // Vérifier que nous sommes dans les limites de la grille
+                            if (x_j >= 0 && x_j < taille[0] && currentY >= 0 && currentY < taille[1]) {
+                                // Si on rencontre un mur (0) et qu'on n'a pas encore créé de porte
+                                if (coord[x_j][currentY] == 0 && compteur_porte == 0) {
+                                    // Marquer comme porte verticale (3)
+                                    coord[x_j][currentY] = 3;
+                                    compteur_porte++;
+
+                                    // S'assurer que les cases adjacentes sont des murs
+                                    if (x_j > 0) coord[x_j-1][currentY] = 0;
+                                    if (x_j+1 < taille[0]) coord[x_j+1][currentY] = 0;
+                                }
+                                // Si on rencontre un mur (0) et qu'on a déjà créé une porte
+                                else if (coord[x_j][currentY] == 0 && compteur_porte > 0) {
+                                    // Marquer comme porte verticale (3)
+                                    coord[x_j][currentY] = 3;
+                                    compteur_porte++;
+
+                                    // S'assurer que les cases adjacentes sont des murs
+                                    if (x_j > 0) coord[x_j-1][currentY] = 0;
+                                    if (x_j+1 < taille[0]) coord[x_j+1][currentY] = 0;
+                                }
+                                // Si ce n'est pas un mur ou si on a déjà créé deux portes
+                                else {
+                                    // Marquer comme sol (1) pour le couloir
+                                    coord[x_j][currentY] = 1;
+                                }
+                            }
+                        }
+                        } else if (couloirboss) {
+                            if ((i == nbChambre-1) || (j == nbChambre -1)) {
+                                while (currentX != x_j) {
+                                if (currentX < x_j) {
+                                    currentX++;
+                                } else {
+                                    currentX--;
+                                }
+
+                                // Vérifier que nous sommes dans les limites de la grille
+                                if (currentX >= 0 && currentX < taille[0] && y_i >= 0 && y_i < taille[1]) {
+                                    // Si on rencontre un mur (0) et qu'on n'a pas encore créé de porte
+                                    if (coord[currentX][y_i] == 0 && compteur_porte == 0) {
+                                        // Marquer comme porte horizontale (2)
+                                        coord[currentX][y_i] = 2;
+                                        compteur_porte++;
+                                        if ((i==nbChambre-1) || (j==nbChambre-1)) {
+                                            nombre_porte_boss ++;
+                                        }
+
+                                        // S'assurer que les cases adjacentes sont des murs
+                                        if (y_i > 0) coord[currentX][y_i-1] = 0;
+                                        if (y_i+1 < taille[1]) coord[currentX][y_i+1] = 0;
+                                    }
+                                    // Si on rencontre un mur (0) et qu'on a déjà créé une porte
+                                    // (on est dans un autre mur, probablement de la deuxième chambre)
+                                    else if (coord[currentX][y_i] == 0 && compteur_porte > 0) {
+                                        // Marquer comme porte horizontale (2)
+                                        coord[currentX][y_i] = 2;
+                                        compteur_porte++;
+
+                                        // S'assurer que les cases adjacentes sont des murs
+                                        if (y_i > 0) coord[currentX][y_i-1] = 0;
+                                        if (y_i+1 < taille[1]) coord[currentX][y_i+1] = 0;
+                                    }
+                                    // Si ce n'est pas un mur ou si on a déjà créé deux portes
+                                    else {
+                                        // Marquer comme sol (1) pour le couloir
+                                        coord[currentX][y_i] = 1;
+                                    }
+                                }
+                            }
+
+                            // Étape 2: Tracer verticalement
+                            int currentY = y_i;
+                            compteur_porte = 0; // Réinitialiser le compteur pour la partie verticale
+
+                            while (currentY != y_j) {
+                                if (currentY < y_j) {
+                                    currentY++;
+                                } else {
+                                    currentY--;
+                                }
+
+                                // Vérifier que nous sommes dans les limites de la grille
+                                if (x_j >= 0 && x_j < taille[0] && currentY >= 0 && currentY < taille[1]) {
+                                    // Si on rencontre un mur (0) et qu'on n'a pas encore créé de porte
+                                    if (coord[x_j][currentY] == 0 && compteur_porte == 0) {
+                                        // Marquer comme porte verticale (3)
+                                        coord[x_j][currentY] = 3;
+                                        compteur_porte++;
+
+                                        // S'assurer que les cases adjacentes sont des murs
+                                        if (x_j > 0) coord[x_j-1][currentY] = 0;
+                                        if (x_j+1 < taille[0]) coord[x_j+1][currentY] = 0;
+                                    }
+                                    // Si on rencontre un mur (0) et qu'on a déjà créé une porte
+                                    else if (coord[x_j][currentY] == 0 && compteur_porte > 0) {
+                                        // Marquer comme porte verticale (3)
+                                        coord[x_j][currentY] = 3;
+                                        compteur_porte++;
+
+                                        // S'assurer que les cases adjacentes sont des murs
+                                        if (x_j > 0) coord[x_j-1][currentY] = 0;
+                                        if (x_j+1 < taille[0]) coord[x_j+1][currentY] = 0;
+                                    }
+                                    // Si ce n'est pas un mur ou si on a déjà créé deux portes
+                                    else {
+                                        // Marquer comme sol (1) pour le couloir
+                                        coord[x_j][currentY] = 1;
+                                    }
+                                }
+                            }
+                            }
+                            couloirboss = false;
+                        }
+                    
                 }
             }
         }
@@ -391,6 +537,8 @@ public class Map {
                     System.out.print("  ");
                 } else if (coord[i][j]==500) {  // Nouveau : affichage des coffres
                     System.out.print("C ");
+                } else if (coord[i][j]==450) {
+                    System.out.print("Spawn ");
                 }
                 else {
                     System.out.print(this.coord[i][j] == 1 ? "  " : "# ");
@@ -842,6 +990,10 @@ public class Map {
         }
    }
 
+
+   public Chambre[] getChambres() {
+    return this.chambres;
+   }
    public void placerCoffresDansChambres() {
     for (Chambre chambre : this.chambres) {
         boolean coffrePlace = chambre.placerCoffreAvecProbabilite(0.6f);
@@ -857,7 +1009,22 @@ public class Map {
             }
         }
     }
-}
+    }
+
+
+    public void placerSpawnBoss() {
+    for (Chambre chambre : this.chambres) {
+            int[][] grille = chambre.getGrille();
+            int[] initial = chambre.getInitial();
+            for (int i = 0; i < grille.length; i++) {
+                for (int j = 0; j < grille[0].length; j++) {
+                    if (grille[i][j] == 450) {
+                        coord[initial[0] + i][initial[1] + j] = 450;
+                    }
+                }
+            }
+        }
+    }
 
     public int compterCoffres() {
         int compteur = 0;
@@ -868,4 +1035,5 @@ public class Map {
         }
         return compteur;
     }
+
 }

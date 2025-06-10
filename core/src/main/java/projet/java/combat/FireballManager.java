@@ -1,5 +1,7 @@
 package projet.java.combat;
 
+import java.util.concurrent.RecursiveAction;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -16,6 +18,7 @@ import projet.java.Main;
 import projet.java.Menu.GameScreen;
 import projet.java.entite.Entite;
 import projet.java.entite.Niveau;
+import projet.java.entite.Projectile;
 import projet.java.entite.Sbire;
 
 public class FireballManager {
@@ -32,15 +35,17 @@ public class FireballManager {
     private final Entite personnage;
     private final Niveau niveau;
     private final Array<FireballProjectile> fireballs = new Array<>();
+    private Array<Rectangle> mursHitboxes;
     
     // Animation de la boule de feu
     private Animation<TextureRegion> fireballAnimation;
     private float scaleFactor = 0.7f; // Taille de la boule de feu (ratio)
     
-    public FireballManager(Main game, Entite personnage, Niveau niveau) {
+    public FireballManager(Main game, Entite personnage, Niveau niveau, Array<Rectangle> mursHitboxes) {
         this.game = game;
         this.personnage = personnage;
         this.niveau = niveau;
+        this.mursHitboxes = mursHitboxes;
         
         // Charger l'animation de la boule de feu
         loadFireballAnimation();
@@ -222,11 +227,11 @@ public class FireballManager {
             }
             
             // Vérifier les collisions avec les sbires
-            checkCollisions(fireball);
+            checkCollisions(fireball, mursHitboxes);
         }
     }
     
-    private void checkCollisions(FireballProjectile fireball) {
+    private void checkCollisions(FireballProjectile fireball, Array<Rectangle> mursHitboxes) {
         // Vérifier la collision avec tous les sbires
         for (Sbire sbire : niveau.getSbires()) {
             if (!sbire.enVie()) continue;
@@ -246,6 +251,16 @@ public class FireballManager {
                 sbire.appliquerKnockback(knockbackDir, 150f);
                 
                 // Marquer le projectile comme "touché" pour le détruire
+                fireball.hit();
+                break;
+            }
+        }
+
+        
+        Rectangle hitbox = fireball.getHitbox();
+        for (int k = 0; k < mursHitboxes.size; k++) {
+            if (hitbox.overlaps(mursHitboxes.get(k))) {
+                System.out.println("Collision avec un mur en X");
                 fireball.hit();
                 break;
             }

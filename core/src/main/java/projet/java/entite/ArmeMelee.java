@@ -79,8 +79,8 @@ public class ArmeMelee extends ArmeBase {
         
         // Position du centre de la hitbox du personnage
         Vector2 hitboxCenter = new Vector2(
-            position.x + hitboxSize.x / 2,
-            position.y + hitboxSize.y / 2
+            position.x + hitboxSize.x / 2 ,
+            position.y + hitboxSize.y / 2 
         );
         
         // Normaliser la direction pour avoir un vecteur unitaire
@@ -132,21 +132,21 @@ public class ArmeMelee extends ArmeBase {
             if (overlaps) {
                 System.out.println("Hitbox overlap détecté avec sbire: " + sbire);
                 
-                // Vérification supplémentaire: l'sbire est-il dans l'arc d'attaque?
-                Vector2 directionVersSbire = new Vector2(
-                    sbire.getPositionX() + sbire.getHitbox().width/2, 
-                    sbire.getPositionY() + sbire.getHitbox().height/2
-                ).sub(position).nor();
+                // // Vérification supplémentaire: l'sbire est-il dans l'arc d'attaque?
+                // Vector2 directionVersSbire = new Vector2(
+                //     sbire.getPositionX() + sbire.getHitbox().width/2, 
+                //     sbire.getPositionY() + sbire.getHitbox().height/2
+                // ).sub(position).nor();
                 
-                float angleVersSbire = directionVersSbire.angleDeg();
-                float angleDifference = Math.abs(angle - angleVersSbire);
-                angleDifference = angleDifference > 180 ? 360 - angleDifference : angleDifference;
+                // float angleVersSbire = directionVersSbire.angleDeg();
+                // float angleDifference = Math.abs(angle - angleVersSbire);
+                // angleDifference = angleDifference > 180 ? 360 - angleDifference : angleDifference;
                 
-                System.out.println("Angle d'attaque: " + angle + ", Angle vers sbire: " + angleVersSbire + 
-                                  ", Différence: " + angleDifference + ", Max permis: " + (angleAttaque / 2));
+                // System.out.println("Angle d'attaque: " + angle + ", Angle vers sbire: " + angleVersSbire + 
+                //                   ", Différence: " + angleDifference + ", Max permis: " + (angleAttaque / 2));
                 
-                // Si l'sbire est dans l'arc d'attaque (défini par angleAttaque)
-                if (angleDifference <= angleAttaque / 2) {
+                // // Si l'sbire est dans l'arc d'attaque (défini par angleAttaque)
+                // if (angleDifference <= angleAttaque / 2) {
                     System.out.println("Sbire touché! Application des dégâts: " + degats);
                     
                     // Appliquer les dégâts à l'sbire
@@ -157,7 +157,7 @@ public class ArmeMelee extends ArmeBase {
                         // Direction du knockback = direction de l'attaque
                         sbire.appliquerKnockback(normalizedDirection, forceKnockback);
                     }
-                }
+                // }
             }
         }
     }

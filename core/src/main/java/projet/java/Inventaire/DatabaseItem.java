@@ -17,12 +17,14 @@ public class DatabaseItem {
     private Texture arme1 = new Texture("epee1.png");
     private Texture arme2 = new Texture("epee2.png");
     private Texture arme3 = new Texture("epee3.png");
+    private Texture hache = new Texture("HERCULEpng/HERCULEpng/hache.png");
     
     
 
     Item Arme1 = new Item("arme1", arme1, Item.ItemType.ARME, 20, 150f);
     Item Arme2 = new Item("arme2", arme2, Item.ItemType.ARME, 100, 300f);
     Item Arme3 = new Item("arme3", arme3, Item.ItemType.ARME, 100, 300f);
+    Item Hache = new Item("hache", hache, Item.ItemType.ARME, 100, 300f);
     Item Potion1 = new Item("potion_vie", potion_vie, Item.ItemType.POTION, 3, 0);
     Item Potion2 = new Item("potion_vitesse", potion_vitesse, Item.ItemType.POTIONVITESSE, 60, 0);
 
@@ -31,6 +33,7 @@ public class DatabaseItem {
         database.add(Arme1);
         database.add(Arme2);
         database.add(Arme3);
+        database.add(Hache);
         database.add(Potion1);
         database.add(Potion2);
     }
