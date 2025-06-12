@@ -22,7 +22,7 @@ public class TouchesScreen implements Screen {
     private Texture backgroundTexture;
     private int selectedIndex = 0;
     // Ajouter la touche "Boule de feu" à la liste des options
-    private final String[] keyOptions = {"Haut", "Bas", "Gauche", "Droite", "Dash", "Attaque", "Boule de feu", "Inventaire", "Debug HitBox", "Retour"};
+    private final String[] keyOptions = {"Haut", "Bas", "Gauche", "Droite", "Dash", "Attaque", "Boule de feu", "Inventaire", "Debug HitBox", "Pouvoir", "Retour"};
     private Rectangle[] optionBounds;
     private int[] keyBindings;
     private boolean waitingForInput = false;
@@ -47,7 +47,8 @@ public class TouchesScreen implements Screen {
             game.toucheAttaque,
             game.toucheBouleFeu,   // Nouvelle touche pour la boule de feu
             game.toucheInventaire,
-            game.toucheDebugHitBox
+            game.toucheDebugHitBox,
+            game.touchePouvoir
         };
     }
 
@@ -72,7 +73,8 @@ public class TouchesScreen implements Screen {
             game.toucheAttaque,
             game.toucheBouleFeu,   // Nouvelle touche pour la boule de feu
             game.toucheInventaire,
-            game.toucheDebugHitBox
+            game.toucheDebugHitBox,
+            game.touchePouvoir
         };
     }
     

@@ -7,6 +7,9 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.ScreenUtils;
+
+import projet.java.Menu.ChargementScreen;
+
 import com.badlogic.gdx.Input;
 import projet.java.Inventaire.DatabaseItem;
 import projet.java.Inventaire.Inventaire;
@@ -110,7 +113,7 @@ public class MenuScreen implements Screen {
         switch (selectedIndex) {
             case 0:
                 game.stopMenuMusic();
-                game.setScreen(new GameScreen(game, 0.006, new Inventaire()));
+                game.setScreen(new ChargementScreen(game, 0.01, new Inventaire(), 20));
                 dispose();
                 break;
             case 1:

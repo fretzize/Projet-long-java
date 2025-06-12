@@ -90,7 +90,7 @@ public class ArmeDistance extends ArmeBase {
      * Version améliorée qui prend en compte la hitbox du personnage
      */
     public void attaquer_arme(Vector2 position, Vector2 direction, Vector2 hitboxSize) {
-        if (!peutAttaquer) return;
+        // if (!peutAttaquer) return;
         
         // Calculer le centre de la hitbox du personnage
         Vector2 hitboxCenter = new Vector2(
@@ -127,7 +127,7 @@ public class ArmeDistance extends ArmeBase {
         }
         
         // Met l'arme en cooldown
-        peutAttaquer = false;
+        // peutAttaquer = false;
         tempsDepuisDerniereAttaque = 0;
         
         // Jouer le son de tir si disponible

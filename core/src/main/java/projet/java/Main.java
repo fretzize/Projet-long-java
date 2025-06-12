@@ -42,6 +42,7 @@ public class Main extends Game {
     public int toucheBouleFeu = MOUSE_RIGHT_CLICK; // Clic droit par défaut
     public int toucheInventaire = Input.Keys.E;
     public int toucheDebugHitBox = Input.Keys.H; // Touche pour activer/désactiver les hitboxes
+    public int touchePouvoir = Input.Keys.F;
 
     public void setTouche(int index, int keycode) {
         switch(index) {
@@ -53,6 +54,7 @@ public class Main extends Game {
             case 5: toucheAttaque = keycode; break;
             case 6: toucheBouleFeu = keycode; break; // Nouvelle touche pour la boule de feu
             case 7: toucheInventaire = keycode; break;
+            case 8: touchePouvoir = keycode; break;
         }
     }
 

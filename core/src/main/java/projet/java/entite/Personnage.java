@@ -24,7 +24,7 @@ public class Personnage extends ApplicationAdapter implements Entite {
     private float positionX;
     private float positionY;
     // private Vector2 position; // = new Vector2(0f, 0f);
-    private int mana_max;
+    private float mana_max;
     private int vie_max;
     private int bouclier_max;
     private Arme arme;
@@ -193,9 +193,9 @@ public class Personnage extends ApplicationAdapter implements Entite {
     public Personnage(Texture skin,Rectangle hitbox) {//}, Vector2 position) {
         this.nom = "mathisvaillant";
         this.vie = 5;
-        //this.mana = mana;
+        this.mana = 100;
         // this.skin = skin;
-        //this.mana_max = mana;
+        this.mana_max = mana;
         this.vie_max = 5;
         this.bouclier = 5;
         this.bouclier_max = 5;
@@ -464,5 +464,16 @@ public class Personnage extends ApplicationAdapter implements Entite {
 
     public Niveau getNiveau() {
         return this.niveau;
+    }
+
+    public int getVieMax() {
+        return this.vie_max;
+    }
+
+    public void setMana(int mana) {
+        this.mana -= mana;
+    }
+    public float getManaMax() {
+        return this.mana_max;
     }
 }

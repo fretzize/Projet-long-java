@@ -48,6 +48,7 @@ public class Grille {
             for (int j = 0; j < colonne; j++) {
                 Item item = Itemgrille.get(i).get(j);
                 if (item != null) {
+                    
                     Texture texture = item.getIcone();
                     game.batch.draw(texture, j * taillecase, i * taillecase, taillecase, taillecase);
                 }

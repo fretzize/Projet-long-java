@@ -16,7 +16,9 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import java.lang.Math;
 
+import projet.java.entite.ArmeDistance;
 import projet.java.entite.ArmeMelee;
+import projet.java.entite.Arme;
 import projet.java.entite.ComportementBoss;
 import projet.java.entite.ComportementDistanceMax;
 import projet.java.entite.ComportementMelee;
@@ -44,6 +46,7 @@ import com.badlogic.gdx.math.MathUtils;
 
 import projet.java.Menu.GameOverScreen;
 import projet.java.Menu.VictoireScreen;
+import projet.java.Menu.ChargementScreen;
 import projet.java.Inventaire.Potion;
 
 
@@ -135,15 +138,20 @@ public class GameScreen implements Screen {
     private Texture Hercule_gauche;
     private Texture Hercule_droite;
 
-    // texture pour le cooldown
+    // texture pour la vie du boss
 
     private Texture barre_vide;
     private Texture barre_pleine;
+    private Texture barre_vide_mana;
+    private Texture barre_pleine_mana;
+
+    private float ViemaxBoss = 450f;
 
     // texture pour essayer inventaire
 
     private Texture arme1;
     private Texture hache;
+    private Texture canon;
     // private Texture arme2;
     // private Texture arme3;
 
@@ -232,18 +240,27 @@ public class GameScreen implements Screen {
     private boolean fincombatboss = false;
     private Rectangle bossHitbox;
 
-    public GameScreen(final Main game, double pourcentage, Inventaire inventaire) {
+
+    // pour savoir si le personnage à acces à son pouvoir
+    private boolean pouvoirOk;
+    private int nombreSbire;
+    private Texture texturebdfeu;
+    private boolean nombrefoisPouvoir;
+
+    public GameScreen(final Main game, double pourcentage, Inventaire inventaire, int nombreSbire) {
         this.game = game;
         camera = new OrthographicCamera();
         camera.setToOrtho(false, 320, 180);
         playerHitbox = new Rectangle(250+hitboxX, 250+hitboxY, 10, 10);
-        this.personnage1 = new Personnage(skin,playerHitbox);
+        this.personnage1 = new Personnage(skin,playerHitbox); // changer pour avoir le nombre de coeur
         this.personnage1.setInventaire(inventaire);
         pourcentage_mob = pourcentage;
         this.personnage1.setBouclier(this.personnage1.getBouclierMax());
+        this.nombreSbire = nombreSbire;
     }
 
     ArmeMelee armeMelee;
+    ArmeDistance armeDistance;
     // et dans le show armeMelee = attackManager.getArme()
     // et dans le render attackManager.setArme(armeMelee)
     // et dans le game screen
@@ -349,33 +366,41 @@ public class GameScreen implements Screen {
             }
         });
         
-        for (int i = 0; i < map.length; i++) {
-            for (int j = 0; j < map[0].length; j++) {
-                Random rand  = new Random();
-                if ((map[i][j] == 100 || map[i][j] ==101 || map[i][j] == 102 || map[i][j] ==103 || map[i][j] == 104 || map[i][j] ==105 || map[i][j] == 106
-                        || map[i][j] ==107 || map[i][j] == 108 || map[i][j] ==109 || map[i][j] == 110 ) && rand.nextFloat() < pourcentage_mob && voisinNotMur(map,i,j)) {
-                    Sbire sbiretemp;
-                    System.out.println("map = " + map[i][j]);
-                    int posX = j * TILE_SIZE;
-                    int posY = (map.length - 1 - i) * TILE_SIZE;
-                    sbiretemp = new Sbire(
-                            300, 0, 3,            // vie, bouclier, mana
-                            posX , posY ,           // positionX, positionY
-                            25,                 // vitesseDeplacement (peut être augmenté si le sbire est trop lent)
-                            300, 3,             // vitesseProjectile, cooldown
-                            new Rectangle(posX+1, posY, 30, 30),  // hitbox plus grande et correctement positionnée
-                            1500, 30,           // porteeProjectile, porteeCaC (augmentée pour faciliter l'attaque)
-                            1, 1,              // degats (projectile), degatsCaC (augmenté de 0 à 15)
-                            personnage1,
-                            new ComportementMelee(),
-                            new Texture(Gdx.files.internal("bomba.png")),
-                            new Texture("Hercule_haut.png"),
-                            new Rectangle(300,300, 32, 32)
-                    );
-                    sbiretest.add(sbiretemp);
+        while (sbiretest.size() < nombreSbire) {
+            for (int i = 0; i < map.length; i++) {
+                for (int j = 0; j < map[0].length; j++) {
+                    Random rand  = new Random();
+                    int posX2 = j * TILE_SIZE;
+                    int posY2 = (map.length - 1 - i) * TILE_SIZE;
+                    Rectangle hitboxTest = new Rectangle(posX2+1, posY2, 30, 30);
+                    if ((map[i][j] == 100 || map[i][j] ==101 || map[i][j] == 102 || map[i][j] ==103 || map[i][j] == 104 || map[i][j] ==105 || map[i][j] == 106
+                            || map[i][j] ==107 || map[i][j] == 108 || map[i][j] ==109 || map[i][j] == 110 ) && (rand.nextFloat() < pourcentage_mob) && voisinNotMur(map,i,j) && (sbiretest.size() < nombreSbire) && !overlapMur(hitboxTest)) {
+                        Sbire sbiretemp;
+                        System.out.println("map = " + map[i][j]);
+                        int posX = j * TILE_SIZE;
+                        int posY = (map.length - i) * TILE_SIZE;
+                        sbiretemp = new Sbire(
+                                300, 0, 3,            // vie, bouclier, mana
+                                posX , posY ,           // positionX, positionY
+                                25,                 // vitesseDeplacement (peut être augmenté si le sbire est trop lent)
+                                300, 3,             // vitesseProjectile, cooldown
+                                new Rectangle(posX+1, posY, 30, 30),  // hitbox plus grande et correctement positionnée
+                                1500, 30,           // porteeProjectile, porteeCaC (augmentée pour faciliter l'attaque)
+                                1, 1,              // degats (projectile), degatsCaC (augmenté de 0 à 15)
+                                personnage1,
+                                new ComportementMelee(),
+                                new Texture(Gdx.files.internal("bomba.png")),
+                                new Texture("Hercule_haut.png"),
+                                new Rectangle(300,300, 32, 32)
+                        );
+                        sbiretest.add(sbiretemp);
+                    }
                 }
             }
+            // System.out.println(sbiretest.size());
         }
+
+        
 
         for (int y = 0; y < map.length; y++) {
             for (int x = 0; x < map[0].length; x++) {
@@ -452,6 +477,8 @@ public class GameScreen implements Screen {
 
         barre_pleine = new Texture("barres_pleine.png");
         barre_vide = new Texture("barres_vide.png");
+        barre_pleine_mana = new Texture("barres_pleine_mana.png");
+        barre_vide_mana = new Texture("barres_vide_mana.png");
 
         // Définir le listener pour les dégâts
         personnage1.setDamageListener(new Personnage.DamageListener() {
@@ -464,15 +491,17 @@ public class GameScreen implements Screen {
         });
         
         // Initialiser le gestionnaire d'animations
-        animationHandler = new AnimationHandler();
-        
+        animationHandler = new AnimationHandler(1);
+        armeMelee = new ArmeMelee("Épée", 20, 0, 35f, 0.4f, "menubackground.png", 90f, 150f);
+        armeDistance = new ArmeDistance("Canon", 1, 1, 70f, 0.1f, "menubackground.png", "FB001.png" , 50, 20, 45);
         // Créer le gestionnaire d'attaques avec le niveau
-        attackManager = new AttackManager(game, personnage1, animationHandler, 0.4f, niveau);
+        attackManager = new AttackManager(game, personnage1, animationHandler, 0.1f, niveau, armeMelee);
         // armeMelee = attackManager.getArme();
         // personnage1.setArme(armeMelee.getNom(), armeMelee.getDegats(), armeMelee.getPortee(), niveau);
         // Initialiser FireballManager après avoir créé le niveau
-        fireballManager = new FireballManager(game, personnage1, niveau, mursHitboxes);
-        
+        fireballManager = new FireballManager(game, personnage1, niveau, mursHitboxes, this);
+        attackManager.setFireballManager(fireballManager);
+
         if (timer != null) {
             timer.cancel();
         }
@@ -496,6 +525,7 @@ public class GameScreen implements Screen {
         debugger = new GameDebugger(personnage1, niveau, attackManager);
         arme1 = new Texture("epee1.png");
         hache = new Texture("HERCULEpng/HERCULEpng/hache.png");
+        canon = new Texture("canon.png");
         // arme2 = new Texture("epee2.png");
         // arme3 = new Texture("epee3.png");
         Potion potionvie = new Potion(3);
@@ -503,18 +533,22 @@ public class GameScreen implements Screen {
         Potion potion_vit = new Potion(60);
         Texture potion_vitesse = potion_vit.getImage(2);
         DatabaseItem database = new DatabaseItem();
-        List<Item> data = database.getData();
+        List<Item> data = new ArrayList<>(database.getData());
 
-        Item Arme1 = data.get(2);
+        Item Arme1 = data.get(0);
         Item Hache = data.get(3);
+        Item Canon = data.get(4);
         // Item Arme2 = new Item("arme2", arme2, Item.ItemType.ARME, 2);
         // Item Arme3 = new Item("arme3", arme3, Item.ItemType.ARME, 3);
-        Item Potion = new Item("potion", potion, Item.ItemType.POTION, potionvie.getVie(), 0);
-        Item Potion_Vitesse = new Item("potion vitesse", potion_vitesse, Item.ItemType.POTIONVITESSE, potion_vit.getVie(), 0);
+        // Item Potion = new Item("potion", potion, Item.ItemType.POTION, potionvie.getVie(), 0);
+        // Item Potion_Vitesse = new Item("potion vitesse", potion_vitesse, Item.ItemType.POTIONVITESSE, potion_vit.getVie(), 0);
+        Item Potion = data.get(5);
+        Item Potion_Vitesse = data.get(6);
         
         if (une_fois == 1) {
             personnage1.getInventaire().addItem(Arme1);
             personnage1.getInventaire().addItem(Hache);
+            personnage1.getInventaire().addItem(Canon);
             // personnage1.getInventaire().addItem(Arme2);
             // personnage1.getInventaire().addItem(Arme3);
             personnage1.getInventaire().addItem(Potion);
@@ -525,6 +559,11 @@ public class GameScreen implements Screen {
         texture_portail = new Texture("portail.png");
         portail = new Portail(300, 300, texture_portail);
         nombre_porte_boss = carte.getnombrechambreBoss();
+        // animationHandler = new AnimationHandler(1);
+        // attackManager.setAnimation(animationHandler);
+        pouvoirOk = false;
+        nombrefoisPouvoir = true;
+        texturebdfeu = new Texture("FB001.png");
         
     }
 
@@ -533,6 +572,20 @@ public class GameScreen implements Screen {
         input(delta);
         // this.armeMelee = personnage1.getArme();
         // attackManager.setArme(armeMelee.getNom(), armeMelee.getDegats(), armeMelee.getPortee());
+        // Initialiser le gestionnaire d'animations
+
+        
+        
+        attackManager.setAnimation(animationHandler);
+
+        // Créer le gestionnaire d'attaques avec le niveau
+        //attackManager = new AttackManager(game, personnage1, animationHandler, 0.4f, niveau);
+        // armeMelee = attackManager.getArme();
+        // personnage1.setArme(armeMelee.getNom(), armeMelee.getDegats(), armeMelee.getPortee(), niveau);
+        // Initialiser FireballManager après avoir créé le niveau
+        // fireballManager = new FireballManager(game, personnage1, niveau, mursHitboxes);
+
+
         playerSpeed = personnage1.getVitesse();
         boolean isMovingUp = Gdx.input.isKeyPressed(game.toucheHaut) || Gdx.input.isKeyPressed(Input.Keys.UP);
         boolean isMovingDown = Gdx.input.isKeyPressed(game.toucheBas) || Gdx.input.isKeyPressed(Input.Keys.DOWN);
@@ -603,8 +656,8 @@ public class GameScreen implements Screen {
 
         if (portail.getHitbox().overlaps(personnage1.getHitbox()) && portail.afficherPortail()) {
             // game.setScreen(new VictoireScreen(game));
-            if (pourcentage_mob != 0.01) {
-                game.setScreen(new GameScreen(game, pourcentage_mob + 0.002, personnage1.getInventaire()));
+            if (pourcentage_mob != 0.02) {
+                game.setScreen(new ChargementScreen(game, pourcentage_mob + 0.002, personnage1.getInventaire(), nombreSbire + 10));
             } else {
                 game.setScreen(new VictoireScreen(game));
             }
@@ -623,6 +676,7 @@ public class GameScreen implements Screen {
                 }
             }
         }
+        
     }
 
     private void input(float avance) {
@@ -793,6 +847,14 @@ public class GameScreen implements Screen {
                 tempscoffre = 0;
         }
 
+        // if (Gdx.input.isKeyPressed(game.touchePouvoir)) {
+        //     pouvoirOk = false;
+        // }
+        if (((sbiretest.size() == nombreSbire/4) || (sbiretest.size() == nombreSbire*3/4) || (sbiretest.size() == nombreSbire/2)) && nombrefoisPouvoir) {
+            pouvoirOk = true;
+            nombrefoisPouvoir = false;
+        }
+        
     }
 
     private void logic() {
@@ -872,9 +934,11 @@ public class GameScreen implements Screen {
             }
         }
         camera.update();
+
+        // System.out.println(pouvoirOk);
         // Mettre à jour le gestionnaire de boules de feu
         if (fireballManager != null) {
-            fireballManager.update(Gdx.graphics.getDeltaTime());
+            fireballManager.update(Gdx.graphics.getDeltaTime(), pouvoirOk);
         }
 
         for (Coffre coffre : coffres) {
@@ -882,11 +946,15 @@ public class GameScreen implements Screen {
                 coffre.setOuvert(true);
                 coffre.setvientouvrir(true);
                 coffre.setTexture(coffreTextureouvert);
-                Item item = coffre.estOuvert() ? coffre.getDatabase().getItemAlea() : null;
-                if (item != null) {
-                    personnage1.getInventaire().addItem(item);
-                    itemcoffre = item.getIcone();
+                if (coffre.estOuvert()) {
+                    Item item = coffre.getDatabase().getItemAlea();
+                    if (item != null) {
+                        personnage1.getInventaire().addItem(item);
+                        itemcoffre = item.getIcone();
+                    }
                 }
+                
+                
             }
         }
 
@@ -1141,6 +1209,21 @@ public class GameScreen implements Screen {
                 
                 // Dessiner le sbire avec les dimensions adaptées
                 // Utiliser la hitbox du sbire pour le positionnement
+                
+                // barre vie boss
+
+                    float barWidth = TILE_SIZE*2; 
+                    float barHeight = TILE_SIZE/3;
+                    float progress = (sbire.getVie() + sbire.getBouclier())/sbire.getVieInit();
+                    // float x = sbire.getPositionX();
+                    // float y = sbire.getPositionY();
+                    
+                game.batch.draw(barre_vide, sbire.getHitbox().x - sbireScaledWidth/16, sbire.getHitbox().y - sbireScaledHeight/16, sbireScaledWidth/2, barHeight/2);
+                game.batch.draw(barre_pleine, sbire.getHitbox().x - sbireScaledWidth/16, sbire.getHitbox().y -sbireScaledWidth/16, progress*sbireScaledWidth/2, barHeight/2);
+
+                // game.batch.draw(barre_pleine, x + TILE_SIZE, y + TILE_SIZE, progress*barWidth, barHeight);
+
+                
                 game.batch.draw(
                     currentFrame2,
                     sbire.getHitbox().x - (sbireScaledWidth - sbire.getHitbox().width) / 2,
@@ -1190,32 +1273,40 @@ public class GameScreen implements Screen {
         if (fireballManager != null) {
             fireballManager.render(game.batch);
         }
-        // cooldown
-
-        float progress = tempsDash / dashCooldown;
-        float barWidth = 30;
-        float barHeight = 5;
-        float x = personnage1.getPositionX() - 3;
-        float y = personnage1.getPositionY() - 8;
-
-        //game.batch.draw(barre_vide, x, y, barWidth, barHeight);
-        //game.batch.draw(barre_pleine, x, y, barWidth * progress, barHeight);
+        
+        
+        float iconSize = Math.min(hauteur_skin, 16); // Maximum 16 pixels
 
         for (int i = 0; i < personnage1.getVie(); i++) {
             // Réduire la taille des icônes de vie pour qu'elles soient proportionnées
-            float iconSize = Math.min(hauteur_skin, 16); // Maximum 16 pixels
+            // float iconSize = Math.min(hauteur_skin, 16); // Maximum 16 pixels
             game.batch.draw(coeur_plein, 
                             camera.position.x - cameraHalfWidth + 5 + (i * (iconSize + 2)), 
                             camera.position.y + cameraHalfHeight - iconSize - 5, 
                             iconSize, iconSize);
         }
         for (int i = 0; i < personnage1.getBouclier(); i++) {
-            float iconSize = Math.min(hauteur_skin, 16); // Maximum 16 pixels
+            
             game.batch.draw(bouclierIntact, 
                             camera.position.x - cameraHalfWidth + 5 + (i * (iconSize + 2)), 
                             camera.position.y + cameraHalfHeight - iconSize*2 - 7, 
                             iconSize, iconSize);
         }
+
+        float barWidth = personnage1.getVieMax()*iconSize;
+        float barHeight = iconSize/4;
+        // System.out.println("mana du personnage" + personnage1.getMana());
+        float progress = personnage1.getMana()/personnage1.getManaMax();
+        game.batch.draw(barre_vide_mana, 
+                            camera.position.x - cameraHalfWidth + 5, 
+                            camera.position.y + cameraHalfHeight - iconSize*3 + 2, 
+                            barWidth, barHeight);
+        
+        game.batch.draw(barre_pleine_mana, 
+                            camera.position.x - cameraHalfWidth + 5, 
+                            camera.position.y + cameraHalfHeight - iconSize*3 + 2, 
+                            barWidth*progress, barHeight);
+        
 
         // À la fin de la méthode draw(), après game.batch.end():
 
@@ -1225,6 +1316,8 @@ public class GameScreen implements Screen {
         float minimapX = camera.position.x + cameraHalfWidth - minimapSize - 10;
         float minimapY = camera.position.y - cameraHalfHeight + 10;
 
+
+        
         // Dessiner le fond de la minimap
         game.batch.setColor(0, 0, 0, 0.7f);
         game.batch.draw(solTexture, minimapX - 2, minimapY - 2, minimapSize + 4, minimapSize + 4);
@@ -1278,6 +1371,24 @@ public class GameScreen implements Screen {
 
         // Réinitialiser la couleur
         game.batch.setColor(1, 1, 1, 1);
+
+
+        iconSize = Math.min(hauteur_skin, 16); // Maximum 16 pixels
+        float width = texturebdfeu.getWidth();
+        float height = texturebdfeu.getHeight();
+        if (pouvoirOk) {
+            game.batch.draw(texturebdfeu, camera.position.x - cameraHalfWidth - 20 , camera.position.y - cameraHalfHeight - 5, 
+                            width, height);
+        } else {
+            // Sauvegarder la couleur originale du batch
+            Color originalColor2 = new Color(game.batch.getColor());
+            game.batch.setColor(0.5f, 0.5f, 0.5f, 1f);
+            game.batch.draw(texturebdfeu, camera.position.x - cameraHalfWidth - 20, camera.position.y - cameraHalfHeight - 5, 
+                                        width, height);
+            game.batch.setColor(originalColor2);
+        }
+
+
         game.batch.end();
 
 
@@ -1375,6 +1486,7 @@ public class GameScreen implements Screen {
         if (!sbireBoss.enVie()) {
             combatBoss = false;
         }
+            
     }
 
     @Override
@@ -1597,11 +1709,11 @@ public class GameScreen implements Screen {
                         if (fincombatboss) {
                             entite.setPositionX(oldX);
                         } else {
-                            if (contientpersonnagesalleboss(personnage1.getPositionX(), personnage1.getPositionY())) {
+                            // if (contientpersonnagesalleboss(personnage1.getPositionX(), personnage1.getPositionY())) {
                                 combatBoss = true;
                                 fincombatboss = true;
                                 entite.setPositionX(oldX+16);
-                            }
+                            // }
                         }
                         
                     }
@@ -1655,11 +1767,11 @@ public class GameScreen implements Screen {
                         if (fincombatboss) {
                             entite.setPositionY(oldY);
                         } else {
-                            if (contientpersonnagesalleboss(personnage1.getPositionX(), personnage1.getPositionY())) {
+                            // if (contientpersonnagesalleboss(personnage1.getPositionX(), personnage1.getPositionY())) {
                                 combatBoss = true;
                                 // fincombatboss = true;
                                 entite.setPositionY(oldY+16);
-                            }
+                            // }
                             
                         }// il faut faire un test si le personnage va à droite ou à gauche
                     }
@@ -1724,14 +1836,33 @@ public class GameScreen implements Screen {
     public boolean voisinNotMur(int[][] map, int i, int j) {
         int[] dx = {-1, 1, 0, 0};
         int[] dy = {0, 0, -1, 1};
+        int[] diax = {-1, -1, 1, 1};
+        int[] diay = {-1, 1, -1, 1};
+        int [] ddx = {2, 2, 2, -2, -2, -2, 0, 0, 1, 1, -1, -1};
+        int [] ddy = {-1, 0, 1, -1, 0, 1, 2, -2, 2, -2, 2, -2};
 
         for (int k = 0; k < 4; k++) {
             int ni = i + dx[k];
             int nj = j + dy[k];
+            int ndi = i + diax[k];
+            int ndj = j + diay[k];
 
+            if (ni >= 0 && ni < map.length && nj >= 0 && nj < map[0].length && ndi >= 0 && ndi < map.length && ndj >= 0 && ndj < map[0].length) {
+                int val = map[ni][nj];
+                int val2 = map[ndi][ndj];
+                if (val == 0 || val == 2 || val == 3 || val == 4 || val == 20 || val == 30 || val2 == 0 || val2 == 2 || val2 == 3 || val2 == 4 || val2 == 20 || val2 == 30) {
+                    return false;
+                }
+            }
+
+        }
+
+        for (int k = 0; k < 12; k++) {
+            int ni = i + ddx[k];
+            int nj = j + ddy[k];
             if (ni >= 0 && ni < map.length && nj >= 0 && nj < map[0].length) {
                 int val = map[ni][nj];
-                if (val == 0 || val == 2 || val == 3 || val == 4) {
+                if (val == 0 || val == 2 || val == 3 || val == 4 || val == 20 || val == 30) {
                     return false;
                 }
             }
@@ -1801,6 +1932,20 @@ public class GameScreen implements Screen {
         }
     }
 
+    public void setAnimation(int i) {
+        this.animationHandler = new AnimationHandler(i);
+    }
 
-
+    public boolean getPouvoir() {
+        return this.pouvoirOk;
+    }
+    public void setPouvoir(boolean bool) {
+        this.pouvoirOk = bool;
+    }
+    private boolean overlapMur(Rectangle hitbox) {
+        for (Rectangle mur : mursHitboxes) {
+            if (hitbox.overlaps(mur)) return true;
+        }
+        return false;
+    }
 }

@@ -13,13 +13,14 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
-
+import com.badlogic.gdx.math.MathUtils;
 import projet.java.Main;
 import projet.java.Menu.GameScreen;
 import projet.java.entite.Entite;
 import projet.java.entite.Niveau;
 import projet.java.entite.Projectile;
 import projet.java.entite.Sbire;
+import com.badlogic.gdx.Screen;
 
 public class FireballManager {
     // Configuration
@@ -36,16 +37,20 @@ public class FireballManager {
     private final Niveau niveau;
     private final Array<FireballProjectile> fireballs = new Array<>();
     private Array<Rectangle> mursHitboxes;
+    private boolean pouvoirOk;
     
     // Animation de la boule de feu
     private Animation<TextureRegion> fireballAnimation;
     private float scaleFactor = 0.7f; // Taille de la boule de feu (ratio)
-    
-    public FireballManager(Main game, Entite personnage, Niveau niveau, Array<Rectangle> mursHitboxes) {
+    private GameScreen gameScreen;
+
+    public FireballManager(Main game, Entite personnage, Niveau niveau, Array<Rectangle> mursHitboxes, GameScreen gameScreen) {
         this.game = game;
         this.personnage = personnage;
         this.niveau = niveau;
         this.mursHitboxes = mursHitboxes;
+        this.pouvoirOk = gameScreen.getPouvoir();
+        this.gameScreen = gameScreen;
         
         // Charger l'animation de la boule de feu
         loadFireballAnimation();
@@ -82,42 +87,59 @@ public class FireballManager {
         fireballAnimation = new Animation<>(0.1f, frames);
     }
     
-    public void update(float delta) {
-        // Gestion du cooldown
-        if (!canCast) {
-            timeSinceLastCast += delta;
-            if (timeSinceLastCast >= cooldown) {
-                canCast = true;
-                timeSinceLastCast = 0f;
-                System.out.println("Boule de feu prête");
+    public void update(float delta, boolean pouvoirOk) {
+        this.pouvoirOk = pouvoirOk;
+        if (pouvoirOk && (Gdx.input.isKeyPressed(game.touchePouvoir))) {
+            for (int i = 0; i < 10; i++) {
+                float angle = i * 36f * MathUtils.degreesToRadians;
+                Vector2 direction = new Vector2(MathUtils.cos(angle), MathUtils.sin(angle));
+
+
+                // Lancer la boule de feu
+                castFireball(direction);
+                gameScreen.setPouvoir(false);
+            }
+        } else {
+            // Gestion du cooldown
+            if (!canCast) {
+                timeSinceLastCast += delta;
+                if (timeSinceLastCast >= cooldown) {
+                    canCast = true;
+                    timeSinceLastCast = 0f;
+                    System.out.println("Boule de feu prête");
+                }
+            }
+            
+            // Vérifier si le joueur veut lancer une boule de feu
+            boolean fireballInput = false;
+            
+            // Ajout de debug pour voir si le clic est détecté
+            if (Gdx.input.isButtonPressed(Input.Buttons.RIGHT)) {
+                System.out.println("Clic droit détecté");
+            }
+            
+            if (game.toucheBouleFeu == Main.MOUSE_RIGHT_CLICK) {
+                fireballInput = Gdx.input.isButtonJustPressed(Input.Buttons.RIGHT);
+            } else {
+                fireballInput = Gdx.input.isKeyJustPressed(game.toucheBouleFeu);
+            }
+            
+            if (fireballInput) {
+                System.out.println("Tentative de lancer une boule de feu (canCast=" + canCast + ")");
+            }
+
+            if (fireballInput && canCast) {
+                // Obtenir la direction de visée (souris - joueur)
+                Vector2 direction = getFireballDirection();
+                
+                // Lancer la boule de feu
+                if (!canCast) return;
+                castFireball(direction);
             }
         }
         
-        // Vérifier si le joueur veut lancer une boule de feu
-        boolean fireballInput = false;
         
-        // Ajout de debug pour voir si le clic est détecté
-        if (Gdx.input.isButtonPressed(Input.Buttons.RIGHT)) {
-            System.out.println("Clic droit détecté");
-        }
         
-        if (game.toucheBouleFeu == Main.MOUSE_RIGHT_CLICK) {
-            fireballInput = Gdx.input.isButtonJustPressed(Input.Buttons.RIGHT);
-        } else {
-            fireballInput = Gdx.input.isKeyJustPressed(game.toucheBouleFeu);
-        }
-        
-        if (fireballInput) {
-            System.out.println("Tentative de lancer une boule de feu (canCast=" + canCast + ")");
-        }
-        
-        if (fireballInput && canCast) {
-            // Obtenir la direction de visée (souris - joueur)
-            Vector2 direction = getFireballDirection();
-            
-            // Lancer la boule de feu
-            castFireball(direction);
-        }
         
         // Mettre à jour les boules de feu existantes
         updateFireballs(delta);
@@ -183,18 +205,18 @@ public class FireballManager {
     }
     
     private void castFireball(Vector2 direction) {
-        if (!canCast) return;
+        // if (!canCast) return;
         
         System.out.println("Lancement d'une boule de feu dans la direction: " + direction);
         
         // Position de départ (légèrement décalée dans la direction pour éviter les collisions avec le joueur)
         Vector2 startPos = new Vector2(
-            personnage.getPositionX() + 22,
-            personnage.getPositionY() + 18
+            personnage.getPositionX() + 26,
+            personnage.getPositionY() +22
         );
         
         // Ajouter un décalage pour faire partir la boule de feu du joueur
-        startPos.add(direction.cpy().scl(20));
+        startPos.add(direction.cpy().scl(5));
         
         // Créer le projectile animé avec une vitesse et direction correctes
         FireballProjectile fireball = new FireballProjectile(
@@ -371,5 +393,15 @@ public class FireballManager {
         public void hit() {
             isActive = false;
         }
+    }
+
+    public void castManualFireball(Vector2 direction) {
+        // if (!canCast) return;
+
+        castFireball(direction);
+    }
+
+    public void setDamage(int degat) {
+        this.damage = degat;
     }
 }

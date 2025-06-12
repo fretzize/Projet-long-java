@@ -27,6 +27,10 @@ public class AnimationHandler {
     public static final int ATTACK_UP = 9;
     public static final int ATTACK_LEFT = 10;
     public static final int ATTACK_RIGHT = 11;
+    public static final int ATTACK_DOWN_HACHE = 12;
+    public static final int ATTACK_UP_HACHE = 13;
+    public static final int ATTACK_LEFT_HACHE = 14;
+    public static final int ATTACK_RIGHT_HACHE = 15;
 
     private Animation<TextureRegion>[] animations;
     private float stateTime = 0;
@@ -36,19 +40,24 @@ public class AnimationHandler {
     private float attackDuration = 0.4f;  // Augmenter de 0.3f à 0.4f pour une animation plus longue
     private float attackTimer = 0;  // Compteur pour la durée de l'attaque
     
+    // entier selon arme;
+    private int arme;
     // Chemin vers les assets
     private final String ASSETS_PATH = "HERCULEpng/HERCULEpng/";
     
     @SuppressWarnings("unchecked")
-    public AnimationHandler() {
+    public AnimationHandler(int i) {
         // Augmenter la taille pour inclure les animations d'attaque
-        animations = new Animation[12];
+        animations = new Animation[16];
 
+        arme = i;
         // Charger les sprites pour chaque animation
-        loadAnimations();
+        loadAnimations(arme);
     }
     
-    private void loadAnimations() {
+
+
+    private void loadAnimations(int j) {
         // Animations existantes
         animations[IDLE_DOWN] = createStaticAnimation("Sword_Idle_front");
         animations[WALK_DOWN] = createWalkAnimation("Sword_Walk_front", 6);
@@ -59,11 +68,23 @@ public class AnimationHandler {
         animations[IDLE_RIGHT] = createStaticAnimation("Sword_Idle_side_right");
         animations[WALK_RIGHT] = createWalkAnimation("Sword_Walk_side_right", 5);
         
-        // Nouvelles animations d'attaque
-        animations[ATTACK_DOWN] = createAttackAnimation("Sword_Attack_front", 8);
-        animations[ATTACK_UP] = createAttackAnimation("Sword_Attack_back", 8);
-        animations[ATTACK_LEFT] = createAttackAnimation("Sword_Attack_side_left", 8);
-        animations[ATTACK_RIGHT] = createAttackAnimation("Sword_Attack_side_right", 8);
+
+        if (j==1) {
+            // Nouvelles animations d'attaque
+            animations[ATTACK_DOWN] = createAttackAnimation("Sword_Attack_front", 8);
+            animations[ATTACK_UP] = createAttackAnimation("Sword_Attack_back", 8);
+            animations[ATTACK_LEFT] = createAttackAnimation("Sword_Attack_side_left", 8);
+            animations[ATTACK_RIGHT] = createAttackAnimation("Sword_Attack_side_right", 8);
+        } else {
+            // Nouvelles animations d'attaque hache
+            animations[ATTACK_DOWN] = createAttackAnimation("Hache_Attack_front", 8);
+            animations[ATTACK_UP] = createAttackAnimation("Hache_Attack_back", 8);
+            animations[ATTACK_LEFT] = createAttackAnimation("Hache_Attack_side_left", 8);
+            animations[ATTACK_RIGHT] = createAttackAnimation("Hache_Attack_side_right", 8);
+        }
+        
+        
+
     }
     
     // Méthode pour créer une animation d'attaque
@@ -124,6 +145,7 @@ public class AnimationHandler {
     }
     
     public void update(float delta, boolean isMovingUp, boolean isMovingDown, boolean isMovingLeft, boolean isMovingRight, boolean attacking) {
+        
         stateTime += delta;
         isMoving = isMovingUp || isMovingDown || isMovingLeft || isMovingRight;
         

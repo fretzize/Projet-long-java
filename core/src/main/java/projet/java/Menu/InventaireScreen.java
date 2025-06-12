@@ -16,6 +16,7 @@ import projet.java.Inventaire.Grille;
 import projet.java.Inventaire.Inventaire;
 import projet.java.Inventaire.Item;
 import projet.java.Menu.GameScreen;
+import projet.java.animation.AnimationHandler;
 import projet.java.combat.AttackManager;
 import projet.java.Main;
 
@@ -31,6 +32,7 @@ public class InventaireScreen implements Screen {
     private Rectangle[] optionBounds;
     private Personnage personnage;
     private AttackManager attackmanager;
+    private AnimationHandler animationHandler;
 
     public InventaireScreen(final Main game, GameScreen gameScreen, Personnage personnage, AttackManager attackManager) {
         this.game = game;
@@ -104,14 +106,15 @@ public class InventaireScreen implements Screen {
         selectedIndex = 0;
 
        
-        
+        // System.out.println("nombre element grills :" + nombre_element_grille);
         inventaire = personnage.getInventaire();
-        place_item_ligne = ligne_grille-1;
+        place_item_ligne = ligne_grille - 1;
         place_item_colonne = 0;
         
         if (inventaire.getItems().size() != nombre_element_grille) {
             nombre_element_grille = 0;
             for (Item item : inventaire.getItems()) {
+                
             //game.batch.draw(item.getIcone(), taillecase, taillecase, taillecase, taillecase);
             //System.out.println(place_item_ligne + place_item_colonne);
                 grille.setItem(place_item_ligne, place_item_colonne, item);
@@ -119,11 +122,13 @@ public class InventaireScreen implements Screen {
             //List<List<Item>> liste = grille.getItemgrille();
             //List<Item> liste_item = liste.get(place_item_ligne);
             //System.out.println("Taille de la liste : " + liste.size());
-                if (place_item_colonne > colonne_grille) {
+                System.out.println(colonne_grille);
+                if (place_item_colonne < colonne_grille-1) {
+                     place_item_colonne ++;
+                    
+                } else {
                     place_item_colonne = 0;
                     place_item_ligne --;
-                } else {
-                    place_item_colonne ++;
                 }
                 nombre_element_grille ++;
             }
@@ -159,9 +164,28 @@ public class InventaireScreen implements Screen {
                             }
                             if (item.getType() == Item.ItemType.ARME) {
                                 // attackmanager.getAttackMana().setArme(item.getNom(), item.getNombre(), item.getRange());
-                                attackmanager.getArmeMelee().setDegat(item.getNombre());
-                                attackmanager.getArmeMelee().setRange(item.getRange());
+                                // attackmanager.getArmeMelee().setDegat(item.getNombre());
+                                // attackmanager.getArmeMelee().setRange(item.getRange());
+                                ArmeMelee armeMelee = new ArmeMelee(item.getNom(), item.getNombre(), 0, item.getRange(), item.getVitesse(), item.getTextureString(), item.getAngle(), item.getForceKnockback());
+                                attackmanager.setArmeMelee(armeMelee);
+                                if (item.getNom().equals("hache")) {
+                                    // System.out.println("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
+                                    // this.animationHandler = new AnimationHandler(2);
+                                    // this.attackmanager.setAnimation(new AnimationHandler(2));
+
+                                    gameScreen.setAnimation(2);
+                                    // this.attackmanager.setArme("hache", item.getNombre(), item.getRange());
+                                } else {
+                                    gameScreen.setAnimation(1);
+                                }
+                                
                                 // personnage.setArme(item.getNom(), item.getNombre(), item.getRange(), gameScreen.getNiveau());
+                            }
+
+                            if (item.getType() == Item.ItemType.PISTOLET) {
+                                ArmeDistance armeDistance = new ArmeDistance(item.getNom(), item.getNombre(), item.getMana(), item.getRange(), item.getVitesse(),item.getTextureString(), item.getTexture_proj(), item.getVitesse(), 0, item.getAngle());
+                                attackmanager.setArmeDistance(armeDistance);
+                                gameScreen.setAnimation(1);
                             }
                             // personnage.setArme(null);
                         } else {

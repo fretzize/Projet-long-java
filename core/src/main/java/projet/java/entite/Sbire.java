@@ -21,6 +21,7 @@ public class Sbire implements Entite{
     int vie;
     int bouclier;
     int mana;
+    private float vieInit;
 
     //La cible du sbire
     private Personnage cible;
@@ -90,6 +91,7 @@ public class Sbire implements Entite{
         this.vie = vie;
         this.bouclier = shield;
         this.mana = mana;
+        this.vieInit = vie;
         
         this.positionX = x;
         this.positionY = y;
@@ -837,4 +839,8 @@ public class Sbire implements Entite{
 	public void setPositionY(float y) {
 		this.positionY = y;
 	}
+
+    public float getVieInit() {
+        return this.vieInit;
+    }
 }

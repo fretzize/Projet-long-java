@@ -7,9 +7,12 @@ import com.badlogic.gdx.math.Vector2;
 
 import projet.java.Main;
 import projet.java.animation.AnimationHandler;
+import projet.java.entite.Arme;
+import projet.java.entite.ArmeDistance;
 import projet.java.entite.ArmeMelee;
 import projet.java.entite.Entite;
 import projet.java.entite.Niveau;
+import projet.java.entite.Personnage;
 
 /**
  * Cette classe gère toute la logique d'attaque, isolant ainsi cette fonctionnalité
@@ -22,14 +25,18 @@ public class AttackManager {
     private float tempsDepuisAttaque = 0f;
     
     // Références
-    private final Entite personnage;
-    private final AnimationHandler animationHandler;
+    private Personnage personnage;
+    private AnimationHandler animationHandler;
     private  ArmeMelee armeMelee;
+    private ArmeDistance armeDistance;
     private final Main game;
     private com.badlogic.gdx.audio.Sound attackSound;
     
     // Ajouter un champ niveau
     private Niveau niveau;
+    private boolean armeCorps;
+    private FireballManager fireballManager;
+    boolean inputAttack = false;
     
     /**
      * Constructeur du gestionnaire d'attaque
@@ -40,18 +47,30 @@ public class AttackManager {
      * @param cooldownAttaque Le temps entre deux attaques en secondes
      * @param niveau Le niveau actuel contenant les sbires
      */
-    public AttackManager(Main game, Entite personnage, AnimationHandler animationHandler, float cooldownAttaque, Niveau niveau) {
+    public AttackManager(Main game, Personnage personnage, AnimationHandler animationHandler, float cooldownAttaque, Niveau niveau, Arme arme) {
         this.game = game;
         this.personnage = personnage;
         this.animationHandler = animationHandler;
         this.cooldownAttaque = cooldownAttaque;
         this.niveau = niveau;
+        inputAttack = false;
         
         // Initialiser l'arme avec une portée raisonnable
-        this.armeMelee = new ArmeMelee("Épée", 20, 0, 35f, cooldownAttaque, "menubackground.png", 90f, 150f);
+        if (arme instanceof ArmeMelee) {
+            this.armeMelee = (ArmeMelee) arme;
+            // IMPORTANT: Associer le niveau à l'arme
+            this.armeMelee.setNiveau(niveau);
+            armeCorps = true;
+        }
+
+        if (arme instanceof ArmeDistance) {
+            this.armeDistance = (ArmeDistance) arme;
+            this.armeDistance.setNiveau(niveau);
+            armeCorps = false;
+        }
         
-        // IMPORTANT: Associer le niveau à l'arme
-        this.armeMelee.setNiveau(niveau);
+        
+        
         
         // Charger le son d'attaque
         try {
@@ -60,10 +79,14 @@ public class AttackManager {
             System.err.println("Impossible de charger le son d'attaque: " + e.getMessage());
         }
     }
+
+    public void setAnimation(AnimationHandler animationHandler) {
+        this.animationHandler = animationHandler;
+    }
     
     // Ajouter ce constructeur pour la compatibilité
-    public AttackManager(Main game, Entite personnage, AnimationHandler animationHandler, float cooldownAttaque) {
-        this(game, personnage, animationHandler, cooldownAttaque, null);
+    public AttackManager(Main game, Personnage personnage, AnimationHandler animationHandler, float cooldownAttaque, Arme arme) {
+        this(game, personnage, animationHandler, cooldownAttaque, null, arme);
         System.err.println("ATTENTION: AttackManager créé sans niveau. Les attaques ne fonctionneront pas correctement.");
     }
     
@@ -92,25 +115,52 @@ public class AttackManager {
         }
         
         // Vérifier si le joueur attaque et peut attaquer
-        boolean inputAttack = false;
-        if (game.toucheAttaque == Main.MOUSE_LEFT_CLICK) {
-            inputAttack = Gdx.input.isButtonJustPressed(Input.Buttons.LEFT);
-        } else {
-            inputAttack = Gdx.input.isKeyJustPressed(game.toucheAttaque);
-        }
         
-        if (inputAttack && peutAttaquer) {
-            // N'autoriser l'attaque que si l'animation précédente est terminée
-            if (!animationHandler.isAttacking()) {
-                // Utiliser la direction de la souris pour l'attaque
-                executeAttack(mouseDirection);
-                attackTriggered = true;
-                
-                // Désactiver immédiatement la possibilité d'attaquer à nouveau
-                peutAttaquer = false;
-                tempsDepuisAttaque = 0f;
+        if (armeCorps) {
+            if (game.toucheAttaque == Main.MOUSE_LEFT_CLICK) {
+                inputAttack = Gdx.input.isButtonJustPressed(Input.Buttons.LEFT);
+            } else {
+                inputAttack = Gdx.input.isKeyJustPressed(game.toucheAttaque);
+            }
+        } else {
+            if (game.toucheAttaque == Main.MOUSE_LEFT_CLICK) {
+                inputAttack = Gdx.input.isButtonPressed(Input.Buttons.LEFT);
+            } else {
+                inputAttack = Gdx.input.isKeyPressed(game.toucheAttaque);
             }
         }
+        
+        
+        
+        if (inputAttack && peutAttaquer) {
+            if (armeCorps) {
+                // N'autoriser l'attaque que si l'animation précédente est terminée
+                if (!animationHandler.isAttacking()) {
+                    // Utiliser la direction de la souris pour l'attaque
+                    executeAttack(mouseDirection);
+                    attackTriggered = true;
+                    
+                    // Désactiver immédiatement la possibilité d'attaquer à nouveau
+                    peutAttaquer = false;
+                    tempsDepuisAttaque = 0f;
+                }
+            } else {
+                if (fireballManager != null && personnage.getMana() != 0) {
+                    fireballManager.setDamage(armeDistance.getDegats());
+                    fireballManager.castManualFireball(mouseDirection);
+                    // System.out.println("Mana du joueur avant attaque : " + personnage.getMana()); 
+                    personnage.setMana(armeDistance.getManaRequis());
+                    // System.out.println("Mana du joueur après attaque : " + personnage.getMana()); 
+
+                }
+                // Jouer le son d'attaque avec le volume réduit
+                if (attackSound != null) {
+                    // Utiliser le modificateur de volume (0.3f = 30% du volume normal)
+                    attackSound.play(game.getSoundVolume() * 0.3f);
+                }
+            }
+            } 
+        
         
         return attackTriggered;
     }
@@ -135,13 +185,9 @@ public class AttackManager {
             updateAnimationForMouseDirection(mouseDirection);
             
             // Passer la position et la taille de la hitbox à la méthode d'attaque
-            armeMelee.attaquer_arme(playerPos, mouseDirection, hitboxInfo);
-            
-            // Jouer le son d'attaque avec le volume réduit
-            if (attackSound != null) {
-                // Utiliser le modificateur de volume (0.3f = 30% du volume normal)
-                attackSound.play(game.getSoundVolume() * 0.3f);
-            }
+            if (armeCorps) {
+                armeMelee.attaquer_arme(playerPos, mouseDirection, hitboxInfo);
+            } 
         } catch (Exception e) {
             System.err.println("Erreur lors de l'attaque: " + e.getMessage());
             e.printStackTrace();
@@ -193,8 +239,16 @@ public class AttackManager {
         return armeMelee;
     }
 
-    public void setArme(String nom, int nombre, float range) {
-        this.armeMelee = new ArmeMelee(nom, nombre, nombre, range, nombre, "epee1.png", range);
+    public void setArmeMelee(ArmeMelee armeMelee) {
+        this.armeMelee = armeMelee;
+        this.armeMelee.setNiveau(this.niveau);
+        this.armeCorps = true;
+    }
+
+    public void setArmeDistance(ArmeDistance armeDistance) {
+        this.armeDistance = armeDistance;
+        this.armeDistance.setNiveau(this.niveau);
+        this.armeCorps = false;
     }
     
     /**
@@ -221,10 +275,18 @@ public class AttackManager {
         if (armeMelee != null) {
             armeMelee.setNiveau(niveau);
         }
+        if (armeDistance != null) {
+            armeDistance.setNiveau(niveau);
+        }
     }
 
     public ArmeMelee getArme() {
         return this.armeMelee;
     }
+
+    public void setFireballManager(FireballManager manager) {
+        this.fireballManager = manager;
+    }
+
 
 }
